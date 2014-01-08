@@ -1,0 +1,3 @@
+#! /bin/bash
+export BUI_PREFIX=/usr/share/bash-ui
+. $BUI_PREFIX/init.sh
