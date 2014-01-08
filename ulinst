@@ -1,3 +1,26 @@
 #! /bin/bash
 export BUI_PREFIX=/usr/share/bash-ui
 . $BUI_PREFIX/init.sh
+if [ -e /etc/ulinst ]
+then
+. /etc/ulinst
+fi
+export TEXTDOMAIN="ulinst"
+bui-msgbox "`gettext \"$DESCRIPTION\"`"
+if bui-choice "`gettext \"Have you already have your harddisk partitioned?\"`"
+then
+true
+else
+if isunderx
+then
+gparted
+else
+cfdisk
+fi
+fi
+STRPCYRP="`gettext \"Please choose your root partition.\"`"
+STRPART="`gettext Partition`"
+bui-msgbox "$STRPCYRP"
+export ROOTPART="`bui-list \"$STRPCYRP\" $STRPART /dev/sd??*`"
+echo $ROOTPART
+
