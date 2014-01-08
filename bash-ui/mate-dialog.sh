@@ -8,3 +8,9 @@ bui-choice(){
 bui-working(){
 	(echo 10 ; while true; do sleep 1000 ; true; done) | $GDPROV --progress --pulsate --text="$1" --no-cancel --auto-close
 }
+bui-inputbox(){
+	$GDPROV --entry --text="$1"
+}
+bui-progress(){
+	$GDPROV --progress --text="$1" --no-cancel --auto-close
+}
