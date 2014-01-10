@@ -1,6 +1,9 @@
-#! /bin/bash
+#! /bin/bash -e
 export BUI_PREFIX=/usr/share/bash-ui
 . $BUI_PREFIX/init.sh
+#alias root-invoker=sudo
+export ROOTINVOKER=sudo
+export INTARGET="$ROOTINVOKER /usr/sbin/chroot /target"
 if [ -e /etc/ulinst ]
 then
 . /etc/ulinst
@@ -21,6 +24,41 @@ fi
 STRPCYRP="`gettext \"Please choose your root partition.\"`"
 STRPART="`gettext Partition`"
 bui-msgbox "$STRPCYRP"
-export ROOTPART="`bui-list \"$STRPCYRP\" $STRPART /dev/sd??*`"
-echo $ROOTPART
-
+#export ROOTPART="`bui-list \"$STRPCYRP\" $STRPART /dev/sd??*`"
+# TODO:DEBUG
+export ROOTPART="/dev/ram0"
+#echo $ROOTPART
+if bui-choice "`gettext \"Do you need me to format this partition to ext4?\"`"
+then
+#bui-working "`gettext \"Formatting...\"`" &
+$ROOTINVOKER /sbin/mkfs.ext4 $ROOTPART
+#kill %1
+fi
+if [ -d /mnt/squash ]
+then
+true
+else
+bui-msgbox "`gettext \"Not under a LiveCD!\"`"
+exit 1
+fi
+$ROOTINVOKER mkdir -p /target
+$ROOTINVOKER mount $ROOTPART /target
+#bui-working "`gettext \"Counting items...\"`" &
+export ITEM_ALL="`$ROOTINVOKER find /mnt/squash | wc -l`"
+export ITEM_ALL="`expr $ITEM_ALL - 1`"
+#kill %1
+$ROOTINVOKER cp -rv --preserve=all /mnt/squash/* /target/ | ulinst-progresser | bui-progress "`gettext \"Installing...\"`"
+$ROOTINVOKER mount --bind /dev /target/dev
+$ROOTINVOKER mount -t sysfs sysfs /target/sys
+$ROOTINVOKER mount -t proc proc /target/proc
+$ROOTINVOKER mount -t devpts devpts /target/dev/pts
+if [ -d /usr/share/ulinst ]
+then
+for i in /usr/share/ulinst/*
+do
+. $i
+done
+fi
+$ROOTINVOKER umount /target/dev/pts
+$ROOTINVOKER umount /target/{dev,proc,sys}
+$ROOTINVOKER umount /target

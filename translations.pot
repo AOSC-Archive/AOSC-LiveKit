@@ -1,0 +1,42 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-01-10 19:39+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ulinst:13
+msgid "Have you already have your harddisk partitioned?"
+msgstr ""
+
+#: ulinst:24
+msgid "Please choose your root partition."
+msgstr ""
+
+#: ulinst:25
+msgid "Partition"
+msgstr ""
+
+#: ulinst:31
+msgid "Do you need me to format this partition to ext4?"
+msgstr ""
+
+#: ulinst:41
+msgid "Not under a LiveCD!"
+msgstr ""
+
+#: ulinst:50
+msgid "Installing..."
+msgstr ""
