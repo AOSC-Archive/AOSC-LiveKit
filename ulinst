@@ -6,20 +6,20 @@ export ROOTINVOKER=sudo
 export INTARGET="$ROOTINVOKER /usr/sbin/chroot /target"
 if [ -e /etc/ulinst ]
 then
-. /etc/ulinst
+  . /etc/ulinst
 fi
 export TEXTDOMAIN="ulinst"
 bui-msgbox "`gettext \"$DESCRIPTION\"`"
 if bui-choice "`gettext \"Have you already have your harddisk partitioned?\"`"
 then
-true
+  true
 else
-if isunderx
-then
-gparted
-else
-cfdisk
-fi
+  if isunderx
+  then
+    $ROOTINVOKER gparted
+  else
+    $ROOTINVOKER cfdisk
+  fi
 fi
 STRPCYRP="`gettext \"Please choose your root partition.\"`"
 STRPART="`gettext Partition`"
@@ -30,16 +30,16 @@ export ROOTPART="/dev/ram0"
 #echo $ROOTPART
 if bui-choice "`gettext \"Do you need me to format this partition to ext4?\"`"
 then
-#bui-working "`gettext \"Formatting...\"`" &
-$ROOTINVOKER /sbin/mkfs.ext4 $ROOTPART
-#kill %1
+  #bui-working "`gettext \"Formatting...\"`" &
+  $ROOTINVOKER /sbin/mkfs.ext4 $ROOTPART  
+  #kill %1
 fi
 if [ -d /mnt/squash ]
 then
-true
+  true
 else
-bui-msgbox "`gettext \"Not under a LiveCD!\"`"
-exit 1
+  bui-msgbox "`gettext \"Not under a LiveCD!\"`"
+  exit 1
 fi
 $ROOTINVOKER mkdir -p /target
 $ROOTINVOKER mount $ROOTPART /target
@@ -54,10 +54,10 @@ $ROOTINVOKER mount -t proc proc /target/proc
 $ROOTINVOKER mount -t devpts devpts /target/dev/pts
 if [ -d /usr/share/ulinst ]
 then
-for i in /usr/share/ulinst/*
-do
-. $i
-done
+  for i in /usr/share/ulinst/*
+  do
+    . $i
+  done
 fi
 $ROOTINVOKER umount /target/dev/pts
 $ROOTINVOKER umount /target/{dev,proc,sys}
