@@ -20,3 +20,6 @@ bui-list(){
 	shift 2
 	( for i in $* ; do echo $i ; done ) | $GDPROV --list --text="$BUILISTTEXT" --column="$BUILISTCOLUMN" --editable
 }
+bui-password(){
+	$GDPROV --entry --text="$1" --hide-text
+}
