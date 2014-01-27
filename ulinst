@@ -24,9 +24,7 @@ fi
 STRPCYRP="`gettext \"Please choose your root partition.\"`"
 STRPART="`gettext Partition`"
 bui-msgbox "$STRPCYRP"
-#export ROOTPART="`bui-list \"$STRPCYRP\" $STRPART /dev/sd??*`"
-# TODO:DEBUG
-export ROOTPART="/dev/ram0"
+export ROOTPART="`bui-list \"$STRPCYRP\" $STRPART /dev/sd??*`"
 #echo $ROOTPART
 if bui-choice "`gettext \"Do you need me to format this partition to ext4?\"`"
 then
