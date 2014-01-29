@@ -8,6 +8,8 @@
 #include <qt4/QtGui/QFont>
 #include <qt4/QtGui/QPushButton>
 #include <qt4/QtCore/QEvent>
+#include <qt4/QtGui/QTextBrowser>
+#include <qt4/QtGui/QCheckBox>
 #include "AOSC-Installer-Core.h"
 
 #define BUTTON_WIDTH    80
@@ -22,6 +24,10 @@ public:
     void resizeEvent(QResizeEvent *);
     void SetNextButtonHide(void);
     void SetPervButtonHide(void);
+    void SetNextButtonDisable(void);
+    void SetNextButtonEnable(void);
+    void SetPervButtonDisable(void);
+    void SetPervButtonEnable(void);
 
     QFont       TitleFont;
     QFont       SecondaryTitleFont;
@@ -57,6 +63,23 @@ protected:
     QLabel  *SecondaryTitle;
     QLabel  *Content;
 };
+//---------------------------------------------------
+class ReadingTab : public ProgressTabWidget{
+    Q_OBJECT
+public:
+    explicit ReadingTab(ProgressTabWidget *parent = 0);
+public slots:
+    void CheckBoxChanged(void);
+protected:
+    QLabel          *Title;
+    QLabel          *Content;
+    QTextBrowser    *Browser;
+    QCheckBox       *CheckBox;
+    QVBoxLayout     *VBoxLayout;
+    QHBoxLayout     *HBoxLayout;
+    bool             CheckBoxStatus;
+};
+//-----------------------------------------------------
 
 //#################### Main Tab ####################//
 
@@ -69,8 +92,9 @@ public slots:
     void PervStep(void);
 protected:
     AOSC_Installer_Core *Installer_Core;
-    WelcomeTab *Welcome;
-    GetStartedTab *GetStarted;
+    WelcomeTab          *Welcome;
+    GetStartedTab       *GetStarted;
+    ReadingTab          *Reading;
 };
 
 #endif

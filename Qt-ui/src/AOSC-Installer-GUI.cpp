@@ -24,6 +24,11 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
     this->insertTab(1,GetStarted,tr("Get Started"));
     this->connect(GetStarted,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(GetStarted,SIGNAL(PervStep()),this,SLOT(PervStep()));
+    //Add Reading Tab
+    Reading     = new ReadingTab;
+    this->insertTab(2,Reading,tr("Reading Time"));
+    this->connect(Reading,SIGNAL(NextSetp()),this,SLOT(NextStep()));
+    this->connect(Reading,SIGNAL(PervStep()),this,SLOT(PervStep()));
 
 }
 
@@ -76,6 +81,21 @@ void ProgressTabWidget::SetPervButtonHide(void){
     PervStepButton->hide();
 }
 
+void ProgressTabWidget::SetNextButtonDisable(void){
+    NextStepButton->setDisabled(true);
+}
+void ProgressTabWidget::SetNextButtonEnable(void){
+    NextStepButton->setEnabled(true);
+}
+
+void ProgressTabWidget::SetPervButtonDisable(void){
+    PervStepButton->setDisabled(true);
+}
+
+void ProgressTabWidget::SetPervButtonEnable(void){
+    PervStepButton->setEnabled(true);
+}
+
 //#########################################################
 
 WelcomeTab::WelcomeTab(ProgressTabWidget *parent) :
@@ -113,4 +133,49 @@ GetStartedTab::GetStartedTab(ProgressTabWidget *parent):
     Title->setGeometry(27,27,27*11,27);
     SecondaryTitle->setGeometry(27,15+40,600,50);
     Content->setGeometry(27,27+70,600,200);
+}
+
+//--------------------------------------------------------------
+
+ReadingTab::ReadingTab(ProgressTabWidget *parent):
+    ProgressTabWidget(parent){
+    Title       = new QLabel(this);
+    Content     = new QLabel;
+    Browser     = new QTextBrowser(this);
+    CheckBox    = new QCheckBox(this);
+    HBoxLayout  = new QHBoxLayout;
+    VBoxLayout  = new QVBoxLayout;
+
+    connect(CheckBox,SIGNAL(clicked()),this,SLOT(CheckBoxChanged()));
+    SetNextButtonDisable();
+    CheckBoxStatus = false;
+
+    Title->setFont(TitleFont);
+    Title->setText(tr("Reading Time!"));
+    Title->setGeometry(27,27,27*11,27);
+
+    Content->setFont(ContentFont);
+    Content->setText(tr("I promise to be nice"));
+
+    this->setLayout(VBoxLayout);
+
+    VBoxLayout->addSpacing(60);
+    VBoxLayout->addWidget(Browser);
+    VBoxLayout->addLayout(HBoxLayout);
+    HBoxLayout->addStretch(500);
+    HBoxLayout->addWidget(Content);
+    HBoxLayout->addStretch(10);
+    HBoxLayout->addWidget(CheckBox);
+    VBoxLayout->addSpacing(30);
+}
+
+void ReadingTab::CheckBoxChanged(){
+    if(CheckBoxStatus == true){
+        SetNextButtonDisable();
+        CheckBoxStatus = false;
+    }
+    else{
+        SetNextButtonEnable();
+        CheckBoxStatus = true;
+    }
 }
