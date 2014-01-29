@@ -22,6 +22,11 @@ public:
     void resizeEvent(QResizeEvent *);
     void SetNextButtonHide(void);
     void SetPervButtonHide(void);
+
+    QFont       TitleFont;
+    QFont       SecondaryTitleFont;
+    QFont       ContentFont;
+
 signals:
     void NextSetp(void);
     void PervStep(void);
@@ -33,16 +38,24 @@ protected:
     QPushButton *PervStepButton;
 };
 
+//################## 分支 Tab 区 ##################//
 class WelcomeTab : public ProgressTabWidget{
     Q_OBJECT
 public:
     explicit WelcomeTab(ProgressTabWidget *parent = 0);
 protected:
-    QFont       TitleFont;
-    QFont       ContentFont;
-    QLabel      *WelcomeTitle;
-    QLabel      *WelcomeContent;
-    QVBoxLayout *MainLayout;
+    QLabel  *Title;
+    QLabel  *Content;
+};
+//--------------------------------------------------
+class GetStartedTab : public ProgressTabWidget{
+    Q_OBJECT
+public:
+    explicit GetStartedTab(ProgressTabWidget *parent = 0);
+protected:
+    QLabel  *Title;
+    QLabel  *SecondaryTitle;
+    QLabel  *Content;
 };
 
 //#################### Main Tab ####################//
@@ -57,6 +70,7 @@ public slots:
 protected:
     AOSC_Installer_Core *Installer_Core;
     WelcomeTab *Welcome;
+    GetStartedTab *GetStarted;
 };
 
 #endif

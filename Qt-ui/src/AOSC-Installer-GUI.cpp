@@ -14,21 +14,27 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
     this->setMaximumSize(900,500);
     this->setMinimumSize(700,350);
     this->tabBar()->hide();
+    //Add Welcome Tab
     Welcome = new WelcomeTab;
-    this->addTab(Welcome,tr("Welcome"));
+    this->insertTab(0,Welcome,tr("Welcome"));
     this->connect(Welcome,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(Welcome,SIGNAL(PervStep()),this,SLOT(PervStep()));
+    //Add Get Started Tab
+    GetStarted = new GetStartedTab;
+    this->insertTab(1,GetStarted,tr("Get Started"));
+    this->connect(GetStarted,SIGNAL(NextSetp()),this,SLOT(NextStep()));
+    this->connect(GetStarted,SIGNAL(PervStep()),this,SLOT(PervStep()));
+
 }
 
 void ProgressTab::NextStep(void){
     int current = this->currentIndex();
-    this->currentChanged(current+1);
-    printf("Next\n");
+    this->setCurrentIndex(current+1);
 }
 
 void ProgressTab::PervStep(void){
     int current = this->currentIndex();
-    this->currentChanged(current-1);
+    this->setCurrentIndex(current-1);
 }
 
 //##########################################################
@@ -42,6 +48,11 @@ ProgressTabWidget::ProgressTabWidget(QWidget *parent) :
     PervStepButton->setText(tr("Back"));
     connect(NextStepButton,SIGNAL(clicked()),this,SLOT(NextStepClicked()));
     connect(PervStepButton,SIGNAL(clicked()),this,SLOT(PervStepClicked()));
+    TitleFont.setPointSize(27);
+    TitleFont.setBold(true);
+    SecondaryTitleFont.setPointSize(15);
+    SecondaryTitleFont.setBold(true);
+    ContentFont.setPointSize(10);
 }
 
 void ProgressTabWidget::resizeEvent(QResizeEvent *){
@@ -69,18 +80,37 @@ void ProgressTabWidget::SetPervButtonHide(void){
 
 WelcomeTab::WelcomeTab(ProgressTabWidget *parent) :
     ProgressTabWidget(parent){
-    WelcomeTitle    = new QLabel(this);
-    WelcomeContent  = new QLabel(this);
+    Title    = new QLabel(this);
+    Content  = new QLabel(this);
 
-    WelcomeTitle->setText(tr("Hi."));
-    TitleFont.setPointSize(27);
-    WelcomeTitle->setFont(TitleFont);
-    WelcomeTitle->setGeometry(27,27,27*3,27);
+    Title->setText(tr("Hi."));
+    Title->setFont(TitleFont);
+    Title->setGeometry(27,27,27*3,27);
 
-    WelcomeContent->setText(tr("Thank you for trying the latest Linux Distribution from Anthon Open Source Community!\n\nOkay, are you now ready to install [DistroName] to your dear computer?"));
-    ContentFont.setPointSize(10);
-    WelcomeContent->setFont(ContentFont);
-    WelcomeContent->setGeometry(27,27+50,600,50);
+    Content->setText(tr("Thank you for trying the latest Linux Distribution from Anthon Open Source Community!\n\nOkay, are you now ready to install [DistroName] to your dear computer?"));
+    Content->setFont(ContentFont);
+    Content->setGeometry(27,27+50,600,50);
 
     SetPervButtonHide();
+}
+
+//--------------------------------------------------------
+
+GetStartedTab::GetStartedTab(ProgressTabWidget *parent):
+    ProgressTabWidget(parent){
+    Title         = new QLabel(this);
+    SecondaryTitle= new QLabel(this);
+    Content       = new QLabel(this);
+
+    Title->setFont(TitleFont);
+    SecondaryTitle->setFont(SecondaryTitleFont);
+    Content->setFont(ContentFont);
+
+    Title->setText(tr("Get Started"));
+    SecondaryTitle->setText(tr("Let's see what we are doing here..."));
+    Content->setText(tr(" - Do some serious reading.\n\n - Get your drive partitioned.\n\n - Find out who you are.\n\n - Start installing.\n\n - Install boot loader.\n\n - All set!"));
+
+    Title->setGeometry(27,27,27*11,27);
+    SecondaryTitle->setGeometry(27,15+40,600,50);
+    Content->setGeometry(27,27+70,600,200);
 }
