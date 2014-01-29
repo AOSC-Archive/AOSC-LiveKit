@@ -203,7 +203,7 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
     HBoxLayout->addWidget(CheckBox);
     VBoxLayout->addSpacing(30);
 
-    QFile file("./GNU_License.html");
+    QFile file("/usr/share/ulinst/data/GNU_License.html");
     if(!file.open(QFile::ReadOnly | QFile::Text)){
         perror("Open License File");
         QMessageBox::warning(this,tr("Open License File"),tr("Open License File Error"),QMessageBox::Yes);
