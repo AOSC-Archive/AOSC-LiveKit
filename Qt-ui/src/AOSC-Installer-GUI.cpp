@@ -1,12 +1,19 @@
 #include "AOSC-Installer-Basic-UI.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <qt4/QtGui/QStyle>
 #include <qt4/QtGui/QTabBar>
 #include <qt4/QtGui/QMessageBox>
+#include <qt4/QtCore/QFile>
+#include <qt4/QtCore/QTextStream>
+#include <qt4/QtCore/QByteArray>
+
+AOSC_Installer_Core *Installer_Core = new AOSC_Installer_Core;
 
 ProgressTab::ProgressTab(QTabWidget *parent) :
     QTabWidget(parent){
-    Installer_Core = new AOSC_Installer_Core;
     if(Installer_Core->Check_Environment() != _EN_LIVE_CD_){
         QMessageBox::warning(this,tr("警告"),tr("你现在不是在LiveCD环境下！"),QMessageBox::Yes);
         exit(0);
@@ -29,7 +36,13 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
     this->insertTab(2,Reading,tr("Reading Time"));
     this->connect(Reading,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(Reading,SIGNAL(PervStep()),this,SLOT(PervStep()));
-
+    //Add GParted Tab
+    GPartedDisk = new GPartedDiskTab;
+    this->insertTab(3,GPartedDisk,tr("Parted Your Disk"));
+    this->connect(GPartedDisk,SIGNAL(PartedDone(QString)),this,SLOT(PartedDone(QString)));
+    this->connect(GPartedDisk,SIGNAL(PervStep()),this,SLOT(PervStep()));
+    this->connect(GPartedDisk,SIGNAL(AskHide()),this,SLOT(AskHide()));
+    this->connect(GPartedDisk,SIGNAL(AskShow()),this,SLOT(AskShow()));
 }
 
 void ProgressTab::NextStep(void){
@@ -40,6 +53,28 @@ void ProgressTab::NextStep(void){
 void ProgressTab::PervStep(void){
     int current = this->currentIndex();
     this->setCurrentIndex(current-1);
+}
+
+void ProgressTab::AskHide(){
+    this->hide();
+}
+
+void ProgressTab::AskShow(){
+    this->show();
+}
+
+void ProgressTab::PartedDone(QString Now){
+    bzero(TargetPartiting,50);
+    QByteArray ba = Now.toLatin1();
+    strcpy(TargetPartiting,ba.data());
+    //Add MainWork Tab
+    MainWork = new MainWorkTab(TargetPartiting);
+    this->insertTab(4,MainWork,tr("Main Work"));
+    this->connect(MainWork,SIGNAL(NextSetp()),this,SLOT(NextStep()));
+    this->connect(MainWork,SIGNAL(PervStep()),this,SLOT(PervStep()));
+    // Next Page
+    int current = this->currentIndex();
+    this->setCurrentIndex(current+1);
 }
 
 //##########################################################
@@ -105,7 +140,7 @@ WelcomeTab::WelcomeTab(ProgressTabWidget *parent) :
 
     Title->setText(tr("Hi."));
     Title->setFont(TitleFont);
-    Title->setGeometry(27,27,27*3,27);
+    Title->setGeometry(27,17,27*3,40);
 
     Content->setText(tr("Thank you for trying the latest Linux Distribution from Anthon Open Source Community!\n\nOkay, are you now ready to install [DistroName] to your dear computer?"));
     Content->setFont(ContentFont);
@@ -130,7 +165,7 @@ GetStartedTab::GetStartedTab(ProgressTabWidget *parent):
     SecondaryTitle->setText(tr("Let's see what we are doing here..."));
     Content->setText(tr(" - Do some serious reading.\n\n - Get your drive partitioned.\n\n - Find out who you are.\n\n - Start installing.\n\n - Install boot loader.\n\n - All set!"));
 
-    Title->setGeometry(27,27,27*11,27);
+    Title->setGeometry(27,17,27*11,40);
     SecondaryTitle->setGeometry(27,15+40,600,50);
     Content->setGeometry(27,27+70,600,200);
 }
@@ -152,7 +187,7 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
 
     Title->setFont(TitleFont);
     Title->setText(tr("Reading Time!"));
-    Title->setGeometry(27,27,27*11,27);
+    Title->setGeometry(27,17,500,40);
 
     Content->setFont(ContentFont);
     Content->setText(tr("I promise to be nice"));
@@ -167,6 +202,15 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
     HBoxLayout->addStretch(10);
     HBoxLayout->addWidget(CheckBox);
     VBoxLayout->addSpacing(30);
+
+    QFile file("./GNU_License.html");
+    if(!file.open(QFile::ReadOnly | QFile::Text)){
+        perror("Open License File");
+        QMessageBox::warning(this,tr("Open License File"),tr("Open License File Error"),QMessageBox::Yes);
+        exit(0);
+    }
+    QTextStream in(&file);
+    Browser->setHtml(in.readAll());
 }
 
 void ReadingTab::CheckBoxChanged(){
@@ -178,4 +222,139 @@ void ReadingTab::CheckBoxChanged(){
         SetNextButtonEnable();
         CheckBoxStatus = true;
     }
+}
+//-------------------------------------------
+
+GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
+    ProgressTabWidget(parent){
+    Title       = new QLabel(this);
+    Waring      = new QLabel(this);
+    Content     = new QLabel(this);
+    Content2    = new QLabel(this);
+    CheckBox    = new QCheckBox(this);
+    ComboBox    = new QComboBox(this);
+    StartPartitingButton = new QPushButton(this);
+    DiskPath    = new char[64];
+
+    this->connect(StartPartitingButton,SIGNAL(clicked()),this,SLOT(StartPartiting()));
+
+    //Read Disk
+    bzero(Disk,2500);
+    int DiskCount=0;
+    system("ls /dev/sd* > /tmp/.DiskParted.info");
+    FILE *fp = fopen("/tmp/.DiskParted.info","r");
+    ComboBox->insertItem(-1,tr("-------"));
+    bzero(DiskPath,64);
+    while(fscanf(fp,"%s",DiskPath) != EOF){
+        ComboBox->insertItem(DiskCount,tr(DiskPath));
+        strcpy(Disk[DiskCount],DiskPath);
+        bzero(DiskPath,64);
+        DiskCount++;
+    }
+    system("rm /tmp/.DiskParted.info");
+    //Done
+    Title->setFont(TitleFont);
+    Title->setText(tr("Partitioning..."));
+    Title->setGeometry(27,17,500,40);
+
+    Waring->setText(tr("<h2><font color=red>This is serious business, double check before you go!</font></h2>"));
+    Waring->setGeometry(27,17+40,600,50);
+
+    StartPartitingButton->setGeometry(27,17+40+50+15,200,70);
+    StartPartitingButton->setText(tr("Start Partiting Your Disk"));
+
+    Content->setFont(ContentFont);
+    Content->setText(tr("请选择你的主分区"));
+    Content->setGeometry(27,17+40+50+15+70+15,100,15);
+
+    Content2->setFont(ContentFont);
+    Content2->setText(tr("需要想格式化么？"));
+    Content2->setGeometry(100+27+10+50,17+40+50+15+70+15,100,15);
+
+    CheckBox->setGeometry(100+27+35,17+40+50+15+70+15,10,10);
+
+    ComboBox->setGeometry(27,17+40+50+15+70+20+15+15,200,30);
+
+    this->connect(ComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentDiskPartition(QString)));
+    this->connect(NextStepButton,SIGNAL(clicked()),this,SLOT(ReadyToGo()));
+}
+
+void GPartedDiskTab::StartPartiting(){
+    emit AskHide();
+    system("gparted");
+    //Read Disk
+    bzero(Disk,2500);
+    int DiskCount=0;
+    system("ls /dev/sd* > /tmp/.DiskParted.info");
+    FILE *fp = fopen("/tmp/.DiskParted.info","r");
+    bzero(DiskPath,64);
+    while(fscanf(fp,"%s",DiskPath) != EOF){
+        ComboBox->insertItem(DiskCount,tr(DiskPath));
+        strcpy(Disk[DiskCount],DiskPath);
+        bzero(DiskPath,64);
+        DiskCount++;
+    }
+    system("rm /tmp/.DiskParted.info");
+    // Done
+    emit AskShow();
+}
+
+void GPartedDiskTab::SetCurrentDiskPartition(QString Now){
+    CurrentDiskPartition = Now;
+}
+
+void GPartedDiskTab::ReadyToGo(){
+    char Target[50];
+    bzero(Target,50);
+    QByteArray ba = CurrentDiskPartition.toLatin1();
+    strncpy(Target,ba.data(),strlen(ba.data()));
+    Target[strlen(ba.data())] = '\0';
+
+    if(strncmp(Target,"-",1)){
+        QMessageBox::warning(this,"Waring",tr("请选择分区"),QMessageBox::Yes);
+        return;
+    }
+
+    if(CheckBox->isChecked() == true){
+        int result;
+        result = QMessageBox::question(this,"Questing",tr("你确定要格式化本分区？"),QMessageBox::Yes|QMessageBox::No);
+        if(result == QMessageBox::Yes){
+            char ExecBuff[512];
+            bzero(ExecBuff,512);
+            sprintf(ExecBuff,"mkfs.ext4 %s",Target);
+            result = system(ExecBuff);
+            if(result != 0){
+                QMessageBox::warning(this,"Waring",tr("格式化分区失败"),QMessageBox::Yes);
+                return;
+            }
+        }else{
+            return;
+        }
+    }
+    emit PartedDone(CurrentDiskPartition);
+}
+
+//-----------------------------------
+
+MainWorkThread::MainWorkThread(char *TargetPartiting){
+    Target = new char[strlen(TargetPartiting)+1];
+    strncpy(Target,TargetPartiting,strlen(TargetPartiting));
+    Target[strlen(TargetPartiting)] = '\0';
+}
+
+void MainWorkThread::run(){
+    //Installing System [Please Edit There]
+}
+
+MainWorkTab::MainWorkTab(char *TargetPartiting, ProgressTabWidget *parent):
+    ProgressTabWidget(parent){
+    Title = new QLabel(this);
+    Start = new QPushButton(this);
+    MainWork = new MainWorkThread(TargetPartiting);
+    Title->setFont(TitleFont);
+    Title->setText(tr("System Is Installing......"));
+    Title->setGeometry(27,17,500,40);
+
+    Start->setText(tr("Click to Start"));
+    Start->setGeometry(27,17+40+50+15+70+15,200,60);
 }

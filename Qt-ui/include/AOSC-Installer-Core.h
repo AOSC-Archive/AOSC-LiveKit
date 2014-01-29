@@ -8,7 +8,9 @@ class AOSC_Installer_Core{
 public:
     AOSC_Installer_Core(void);
 //##### Step ######//
-    int Check_Environment(void);
+    int     Check_Environment(void);
+    int     Find_Disk(char ***DP);
+    int     MainWork(char *TargetPartiting);
 };
 
 #endif

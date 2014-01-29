@@ -10,6 +10,9 @@
 #include <qt4/QtCore/QEvent>
 #include <qt4/QtGui/QTextBrowser>
 #include <qt4/QtGui/QCheckBox>
+#include <qt4/QtGui/QComboBox>
+#include <qt4/QtCore/QString>
+#include <qt4/QtCore/QThread>
 #include "AOSC-Installer-Core.h"
 
 #define BUTTON_WIDTH    80
@@ -36,6 +39,8 @@ public:
 signals:
     void NextSetp(void);
     void PervStep(void);
+    void AskHide(void);
+    void AskShow(void);
 public slots:
     void NextStepClicked(void);
     void PervStepClicked(void);
@@ -80,6 +85,53 @@ protected:
     bool             CheckBoxStatus;
 };
 //-----------------------------------------------------
+class GPartedDiskTab : public ProgressTabWidget{
+    Q_OBJECT
+public:
+    explicit GPartedDiskTab(ProgressTabWidget *parent = 0);
+signals:
+    void PartedDone(QString);
+public slots:
+    void SetCurrentDiskPartition(QString);
+    void StartPartiting(void);
+    void ReadyToGo(void);
+protected:
+    QLabel          *Title;
+    QLabel          *Waring;
+    QLabel          *Content;
+    QLabel          *Content2;
+    QCheckBox       *CheckBox;
+    QPushButton     *StartPartitingButton;
+    QComboBox       *ComboBox;
+    char            *DiskPath;
+    char             Disk[50][50];
+    int              DiskCount;
+    QString          CurrentDiskPartition;
+};
+//------------------------------------------------------
+class MainWorkThread : public QThread{
+    Q_OBJECT
+public:
+    explicit MainWorkThread(char *TargetPartiting);
+    void run();
+signals:
+    void CopyFileDone(int);             // int is Status
+    void InstallBootLoaderDone(int);    // As well
+protected:
+    char *Target;
+};
+
+
+
+class MainWorkTab : public ProgressTabWidget{
+    Q_OBJECT
+public:
+    explicit MainWorkTab(char *TargetPartiting,ProgressTabWidget *parent = 0);
+protected:
+    QLabel          *Title;
+    QPushButton     *Start;
+    MainWorkThread  *MainWork;
+};
 
 //#################### Main Tab ####################//
 
@@ -90,11 +142,16 @@ public:
 public slots:
     void NextStep(void);
     void PervStep(void);
+    void AskHide(void);
+    void AskShow(void);
+    void PartedDone(QString);
 protected:
-    AOSC_Installer_Core *Installer_Core;
+    char                 TargetPartiting[50];
     WelcomeTab          *Welcome;
     GetStartedTab       *GetStarted;
     ReadingTab          *Reading;
+    GPartedDiskTab      *GPartedDisk;
+    MainWorkTab         *MainWork;
 };
 
 #endif
