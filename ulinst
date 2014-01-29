@@ -1,5 +1,5 @@
 #! /bin/bash -e
-export BUI_PREFIX=/usr/share/bash-ui
+export BUI_PREFIX=./bash-ui
 . $BUI_PREFIX/init.sh
 #alias root-invoker=sudo
 export ROOTINVOKER=sudo
