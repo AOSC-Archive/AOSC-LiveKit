@@ -134,17 +134,27 @@ int AOSC_Installer_Core::SetGrub(char *TargetDisk){
 int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
     char ExecBuff[512];
     int status;
-    sprintf(ExecBuff,"usermod -l %s -md /home/%s live",UserName);
+    sprintf(ExecBuff,"usermod -l %s -md /home/%s live",UserName,UserName);
     status = system(ExecBuff);
     if(status < 0){
-	return status;
+        return status;
     }
-    // Need help with passwd input.
+    sprintf(ExecBuff,"/usr/bin/cpw.sh %s %s",UserName,PassWord);
+    status = system(ExecBuff);
+    if(status < 0){
+        return status;
+    }
     return 0;
 }
 
 int AOSC_Installer_Core::SetRootPassWord(char *PassWord){
-    // Still need help here.
+    char ExecBuff[256];
+    int status;
+    sprintf(ExecBuff,"/usr/bin/cpw.sh root %s",PassWord);
+    status = system(ExecBuff);
+    if(status < 0){
+        return status;
+    }
     return 0;
 }
 

@@ -25,7 +25,7 @@ public:
     int     SetUser(char *UserName,char *PassWord);
     int     SetRootPassWord(char *PassWord);
     int     UpdateGrub(void);
-    int     UpdateFstab(void);
+    int     UpdateFstab(char *TargetPartition);
 
     bool    qCopyDirectory(const QDir& fromDir, const QDir& toDir, bool bCoverIfFileExists);
 signals:

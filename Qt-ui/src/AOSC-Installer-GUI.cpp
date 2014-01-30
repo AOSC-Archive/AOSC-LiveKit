@@ -425,7 +425,7 @@ void MainWorkThread::run(){
     //-----Update Grub-----------//
     emit UpdateGrubDone(Core->UpdateGrub());
     //-----Update Fstab----------//
-    emit UpdateFstabDOne(Core->UpdateFstab());
+    emit UpdateFstabDOne(Core->UpdateFstab(TargetPartition));
 }
 void MainWorkThread::FileCopyed(int Now){
     emit NowCopy(Now);
