@@ -15,30 +15,30 @@ AOSC_Installer_Core *Installer_Core = new AOSC_Installer_Core;
 ProgressTab::ProgressTab(QTabWidget *parent) :
     QTabWidget(parent){
     if(Installer_Core->Check_Environment() != _EN_LIVE_CD_){
-        QMessageBox::warning(this,tr("警告"),tr("你现在不是在LiveCD环境下！"),QMessageBox::Yes);
-        exit(0);
+        QMessageBox::warning(this,tr("错误"),tr("你现在不在LiveCD环境下，安装程序将立即退出。"),QMessageBox::Yes);
+        exit(-1);
     }
     this->setMaximumSize(900,500);
     this->setMinimumSize(700,350);
     this->tabBar()->hide();
     //Add Welcome Tab
     Welcome = new WelcomeTab;
-    this->insertTab(0,Welcome,tr("Welcome"));
+    this->insertTab(0,Welcome,tr("欢迎"));
     this->connect(Welcome,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(Welcome,SIGNAL(PervStep()),this,SLOT(PervStep()));
     //Add Get Started Tab
     GetStarted = new GetStartedTab;
-    this->insertTab(1,GetStarted,tr("Get Started"));
+    this->insertTab(1,GetStarted,tr("准备开始"));
     this->connect(GetStarted,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(GetStarted,SIGNAL(PervStep()),this,SLOT(PervStep()));
     //Add Reading Tab
     Reading     = new ReadingTab;
-    this->insertTab(2,Reading,tr("Reading Time"));
+    this->insertTab(2,Reading,tr("阅读时间!"));
     this->connect(Reading,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(Reading,SIGNAL(PervStep()),this,SLOT(PervStep()));
     //Add GParted Tab
     GPartedDisk = new GPartedDiskTab;
-    this->insertTab(3,GPartedDisk,tr("Parted Your Disk"));
+    this->insertTab(3,GPartedDisk,tr("磁盘分区"));
     this->connect(GPartedDisk,SIGNAL(PartedDone(QString,QString)),this,SLOT(PartedDone(QString,QString)));
     this->connect(GPartedDisk,SIGNAL(PervStep()),this,SLOT(PervStep()));
     this->connect(GPartedDisk,SIGNAL(AskHide()),this,SLOT(AskHide()));
@@ -73,7 +73,7 @@ void ProgressTab::PartedDone(QString _TargetPartition,QString _TargetDisk){
     printf("Target Partiting = %s\nTarget Disk= %s\n",TargetPartition,TargetDisk);
     //Add MainWork Tab
     MainWork = new MainWorkTab(TargetPartition,TargetDisk);
-    this->insertTab(4,MainWork,tr("Main Work"));
+    this->insertTab(4,MainWork,tr("正在工作……"));
     this->connect(MainWork,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(MainWork,SIGNAL(PervStep()),this,SLOT(PervStep()));
     // Next Page
@@ -88,8 +88,8 @@ ProgressTabWidget::ProgressTabWidget(QWidget *parent) :
     QWidget(parent){
     NextStepButton = new QPushButton(this);
     PervStepButton = new QPushButton(this);
-    NextStepButton->setText(tr("Next"));
-    PervStepButton->setText(tr("Back"));
+    NextStepButton->setText(tr("前进"));
+    PervStepButton->setText(tr("后退"));
     connect(NextStepButton,SIGNAL(clicked()),this,SLOT(NextStepClicked()));
     connect(PervStepButton,SIGNAL(clicked()),this,SLOT(PervStepClicked()));
     TitleFont.setPointSize(27);
@@ -142,11 +142,11 @@ WelcomeTab::WelcomeTab(ProgressTabWidget *parent) :
     Title    = new QLabel(this);
     Content  = new QLabel(this);
 
-    Title->setText(tr("Hi."));
+    Title->setText(tr("诶，你好!"));
     Title->setFont(TitleFont);
     Title->setGeometry(27,17,27*3,50);
 
-    Content->setText(tr("Thank you for trying the latest Linux Distribution from Anthon Open Source Community!\n\nOkay, are you now ready to install [DistroName] to your dear computer?"));
+    Content->setText(tr("感谢尝试安同开源社区最新的发行版!\n\n你准备好将发行版安装到你亲爱的电脑上了么?"));
     Content->setFont(ContentFont);
     Content->setGeometry(27,27+50,600,50);
 
@@ -165,9 +165,9 @@ GetStartedTab::GetStartedTab(ProgressTabWidget *parent):
     SecondaryTitle->setFont(SecondaryTitleFont);
     Content->setFont(ContentFont);
 
-    Title->setText(tr("Get Started"));
-    SecondaryTitle->setText(tr("Let's see what we are doing here..."));
-    Content->setText(tr(" - Do some serious reading.\n\n - Get your drive partitioned.\n\n - Find out who you are.\n\n - Start installing.\n\n - Install boot loader.\n\n - All set!"));
+    Title->setText(tr("准备开始"));
+    SecondaryTitle->setText(tr("我们接下来需要做这些事情……"));
+    Content->setText(tr(" - 进行大量的阅读（托腮 \n\n - 将磁盘分区\n\n - 让我们认识一下你\n\n - 开始安装\n\n - 尽情享用!"));
 
     Title->setGeometry(27,17,27*11,50);
     SecondaryTitle->setGeometry(27,15+40,600,50);
@@ -190,11 +190,11 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
     CheckBoxStatus = false;
 
     Title->setFont(TitleFont);
-    Title->setText(tr("Reading Time!"));
+    Title->setText(tr("阅读时间!"));
     Title->setGeometry(27,17,500,50);
 
     Content->setFont(ContentFont);
-    Content->setText(tr("I promise to be nice"));
+    Content->setText(tr("我保证会乖乖地遵守此许可协议!"));
 
     this->setLayout(VBoxLayout);
 
@@ -210,7 +210,7 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
     QFile file("/usr/share/ulinst/data/GNU_License.html");
     if(!file.open(QFile::ReadOnly | QFile::Text)){
         perror("Open License File");
-        QMessageBox::warning(this,tr("Open License File"),tr("Open License File Error"),QMessageBox::Yes);
+        QMessageBox::warning(this,tr("打开许可文件"),tr("打开许可文件时出错!"),QMessageBox::Yes);
         exit(0);
     }
     QTextStream in(&file);
@@ -275,20 +275,20 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     system("rm /tmp/.Disk.info");
     //Done
     Title->setFont(TitleFont);
-    Title->setText(tr("Partitioning..."));
+    Title->setText(tr("磁盘分区中……"));
     Title->setGeometry(27,17,500,50);
 
-    Waring->setText(tr("<h2><font color=red>This is serious business, double check before you go!</font></h2>"));
+    Waring->setText(tr("<h2><font color=red>这事儿很重要，请检查清楚再继续!</font></h2>"));
     Waring->setGeometry(27,17+40,600,50);
 
     StartPartitingButton->setGeometry(27,17+40+50+15,200,70);
-    StartPartitingButton->setText(tr("Start Partiting Your Disk"));
+    StartPartitingButton->setText(tr("正在将你的磁盘分区"));
 
     Content->setFont(ContentFont);
     Content->setText(tr("请选择你的主分区"));
     Content->setGeometry(27,17+40+50+15+70+15,120,30);
     Content2->setFont(ContentFont);
-    Content2->setText(tr("格式化"));
+    Content2->setText(tr("格式化此分区"));
     Content2->setGeometry(100+27+10+25,17+40+50+15+70+15,90,30);
     CheckBox->setGeometry(100+27+10+25+15+30,17+40+50+15+70+15+3,25,25);
 
@@ -364,7 +364,7 @@ void GPartedDiskTab::ReadyToGo(){
     TargetDisk[strlen(ba.data())] = '\0';
 
     if(strlen(TargetPartition) == 0){
-        QMessageBox::warning(this,"Waring",tr("请选择分区"),QMessageBox::Yes);
+        QMessageBox::warning(this,"Waring",tr("请选择一个分区"),QMessageBox::Yes);
         return;
     }
     if(strlen(TargetDisk) == 0){
@@ -372,18 +372,18 @@ void GPartedDiskTab::ReadyToGo(){
         return;
     }
     int result;
-    result = QMessageBox::question(this,"Question",tr("你确定执行下一步骤？"),QMessageBox::Yes|QMessageBox::No);
+    result = QMessageBox::question(this,"Question",tr("确定开始安装?"),QMessageBox::Yes|QMessageBox::No);
     if(result == QMessageBox::No)
         return;
     if(CheckBox->isChecked() == true){
-        result = QMessageBox::question(this,"Questing",tr("你确定要格式化本分区？"),QMessageBox::Yes|QMessageBox::No);
+        result = QMessageBox::question(this,"Questing",tr("你确定要格式化此分区?"),QMessageBox::Yes|QMessageBox::No);
         if(result == QMessageBox::Yes){
             char ExecBuff[512];
             bzero(ExecBuff,512);
             sprintf(ExecBuff,"mkfs.ext4 %s",TargetPartition);
             result = system(ExecBuff);
             if(result != 0){
-                QMessageBox::warning(this,"Waring",tr("格式化分区失败"),QMessageBox::Yes);
+                QMessageBox::warning(this,"Waring",tr("OMG, 格式化分区失败!"),QMessageBox::Yes);
                 return;
             }
         }else{
@@ -476,7 +476,7 @@ MainWorkTab::MainWorkTab(char *_TargetPartition, char *_TargetDisk, ProgressTabW
     TargetDisk[strlen(_TargetDisk)] = '\0';
 
     Title->setFont(TitleFont);
-    Title->setText(tr("System Is Ready To Install"));
+    Title->setText(tr("系统已完成安装前准备"));
     Title->setGeometry(27,17,500,50);
 
     Content->setFont(ContentFont);
@@ -499,7 +499,7 @@ void MainWorkTab::Install_Start(){
 void MainWorkTab::TotalFileDone(int Total){
     TotalFile = Total;
     Content->setText(tr("正在复制安装文件"));
-    Title->setText(tr("System is installing......"));
+    Title->setText(tr("系统正在安装……"));
     ProgressBar = new QProgressBar(this);
     ProgressBar->setRange(0,TotalFile);
     ProgressBar->setGeometry(27,17+40+50+15+30,600,40);
@@ -512,19 +512,19 @@ void MainWorkTab::TotalFileDone(int Total){
 void MainWorkTab::CopyDone(int Status){
     if(Status == true){
         ProgressBar->setValue(TotalFile);
-        Content->setText(tr("Basic System Installed"));
+        Content->setText(tr("系统安装完毕"));
     }else{
-        QMessageBox::warning(this,"Waring",tr("Install System Error!"),QMessageBox::Yes);
+        QMessageBox::warning(this,"Waring",tr("系统安装出错!"),QMessageBox::Yes);
         exit(-1);
     }
 }
 
 void MainWorkTab::SetGrubDone(int Status){
     if(Status < 0){
-        QMessageBox::warning(this,"Waring",tr("安装Grub失败!"),QMessageBox::Yes);
+        QMessageBox::warning(this,"Waring",tr("安装 GRUB 失败!"),QMessageBox::Yes);
         exit(-1);
     }
-    Content->setText(tr("Install Grub Success!"));
+    Content->setText(tr("GRUB 安装成功!"));
 }
 
 void MainWorkTab::SetUseeDone(int Status){
@@ -532,31 +532,31 @@ void MainWorkTab::SetUseeDone(int Status){
         QMessageBox::warning(this,"Waring",tr("设置用户数据失败!"),QMessageBox::Yes);
         exit(-1);
     }
-    Content->setText(tr("Set User Information Success!"));
+    Content->setText(tr("设置用户数据成功!"));
 }
 
 void MainWorkTab::SetRootDone(int Status){
     if(Status < 0){
-        QMessageBox::warning(this,"Waring",tr("设置Root用户失败!"),QMessageBox::Yes);
+        QMessageBox::warning(this,"Waring",tr("Root 用户配置失败!"),QMessageBox::Yes);
         exit(-1);
     }
-    Content->setText(tr("Set Root Information Success!"));
+    Content->setText(tr("Root 用户配置成功!"));
 }
 
 void MainWorkTab::UpdateGrubDone(int Status){
     if(Status < 0){
-        QMessageBox::warning(this,"Waring",tr("配置Grub失败!"),QMessageBox::Yes);
+        QMessageBox::warning(this,"Waring",tr("GRUB 配置失败!"),QMessageBox::Yes);
         exit(-1);
     }
-    Content->setText(tr("Update Grub Success!"));
+    Content->setText(tr("GRUB 配置成功!"));
 }
 
 void MainWorkTab::UpdateFstabDOne(int Status){
     if(Status < 0){
-        QMessageBox::warning(this,"Waring",tr("更新Fstab失败!"),QMessageBox::Yes);
+        QMessageBox::warning(this,"Waring",tr("更新 /etc/fstab 失败!"),QMessageBox::Yes);
         exit(-1);
     }
-    Content->setText(tr("Update Fstab Success!"));
+    Content->setText(tr("更新 /etc/fstab 成功!"));
 }
 
 //--------------------------------------
