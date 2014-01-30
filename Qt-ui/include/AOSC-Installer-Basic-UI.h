@@ -119,7 +119,7 @@ protected:
 class MainWorkThread : public QThread{
     Q_OBJECT
 public:
-    explicit MainWorkThread(char *_TargetPartiting, char *_TargetDisk);
+    explicit MainWorkThread(char *_TargetPartition, char *_TargetDisk);
     void run();
 signals:
     void CopyFileDone(int);             // int is Status
@@ -135,7 +135,7 @@ public slots:
     void SetUser(QString Name,QString Pass);
     void SetRoot(QString Pass);
 protected:
-    char *TargetPartiting;
+    char *TargetPartition;
     char *TargetDisk;
     int   Total;
     AOSC_Installer_Core *Core;
@@ -144,7 +144,7 @@ protected:
 class MainWorkTab : public ProgressTabWidget{
     Q_OBJECT
 public:
-    explicit MainWorkTab(char *_TargetPartiting, char *_TargetDisk, ProgressTabWidget *parent = 0);
+    explicit MainWorkTab(char *_TargetPartition, char *_TargetDisk, ProgressTabWidget *parent = 0);
 public slots:
     void Install_Start(void);
     void TotalFileDone(int);
@@ -162,7 +162,7 @@ protected:
     MainWorkThread  *MainWork;
     QProgressBar    *ProgressBar;
     int             TotalFile;
-    char            TargetPartiting[64];
+    char            TargetPartition[64];
     char            TargetDisk[64];
 };
 //-------------------------------------------------------
@@ -181,7 +181,7 @@ public slots:
     void AskShow(void);
     void PartedDone(QString, QString);
 protected:
-    char                 TargetPartiting[64];
+    char                 TargetPartition[64];
     char                 TargetDisk[64];
     WelcomeTab          *Welcome;
     GetStartedTab       *GetStarted;

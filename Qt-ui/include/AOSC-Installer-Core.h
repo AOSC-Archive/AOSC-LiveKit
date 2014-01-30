@@ -16,10 +16,10 @@ public:
 //##### Step ######//
     int     Check_Environment(void);
     int     Find_Disk(char ***DP);
-    int     MainWork(char *TargetPartiting);
+    int     MainWork(char *TargetPartition);
 
     //Main Step
-    int     MountFS(char *TargetPartiting);
+    int     MountFS(char *TargetPartition);
     bool    CopyFileToNewSystem(void);
     int     SetGrub(char *TargetDisk);
     int     SetUser(char *UserName,char *PassWord);

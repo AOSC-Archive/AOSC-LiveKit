@@ -63,16 +63,16 @@ void ProgressTab::AskShow(){
     this->show();
 }
 
-void ProgressTab::PartedDone(QString _TargetPartiting,QString _TargetDisk){
-    bzero(TargetPartiting,64);
-    QByteArray ba = _TargetPartiting.toLatin1();
-    strcpy(TargetPartiting,ba.data());
+void ProgressTab::PartedDone(QString _TargetPartition,QString _TargetDisk){
+    bzero(TargetPartition,64);
+    QByteArray ba = _TargetPartition.toLatin1();
+    strcpy(TargetPartition,ba.data());
     bzero(TargetDisk,64);
     ba = _TargetDisk.toLatin1();
     strcpy(TargetDisk,ba.data());
-    printf("Target Partiting = %s\nTarget Disk= %s\n",TargetPartiting,TargetDisk);
+    printf("Target Partiting = %s\nTarget Disk= %s\n",TargetPartition,TargetDisk);
     //Add MainWork Tab
-    MainWork = new MainWorkTab(TargetPartiting,TargetDisk);
+    MainWork = new MainWorkTab(TargetPartition,TargetDisk);
     this->insertTab(4,MainWork,tr("Main Work"));
     this->connect(MainWork,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(MainWork,SIGNAL(PervStep()),this,SLOT(PervStep()));
@@ -353,17 +353,17 @@ void GPartedDiskTab::SetCurrentDisk(QString Now){
 void GPartedDiskTab::ReadyToGo(){
     char TargetDisk[50];
     bzero(TargetDisk,50);
-    char TargetPartiting[50];
-    bzero(TargetPartiting,50);
+    char TargetPartition[50];
+    bzero(TargetPartition,50);
     QByteArray ba = CurrentDiskPartition.toLatin1();
-    strncpy(TargetPartiting,ba.data(),strlen(ba.data()));
-    TargetPartiting[strlen(ba.data())] = '\0';
+    strncpy(TargetPartition,ba.data(),strlen(ba.data()));
+    TargetPartition[strlen(ba.data())] = '\0';
 
     ba = CurrentDisk.toLatin1();
     strncpy(TargetDisk,ba.data(),strlen(ba.data()));
     TargetDisk[strlen(ba.data())] = '\0';
 
-    if(strlen(TargetPartiting) == 0){
+    if(strlen(TargetPartition) == 0){
         QMessageBox::warning(this,"Waring",tr("请选择分区"),QMessageBox::Yes);
         return;
     }
@@ -380,7 +380,7 @@ void GPartedDiskTab::ReadyToGo(){
         if(result == QMessageBox::Yes){
             char ExecBuff[512];
             bzero(ExecBuff,512);
-            sprintf(ExecBuff,"mkfs.ext4 %s",TargetPartiting);
+            sprintf(ExecBuff,"mkfs.ext4 %s",TargetPartition);
             result = system(ExecBuff);
             if(result != 0){
                 QMessageBox::warning(this,"Waring",tr("格式化分区失败"),QMessageBox::Yes);
@@ -395,18 +395,18 @@ void GPartedDiskTab::ReadyToGo(){
 
 //-----------------------------------
 
-MainWorkThread::MainWorkThread(char *_TargetPartiting, char *_TargetDisk){
-    TargetPartiting = new char[strlen(_TargetPartiting)+1];
+MainWorkThread::MainWorkThread(char *_TargetPartition, char *_TargetDisk){
+    TargetPartition = new char[strlen(_TargetPartition)+1];
     TargetDisk = new char[strlen(_TargetDisk)+1];
-    strncpy(TargetPartiting,_TargetPartiting,strlen(_TargetPartiting));
-    TargetPartiting[strlen(_TargetPartiting)] = '\0';
+    strncpy(TargetPartition,_TargetPartition,strlen(_TargetPartition));
+    TargetPartition[strlen(_TargetPartition)] = '\0';
     strncpy(TargetDisk,_TargetDisk,strlen(_TargetDisk));
     TargetDisk[strlen(_TargetDisk)] = '\0';
 }
 
 void MainWorkThread::run(){
     Core = new AOSC_Installer_Core();
-    int status = Core->MountFS(TargetPartiting);
+    int status = Core->MountFS(TargetPartition);
     if(status < 0){
         perror("Mount");
         emit CopyFileDone(-1);
@@ -461,7 +461,7 @@ void MainWorkTab::FileCopying(int Now){
     ProgressBar->setValue(Now);
 }
 
-MainWorkTab::MainWorkTab(char *_TargetPartiting, char *_TargetDisk, ProgressTabWidget *parent):
+MainWorkTab::MainWorkTab(char *_TargetPartition, char *_TargetDisk, ProgressTabWidget *parent):
     ProgressTabWidget(parent){
     Title       = new QLabel(this);
     Content     = new QLabel(this);
@@ -469,9 +469,9 @@ MainWorkTab::MainWorkTab(char *_TargetPartiting, char *_TargetDisk, ProgressTabW
     SetNextButtonDisable();
     SetPervButtonDisable();
     bzero(TargetDisk,64);
-    bzero(TargetPartiting,64);
-    strncpy(TargetPartiting,_TargetPartiting,strlen(_TargetPartiting));
-    TargetPartiting[strlen(_TargetPartiting)] = '\0';
+    bzero(TargetPartition,64);
+    strncpy(TargetPartition,_TargetPartition,strlen(_TargetPartition));
+    TargetPartition[strlen(_TargetPartition)] = '\0';
     strncpy(TargetDisk,_TargetDisk,strlen(_TargetDisk));
     TargetDisk[strlen(_TargetDisk)] = '\0';
 
@@ -490,7 +490,7 @@ MainWorkTab::MainWorkTab(char *_TargetPartiting, char *_TargetDisk, ProgressTabW
 
 void MainWorkTab::Install_Start(){
     Content->setText(tr("正在准备安装文件"));
-    MainWork = new MainWorkThread(TargetPartiting,TargetDisk);
+    MainWork = new MainWorkThread(TargetPartition,TargetDisk);
     this->connect(MainWork,SIGNAL(TotalFile(int)),this,SLOT(TotalFileDone(int)));
 
     MainWork->run();

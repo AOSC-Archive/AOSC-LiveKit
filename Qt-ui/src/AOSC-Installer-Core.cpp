@@ -104,7 +104,7 @@ bool AOSC_Installer_Core::qCopyDirectory(const QDir& fromDir, const QDir& toDir,
 }
 
 //#################Main Step#####################
-int AOSC_Installer_Core::MountFS(char *TargetPartiting){
+int AOSC_Installer_Core::MountFS(char *TargetPartition){
     char ExecBuff[512];
     int status;
     sprintf(ExecBuff,"mount -o loop %s /mnt",_INSTALL_FILE_);
@@ -112,7 +112,7 @@ int AOSC_Installer_Core::MountFS(char *TargetPartiting){
     if(status < 0){
         return status;
     }
-    sprintf(ExecBuff,"mount %s /target",TargetPartiting);
+    sprintf(ExecBuff,"mount %s /target",TargetPartition);
     status = system(ExecBuff);
     if(status < 0){
         return status;
@@ -121,26 +121,51 @@ int AOSC_Installer_Core::MountFS(char *TargetPartiting){
 }
 
 int AOSC_Installer_Core::SetGrub(char *TargetDisk){
-
+    char ExecBuff[512];
+    int status;
+    sprintf(ExecBuff,"grub-install %s",TargetDisk);
+    status = system(ExecBuff);
+    if(status < 0){
+	return status;
+    }
     return 0;
 }
 
 int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
-
+    char ExecBuff[512];
+    int status;
+    sprintf(ExecBuff,"usermod -l %s -md /home/%s live",UserName);
+    status = system(ExecBuff);
+    if(status < 0){
+	return status;
+    }
+    // Need help with passwd input.
     return 0;
 }
 
 int AOSC_Installer_Core::SetRootPassWord(char *PassWord){
-
+    // Still need help here.
     return 0;
 }
 
 int AOSC_Installer_Core::UpdateGrub(){
-
+    char ExecBuff[512];
+    int status;
+    sprintf(ExecBuff,"grub-mkconfig -o /boot/grub/grub.cfg");
+    status = system(ExecBuff);
+    if(status < 0){
+	return status;
+    }
     return 0;
 }
 
-int AOSC_Installer_Core::UpdateFstab(){
-
+int AOSC_Installer_Core::UpdateFstab(char *TargetPartition){
+    char ExecBuff[512];
+    int status;
+    sprintf(ExecBuff,"echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
+    status = system(ExecBuff);
+    if(status < 0){
+	return status;
+    }
     return 0;
 }
