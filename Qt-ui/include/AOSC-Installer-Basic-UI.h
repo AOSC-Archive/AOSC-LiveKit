@@ -13,6 +13,7 @@
 #include <qt4/QtGui/QComboBox>
 #include <qt4/QtCore/QString>
 #include <qt4/QtCore/QThread>
+#include <qt4/QtGui/QProgressBar>
 #include "AOSC-Installer-Core.h"
 
 #define BUTTON_WIDTH    80
@@ -122,23 +123,38 @@ public:
     void run();
 signals:
     void CopyFileDone(int);             // int is Status
-    void InstallBootLoaderDone(int);    // As well
+    void TotalFile(int);
+    void NowCopy(int);
+public slots:
+    void FileCopyed(int);
 protected:
     char *TargetPartiting;
     char *TargetDisk;
+    int   Total;
+    AOSC_Installer_Core *Core;
 };
-
-
 
 class MainWorkTab : public ProgressTabWidget{
     Q_OBJECT
 public:
-    explicit MainWorkTab(char *TargetPartiting,char *TargetDisk,ProgressTabWidget *parent = 0);
+    explicit MainWorkTab(char *_TargetPartiting, char *_TargetDisk, ProgressTabWidget *parent = 0);
+public slots:
+    void Install_Start(void);
+    void TotalFileDone(int);
+    void FileCopying(int);
+    void CopyDone(int);
 protected:
     QLabel          *Title;
+    QLabel          *Content;
     QPushButton     *Start;
     MainWorkThread  *MainWork;
+    QProgressBar    *ProgressBar;
+    int             TotalFile;
+    char            TargetPartiting[64];
+    char            TargetDisk[64];
 };
+//-------------------------------------------------------
+
 
 //#################### Main Tab ####################//
 

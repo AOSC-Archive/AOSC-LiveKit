@@ -403,18 +403,77 @@ MainWorkThread::MainWorkThread(char *_TargetPartiting, char *_TargetDisk){
 }
 
 void MainWorkThread::run(){
-    //Installing System [Please Edit There]
+    Core = new AOSC_Installer_Core();
+    system("ls -lR /mnt | grep ^- | wc -l > /tmp/.TotalFile.info");
+    FILE *f = fopen("/tmp/.TotalFile.info","r");
+    fscanf(f,"%d",&Total);
+    printf("Total File = %d\n",Total);
+    emit TotalFile(Total);
+    connect(Core,SIGNAL(Copyed(int)),this,SLOT(FileCopyed(int)));
+    int Status = Core->CopyFileToNewSystem();
+    emit CopyFileDone(Status);
+}
+void MainWorkThread::FileCopyed(int Now){
+    emit NowCopy(Now);
 }
 
-MainWorkTab::MainWorkTab(char *TargetPartiting, char *TargetDisk, ProgressTabWidget *parent):
+//------------------------------------------
+void MainWorkTab::FileCopying(int Now){
+    ProgressBar->setValue(Now);
+}
+
+MainWorkTab::MainWorkTab(char *_TargetPartiting, char *_TargetDisk, ProgressTabWidget *parent):
     ProgressTabWidget(parent){
-    Title = new QLabel(this);
-    Start = new QPushButton(this);
-    MainWork = new MainWorkThread(TargetPartiting,TargetDisk);
+    Title       = new QLabel(this);
+    Content     = new QLabel(this);
+    Start       = new QPushButton(this);
+    bzero(TargetDisk,64);
+    bzero(TargetPartiting,64);
+    strncpy(TargetPartiting,_TargetPartiting,strlen(_TargetPartiting));
+    TargetPartiting[strlen(_TargetPartiting)] = '\0';
+    strncpy(TargetDisk,_TargetDisk,strlen(_TargetDisk));
+    TargetDisk[strlen(_TargetDisk)] = '\0';
+
     Title->setFont(TitleFont);
-    Title->setText(tr("System Is Installing......"));
+    Title->setText(tr("System Is Ready To Install"));
     Title->setGeometry(27,17,500,50);
+
+    Content->setFont(ContentFont);
+    Content->setGeometry(27,17+50,500,50);
 
     Start->setText(tr("Click to Start"));
     Start->setGeometry(27,17+40+50+15+70+15,200,60);
+
+    this->connect(Start,SIGNAL(clicked()),this,SLOT(Install_Start()));
 }
+
+void MainWorkTab::Install_Start(){
+    Content->setText(tr("正在准备安装文件"));
+    MainWork = new MainWorkThread(TargetPartiting,TargetDisk);
+    this->connect(MainWork,SIGNAL(TotalFile(int)),this,SLOT(TotalFileDone(int)));
+    MainWork->run();
+}
+
+void MainWorkTab::TotalFileDone(int Total){
+    TotalFile = Total;
+    Content->setText(tr("正在安装系统"));
+    ProgressBar = new QProgressBar(this);
+    ProgressBar->setRange(0,TotalFile);
+    ProgressBar->setGeometry(27,17+40+50+15+30,600,40);
+    Start->hide();
+    ProgressBar->show();
+    this->connect(MainWork,SIGNAL(NowCopy(int)),this,SLOT(FileCopying(int)));
+    this->connect(MainWork,SIGNAL(CopyFileDone(int)),this,SLOT(CopyDone(int)));
+}
+
+void MainWorkTab::CopyDone(int Status){
+    if(Status == true){
+        ProgressBar->setValue(TotalFile);
+        Content->setText(tr("基本系统安装结束"));
+    }else{
+        QMessageBox::warning(this,"Waring",tr("Install File Error!"),QMessageBox::Yes);
+        exit(-1);
+    }
+}
+
+//--------------------------------------
