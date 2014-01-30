@@ -2,7 +2,7 @@
 #define _AOSC_INSTALLER_CORE_H_
 
 #define _EN_LIVE_CD_    0
-#define _INSTALL_FILE_  "/INSTALL_FILE"
+#define _INSTALL_FILE_  "/squash"
 
 class AOSC_Installer_Core{
 public:

@@ -90,9 +90,10 @@ class GPartedDiskTab : public ProgressTabWidget{
 public:
     explicit GPartedDiskTab(ProgressTabWidget *parent = 0);
 signals:
-    void PartedDone(QString);
+    void PartedDone(QString,QString);
 public slots:
     void SetCurrentDiskPartition(QString);
+    void SetCurrentDisk(QString);
     void StartPartiting(void);
     void ReadyToGo(void);
 protected:
@@ -100,25 +101,31 @@ protected:
     QLabel          *Waring;
     QLabel          *Content;
     QLabel          *Content2;
+    QLabel          *Content3;
     QCheckBox       *CheckBox;
     QPushButton     *StartPartitingButton;
-    QComboBox       *ComboBox;
+    QComboBox       *DiskComboBox;
+    QComboBox       *DiskPartitingComboBox;
     char            *DiskPath;
-    char             Disk[50][50];
+    char            *DiskPartitingPath;
     int              DiskCount;
+    int              DiskPartitingCount;
     QString          CurrentDiskPartition;
+    QString          CurrentDisk;
+    FILE            *fp;
 };
 //------------------------------------------------------
 class MainWorkThread : public QThread{
     Q_OBJECT
 public:
-    explicit MainWorkThread(char *TargetPartiting);
+    explicit MainWorkThread(char *_TargetPartiting, char *_TargetDisk);
     void run();
 signals:
     void CopyFileDone(int);             // int is Status
     void InstallBootLoaderDone(int);    // As well
 protected:
-    char *Target;
+    char *TargetPartiting;
+    char *TargetDisk;
 };
 
 
@@ -126,7 +133,7 @@ protected:
 class MainWorkTab : public ProgressTabWidget{
     Q_OBJECT
 public:
-    explicit MainWorkTab(char *TargetPartiting,ProgressTabWidget *parent = 0);
+    explicit MainWorkTab(char *TargetPartiting,char *TargetDisk,ProgressTabWidget *parent = 0);
 protected:
     QLabel          *Title;
     QPushButton     *Start;
@@ -144,9 +151,10 @@ public slots:
     void PervStep(void);
     void AskHide(void);
     void AskShow(void);
-    void PartedDone(QString);
+    void PartedDone(QString, QString);
 protected:
-    char                 TargetPartiting[50];
+    char                 TargetPartiting[64];
+    char                 TargetDisk[64];
     WelcomeTab          *Welcome;
     GetStartedTab       *GetStarted;
     ReadingTab          *Reading;
