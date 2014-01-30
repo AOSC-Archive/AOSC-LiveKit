@@ -102,3 +102,45 @@ bool AOSC_Installer_Core::qCopyDirectory(const QDir& fromDir, const QDir& toDir,
     }
     return true;
 }
+
+//#################Main Step#####################
+int AOSC_Installer_Core::MountFS(char *TargetPartiting){
+    char ExecBuff[512];
+    int status;
+    sprintf(ExecBuff,"mount -o loop %s /mnt",_INSTALL_FILE_);
+    status = system(ExecBuff);
+    if(status < 0){
+        return status;
+    }
+    sprintf(ExecBuff,"mount %s /target",TargetPartiting);
+    status = system(ExecBuff);
+    if(status < 0){
+        return status;
+    }
+    return 0;
+}
+
+int AOSC_Installer_Core::SetGrub(char *TargetDisk){
+
+    return 0;
+}
+
+int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
+
+    return 0;
+}
+
+int AOSC_Installer_Core::SetRootPassWord(char *PassWord){
+
+    return 0;
+}
+
+int AOSC_Installer_Core::UpdateGrub(){
+
+    return 0;
+}
+
+int AOSC_Installer_Core::UpdateFstab(){
+
+    return 0;
+}

@@ -17,7 +17,16 @@ public:
     int     Check_Environment(void);
     int     Find_Disk(char ***DP);
     int     MainWork(char *TargetPartiting);
+
+    //Main Step
+    int     MountFS(char *TargetPartiting);
     bool    CopyFileToNewSystem(void);
+    int     SetGrub(char *TargetDisk);
+    int     SetUser(char *UserName,char *PassWord);
+    int     SetRootPassWord(char *PassWord);
+    int     UpdateGrub(void);
+    int     UpdateFstab(void);
+
     bool    qCopyDirectory(const QDir& fromDir, const QDir& toDir, bool bCoverIfFileExists);
 signals:
     void    Copyed(int);

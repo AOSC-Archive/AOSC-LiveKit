@@ -371,9 +371,11 @@ void GPartedDiskTab::ReadyToGo(){
         QMessageBox::warning(this,"Waring",tr("请选择引导设备"),QMessageBox::Yes);
         return;
     }
-
+    int result;
+    result = QMessageBox::question(this,"Question",tr("你确定执行下一步骤？"),QMessageBox::Yes|QMessageBox::No);
+    if(result == QMessageBox::No)
+        return;
     if(CheckBox->isChecked() == true){
-        int result;
         result = QMessageBox::question(this,"Questing",tr("你确定要格式化本分区？"),QMessageBox::Yes|QMessageBox::No);
         if(result == QMessageBox::Yes){
             char ExecBuff[512];
@@ -404,6 +406,12 @@ MainWorkThread::MainWorkThread(char *_TargetPartiting, char *_TargetDisk){
 
 void MainWorkThread::run(){
     Core = new AOSC_Installer_Core();
+    int status = Core->MountFS(TargetPartiting);
+    if(status < 0){
+        perror("Mount");
+        emit CopyFileDone(-1);
+        return;
+    }
     system("ls -lR /mnt | grep ^- | wc -l > /tmp/.TotalFile.info");
     FILE *f = fopen("/tmp/.TotalFile.info","r");
     fscanf(f,"%d",&Total);
@@ -412,9 +420,40 @@ void MainWorkThread::run(){
     connect(Core,SIGNAL(Copyed(int)),this,SLOT(FileCopyed(int)));
     int Status = Core->CopyFileToNewSystem();
     emit CopyFileDone(Status);
+    //-----Set Grub--------------//
+    emit SetGrubDone(Core->SetGrub(TargetDisk));
+    //-----Update Grub-----------//
+    emit UpdateGrubDone(Core->UpdateGrub());
+    //-----Update Fstab----------//
+    emit UpdateFstabDOne(Core->UpdateFstab());
 }
 void MainWorkThread::FileCopyed(int Now){
     emit NowCopy(Now);
+}
+
+void MainWorkThread::SetUser(QString Name, QString Pass){
+    char *UserName = new char[64];
+    char *PassWord = new char[64];
+    bzero(UserName,64);
+    bzero(PassWord,64);
+    QByteArray ba;
+    ba = Name.toLatin1();
+    strcpy(UserName,ba.data());
+    UserName[strlen(ba.data())] = '\0';
+    ba = Pass.toLatin1();
+    strcpy(PassWord,ba.data());
+    PassWord[strlen(ba.data())] = '\0';
+    emit SetUseeDone(Core->SetUser(UserName,PassWord));
+}
+
+void MainWorkThread::SetRoot(QString Pass){
+    char *PassWord = new char[64];
+    bzero(PassWord,64);
+    QByteArray ba;
+    ba = Pass.toLatin1();
+    strcpy(PassWord,ba.data());
+    PassWord[strlen(ba.data())] = '\0';
+    emit SetRootDone(Core->SetRootPassWord(PassWord));
 }
 
 //------------------------------------------
@@ -427,6 +466,8 @@ MainWorkTab::MainWorkTab(char *_TargetPartiting, char *_TargetDisk, ProgressTabW
     Title       = new QLabel(this);
     Content     = new QLabel(this);
     Start       = new QPushButton(this);
+    SetNextButtonDisable();
+    SetPervButtonDisable();
     bzero(TargetDisk,64);
     bzero(TargetPartiting,64);
     strncpy(TargetPartiting,_TargetPartiting,strlen(_TargetPartiting));
@@ -451,12 +492,14 @@ void MainWorkTab::Install_Start(){
     Content->setText(tr("正在准备安装文件"));
     MainWork = new MainWorkThread(TargetPartiting,TargetDisk);
     this->connect(MainWork,SIGNAL(TotalFile(int)),this,SLOT(TotalFileDone(int)));
+
     MainWork->run();
 }
 
 void MainWorkTab::TotalFileDone(int Total){
     TotalFile = Total;
-    Content->setText(tr("正在安装系统"));
+    Content->setText(tr("正在复制安装文件"));
+    Title->setText(tr("System is installing......"));
     ProgressBar = new QProgressBar(this);
     ProgressBar->setRange(0,TotalFile);
     ProgressBar->setGeometry(27,17+40+50+15+30,600,40);
@@ -469,11 +512,51 @@ void MainWorkTab::TotalFileDone(int Total){
 void MainWorkTab::CopyDone(int Status){
     if(Status == true){
         ProgressBar->setValue(TotalFile);
-        Content->setText(tr("基本系统安装结束"));
+        Content->setText(tr("Basic System Installed"));
     }else{
-        QMessageBox::warning(this,"Waring",tr("Install File Error!"),QMessageBox::Yes);
+        QMessageBox::warning(this,"Waring",tr("Install System Error!"),QMessageBox::Yes);
         exit(-1);
     }
+}
+
+void MainWorkTab::SetGrubDone(int Status){
+    if(Status < 0){
+        QMessageBox::warning(this,"Waring",tr("安装Grub失败!"),QMessageBox::Yes);
+        exit(-1);
+    }
+    Content->setText(tr("Install Grub Success!"));
+}
+
+void MainWorkTab::SetUseeDone(int Status){
+    if(Status < 0){
+        QMessageBox::warning(this,"Waring",tr("设置用户数据失败!"),QMessageBox::Yes);
+        exit(-1);
+    }
+    Content->setText(tr("Set User Information Success!"));
+}
+
+void MainWorkTab::SetRootDone(int Status){
+    if(Status < 0){
+        QMessageBox::warning(this,"Waring",tr("设置Root用户失败!"),QMessageBox::Yes);
+        exit(-1);
+    }
+    Content->setText(tr("Set Root Information Success!"));
+}
+
+void MainWorkTab::UpdateGrubDone(int Status){
+    if(Status < 0){
+        QMessageBox::warning(this,"Waring",tr("配置Grub失败!"),QMessageBox::Yes);
+        exit(-1);
+    }
+    Content->setText(tr("Update Grub Success!"));
+}
+
+void MainWorkTab::UpdateFstabDOne(int Status){
+    if(Status < 0){
+        QMessageBox::warning(this,"Waring",tr("更新Fstab失败!"),QMessageBox::Yes);
+        exit(-1);
+    }
+    Content->setText(tr("Update Fstab Success!"));
 }
 
 //--------------------------------------

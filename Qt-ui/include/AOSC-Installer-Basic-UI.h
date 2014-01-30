@@ -125,8 +125,15 @@ signals:
     void CopyFileDone(int);             // int is Status
     void TotalFile(int);
     void NowCopy(int);
+    void SetGrubDone(int);
+    void SetUseeDone(int);
+    void SetRootDone(int);
+    void UpdateGrubDone(int);
+    void UpdateFstabDOne(int);
 public slots:
     void FileCopyed(int);
+    void SetUser(QString Name,QString Pass);
+    void SetRoot(QString Pass);
 protected:
     char *TargetPartiting;
     char *TargetDisk;
@@ -143,6 +150,11 @@ public slots:
     void TotalFileDone(int);
     void FileCopying(int);
     void CopyDone(int);
+    void SetGrubDone(int);
+    void SetUseeDone(int);
+    void SetRootDone(int);
+    void UpdateGrubDone(int);
+    void UpdateFstabDOne(int);
 protected:
     QLabel          *Title;
     QLabel          *Content;
