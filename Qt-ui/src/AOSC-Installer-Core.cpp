@@ -123,7 +123,18 @@ int AOSC_Installer_Core::MountFS(char *TargetPartition){
 int AOSC_Installer_Core::SetGrub(char *TargetDisk){
     char ExecBuff[512];
     int status;
-    sprintf(ExecBuff,"grub-install %s",TargetDisk);
+    sprintf(ExecBuff,"chroot /target grub-install %s",TargetDisk);
+    status = system(ExecBuff);
+    if(status < 0){
+	return status;
+    }
+    return 0;
+}
+
+int AOSC_Installer_Core::UpdateGrub(){
+    char ExecBuff[512];
+    int status;
+    sprintf(ExecBuff,"chroot /target grub-mkconfig -o /boot/grub/grub.cfg &");
     status = system(ExecBuff);
     if(status < 0){
 	return status;
@@ -134,12 +145,12 @@ int AOSC_Installer_Core::SetGrub(char *TargetDisk){
 int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
     char ExecBuff[512];
     int status;
-    sprintf(ExecBuff,"usermod -l %s -md /home/%s live",UserName,UserName);
+    sprintf(ExecBuff,"chroot /target usermod -l %s -md /home/%s live",UserName,UserName);
     status = system(ExecBuff);
     if(status < 0){
         return status;
     }
-    sprintf(ExecBuff,"/usr/bin/cpw.sh %s %s",UserName,PassWord);
+    sprintf(ExecBuff,"chroot /target /usr/bin/cpw.sh %s %s",UserName,PassWord);
     status = system(ExecBuff);
     if(status < 0){
         return status;
@@ -147,6 +158,7 @@ int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
     return 0;
 }
 
+/* 
 int AOSC_Installer_Core::SetRootPassWord(char *PassWord){
     char ExecBuff[256];
     int status;
@@ -157,22 +169,12 @@ int AOSC_Installer_Core::SetRootPassWord(char *PassWord){
     }
     return 0;
 }
-
-int AOSC_Installer_Core::UpdateGrub(){
-    char ExecBuff[512];
-    int status;
-    sprintf(ExecBuff,"grub-mkconfig -o /boot/grub/grub.cfg");
-    status = system(ExecBuff);
-    if(status < 0){
-	return status;
-    }
-    return 0;
-}
+*/ 
 
 int AOSC_Installer_Core::UpdateFstab(char *TargetPartition){
     char ExecBuff[512];
     int status;
-    sprintf(ExecBuff,"echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
+    sprintf(ExecBuff,"chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
     status = system(ExecBuff);
     if(status < 0){
 	return status;
