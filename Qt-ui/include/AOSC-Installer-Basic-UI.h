@@ -116,37 +116,16 @@ protected:
     FILE            *fp;
 };
 //------------------------------------------------------
-class MainWorkThread : public QThread{
-    Q_OBJECT
-public:
-    explicit MainWorkThread(char *_TargetPartition, char *_TargetDisk);
-    void run();
-signals:
-    void CopyFileDone(int);             // int is Status
-    void TotalFile(int);
-    void NowCopy(int);
-    void SetGrubDone(int);
-    void SetUseeDone(int);
-    void SetRootDone(int);
-    void UpdateGrubDone(int);
-    void UpdateFstabDOne(int);
-public slots:
-    void FileCopyed(int);
-    void SetUser(QString Name,QString Pass);
-    void SetRoot(QString Pass);
-protected:
-    char *TargetPartition;
-    char *TargetDisk;
-    int   Total;
-    AOSC_Installer_Core *Core;
-};
-
 class MainWorkTab : public ProgressTabWidget{
     Q_OBJECT
 public:
-    explicit MainWorkTab(char *_TargetPartition, char *_TargetDisk, ProgressTabWidget *parent = 0);
+    explicit MainWorkTab(QString _TargetPartition, QString _TargetDisk, ProgressTabWidget *parent = 0);
+signals:
+    void MountFS(QString);
+    void S_StartInstall(QString,QString);
 public slots:
-    void Install_Start(void);
+    void StartInstall(void);
+    void MountFSDone(int Status);
     void TotalFileDone(int);
     void FileCopying(int);
     void CopyDone(int);
@@ -154,16 +133,16 @@ public slots:
     void SetUseeDone(int);
     void SetRootDone(int);
     void UpdateGrubDone(int);
-    void UpdateFstabDOne(int);
+    void UpdateFstabDone(int);
 protected:
     QLabel          *Title;
     QLabel          *Content;
+    QLabel          *Content2;
     QPushButton     *Start;
-    MainWorkThread  *MainWork;
     QProgressBar    *ProgressBar;
     int             TotalFile;
-    char            TargetPartition[64];
-    char            TargetDisk[64];
+    QString         TargetPartition;
+    QString         TargetDisk;
 };
 //-------------------------------------------------------
 
@@ -180,7 +159,9 @@ public slots:
     void AskHide(void);
     void AskShow(void);
     void PartedDone(QString, QString);
+    void StartInstall(QString, QString);
 protected:
+    AOSC_Installer_Core *Core;
     char                 TargetPartition[64];
     char                 TargetDisk[64];
     WelcomeTab          *Welcome;

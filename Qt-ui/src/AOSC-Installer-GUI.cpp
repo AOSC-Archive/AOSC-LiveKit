@@ -1,5 +1,6 @@
 #include "AOSC-Installer-Basic-UI.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -10,11 +11,10 @@
 #include <qt4/QtCore/QTextStream>
 #include <qt4/QtCore/QByteArray>
 
-AOSC_Installer_Core *Installer_Core = new AOSC_Installer_Core;
-
 ProgressTab::ProgressTab(QTabWidget *parent) :
     QTabWidget(parent){
-    if(Installer_Core->Check_Environment() != _EN_LIVE_CD_){
+    Core = new AOSC_Installer_Core;
+    if(Core->CheckEnvironment() != _EN_LIVE_CD_){
         QMessageBox::warning(this,tr("错误"),tr("你现在不在LiveCD环境下，安装程序将立即退出。"),QMessageBox::Yes);
         exit(-1);
     }
@@ -72,13 +72,26 @@ void ProgressTab::PartedDone(QString _TargetPartition,QString _TargetDisk){
     strcpy(TargetDisk,ba.data());
     printf("Target Partiting = %s\nTarget Disk= %s\n",TargetPartition,TargetDisk);
     //Add MainWork Tab
-    MainWork = new MainWorkTab(TargetPartition,TargetDisk);
+    MainWork = new MainWorkTab(_TargetPartition,_TargetDisk);
     this->insertTab(4,MainWork,tr("正在工作……"));
     this->connect(MainWork,SIGNAL(NextSetp()),this,SLOT(NextStep()));
     this->connect(MainWork,SIGNAL(PervStep()),this,SLOT(PervStep()));
+    this->connect(MainWork,SIGNAL(S_StartInstall(QString,QString)),this,SLOT(StartInstall(QString,QString)));
     // Next Page
     int current = this->currentIndex();
     this->setCurrentIndex(current+1);
+}
+
+void ProgressTab::StartInstall(QString TargetPartition, QString TargetDisk){
+    Core->SetInstallTarget(TargetPartition,TargetDisk);
+    this->connect(Core,SIGNAL(Copyed(int))          ,MainWork,SLOT(FileCopying(int)));
+    this->connect(Core,SIGNAL(CopyDone(int))        ,MainWork,SLOT(CopyDone(int)));
+    this->connect(Core,SIGNAL(TotalFile(int))       ,MainWork,SLOT(TotalFileDone(int)));
+    this->connect(Core,SIGNAL(SetGrubDone(int))     ,MainWork,SLOT(SetGrubDone(int)));
+    this->connect(Core,SIGNAL(MountFSDone(int))     ,MainWork,SLOT(MountFSDone(int)));
+    this->connect(Core,SIGNAL(UpdateGrubDone(int))  ,MainWork,SLOT(UpdateGrubDone(int)));
+    this->connect(Core,SIGNAL(UpdateFstabDone(int)) ,MainWork,SLOT(UpdateFstabDone(int)));
+    Core->start();
 }
 
 //##########################################################
@@ -144,7 +157,7 @@ WelcomeTab::WelcomeTab(ProgressTabWidget *parent) :
 
     Title->setText(tr("诶，你好!"));
     Title->setFont(TitleFont);
-    Title->setGeometry(27,17,27*3,50);
+    Title->setGeometry(27,17,27*6,50);
 
     Content->setText(tr("感谢尝试安同开源社区最新的发行版!\n\n你准备好将发行版安装到你亲爱的电脑上了么?"));
     Content->setFont(ContentFont);
@@ -248,9 +261,12 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     //-----------------------------------------------
     //Read DiskPartiting-----------------------------
     //-----------------------------------------------
+    DiskPartitingComboBox->clear();
     int DiskPartitingCount = 0;
-    system("ls /dev/sd?? > /tmp/.DiskPartiting.info");
-    fp = fopen("/tmp/.DiskPartiting.info","r");
+    char ExecBuff[64];
+    sprintf(ExecBuff,"ls /dev/sd?? > %s",_TMP_PARTITION_FILE);
+    system(ExecBuff);
+    fp = fopen(_TMP_PARTITION_FILE,"r");
     DiskPartitingComboBox->insertItem(-1,tr("---"));
     bzero(DiskPartitingPath,64);
     while(fscanf(fp,"%s",DiskPartitingPath) != EOF){
@@ -258,13 +274,16 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
         bzero(DiskPartitingPath,64);
         DiskPartitingCount ++;
     }
-    system("rm /tmp/.DiskPartiting.info");
+    sprintf(ExecBuff,"rm -rf %s",_TMP_PARTITION_FILE);
+    system(ExecBuff);
     //--------------------------------------
     //Read Disk-----------------------------
     //--------------------------------------
     int DiskCount=0;
-    system("ls /dev/sd? > /tmp/.Disk.info");
-    fp = fopen("/tmp/.Disk.info","r");
+    DiskComboBox->clear();
+    sprintf(ExecBuff,"ls /dev/sd? > %s",_TMP_DISK_FILE);
+    system(ExecBuff);
+    fp = fopen(_TMP_DISK_FILE,"r");
     DiskComboBox->insertItem(-1,tr("---"));
     bzero(DiskPath,64);
     while(fscanf(fp,"%s",DiskPath) != EOF){
@@ -272,7 +291,8 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
         bzero(DiskPath,64);
         DiskCount++;
     }
-    system("rm /tmp/.Disk.info");
+    sprintf(ExecBuff,"rm -rf %s",_TMP_DISK_FILE);
+    system(ExecBuff);
     //Done
     Title->setFont(TitleFont);
     Title->setText(tr("磁盘分区中……"));
@@ -282,15 +302,15 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     Waring->setGeometry(27,17+40,600,50);
 
     StartPartitingButton->setGeometry(27,17+40+50+15,200,70);
-    StartPartitingButton->setText(tr("正在将你的磁盘分区"));
+    StartPartitingButton->setText(tr("点击我打开磁盘分区软件"));
 
     Content->setFont(ContentFont);
     Content->setText(tr("请选择你的主分区"));
     Content->setGeometry(27,17+40+50+15+70+15,120,30);
     Content2->setFont(ContentFont);
-    Content2->setText(tr("格式化此分区"));
-    Content2->setGeometry(100+27+10+25,17+40+50+15+70+15,90,30);
-    CheckBox->setGeometry(100+27+10+25+15+30,17+40+50+15+70+15+3,25,25);
+    Content2->setText(tr("格式化"));
+    Content2->setGeometry(100+27+10+25+10+5,17+40+50+15+70+15,90,30);
+    CheckBox->setGeometry(100+27+10+10+10+5,17+40+50+15+70+15+3,25,25);
 
     Content3->setFont(ContentFont);
     Content3->setText(tr("请选择你的引导设备"));
@@ -313,8 +333,10 @@ void GPartedDiskTab::StartPartiting(){
     //-----------------------------------------------
     DiskPartitingComboBox->clear();
     int DiskPartitingCount = 0;
-    system("ls /dev/sd?? > /tmp/.DiskPartiting.info");
-    fp = fopen("/tmp/.DiskPartiting.info","r");
+    char ExecBuff[64];
+    sprintf(ExecBuff,"ls /dev/sd?? > %s",_TMP_PARTITION_FILE);
+    system(ExecBuff);
+    fp = fopen(_TMP_PARTITION_FILE,"r");
     DiskPartitingComboBox->insertItem(-1,tr("---"));
     bzero(DiskPartitingPath,64);
     while(fscanf(fp,"%s",DiskPartitingPath) != EOF){
@@ -322,14 +344,16 @@ void GPartedDiskTab::StartPartiting(){
         bzero(DiskPartitingPath,64);
         DiskPartitingCount ++;
     }
-    system("rm /tmp/.DiskPartiting.info");
+    sprintf(ExecBuff,"rm -rf %s",_TMP_PARTITION_FILE);
+    system(ExecBuff);
     //--------------------------------------
     //Read Disk-----------------------------
     //--------------------------------------
     int DiskCount=0;
     DiskComboBox->clear();
-    system("ls /dev/sd? > /tmp/.Disk.info");
-    fp = fopen("/tmp/.Disk.info","r");
+    sprintf(ExecBuff,"ls /dev/sd? > %s",_TMP_DISK_FILE);
+    system(ExecBuff);
+    fp = fopen(_TMP_DISK_FILE,"r");
     DiskComboBox->insertItem(-1,tr("---"));
     bzero(DiskPath,64);
     while(fscanf(fp,"%s",DiskPath) != EOF){
@@ -337,7 +361,8 @@ void GPartedDiskTab::StartPartiting(){
         bzero(DiskPath,64);
         DiskCount++;
     }
-    system("rm /tmp/.Disk.info");
+    sprintf(ExecBuff,"rm -rf %s",_TMP_DISK_FILE);
+    system(ExecBuff);
     //Done
     emit AskShow();
 }
@@ -394,125 +419,66 @@ void GPartedDiskTab::ReadyToGo(){
 }
 
 //-----------------------------------
-
-MainWorkThread::MainWorkThread(char *_TargetPartition, char *_TargetDisk){
-    TargetPartition = new char[strlen(_TargetPartition)+1];
-    TargetDisk = new char[strlen(_TargetDisk)+1];
-    strncpy(TargetPartition,_TargetPartition,strlen(_TargetPartition));
-    TargetPartition[strlen(_TargetPartition)] = '\0';
-    strncpy(TargetDisk,_TargetDisk,strlen(_TargetDisk));
-    TargetDisk[strlen(_TargetDisk)] = '\0';
-}
-
-void MainWorkThread::run(){
-    Core = new AOSC_Installer_Core();
-    int status = Core->MountFS(TargetPartition);
-    if(status < 0){
-        perror("Mount");
-        emit CopyFileDone(-1);
-        return;
-    }
-    system("ls -lR /mnt | grep ^- | wc -l > /tmp/.TotalFile.info");
-    FILE *f = fopen("/tmp/.TotalFile.info","r");
-    fscanf(f,"%d",&Total);
-    printf("Total File = %d\n",Total);
-    emit TotalFile(Total);
-    connect(Core,SIGNAL(Copyed(int)),this,SLOT(FileCopyed(int)));
-    int Status = Core->CopyFileToNewSystem();
-    emit CopyFileDone(Status);
-    //-----Set Grub--------------//
-    emit SetGrubDone(Core->SetGrub(TargetDisk));
-    //-----Update Grub-----------//
-    emit UpdateGrubDone(Core->UpdateGrub());
-    //-----Update Fstab----------//
-    emit UpdateFstabDOne(Core->UpdateFstab(TargetPartition));
-}
-void MainWorkThread::FileCopyed(int Now){
-    emit NowCopy(Now);
-}
-
-void MainWorkThread::SetUser(QString Name, QString Pass){
-    char *UserName = new char[64];
-    char *PassWord = new char[64];
-    bzero(UserName,64);
-    bzero(PassWord,64);
-    QByteArray ba;
-    ba = Name.toLatin1();
-    strcpy(UserName,ba.data());
-    UserName[strlen(ba.data())] = '\0';
-    ba = Pass.toLatin1();
-    strcpy(PassWord,ba.data());
-    PassWord[strlen(ba.data())] = '\0';
-    emit SetUseeDone(Core->SetUser(UserName,PassWord));
-}
-
-void MainWorkThread::SetRoot(QString Pass){
-    char *PassWord = new char[64];
-    bzero(PassWord,64);
-    QByteArray ba;
-    ba = Pass.toLatin1();
-    strcpy(PassWord,ba.data());
-    PassWord[strlen(ba.data())] = '\0';
-    emit SetRootDone(Core->SetRootPassWord(PassWord));
-}
-
-//------------------------------------------
 void MainWorkTab::FileCopying(int Now){
     ProgressBar->setValue(Now);
 }
 
-MainWorkTab::MainWorkTab(char *_TargetPartition, char *_TargetDisk, ProgressTabWidget *parent):
+MainWorkTab::MainWorkTab(QString _TargetPartition, QString _TargetDisk, ProgressTabWidget *parent):
     ProgressTabWidget(parent){
     Title       = new QLabel(this);
     Content     = new QLabel(this);
+    Content2    = new QLabel(this);
     Start       = new QPushButton(this);
     SetNextButtonDisable();
     SetPervButtonDisable();
-    bzero(TargetDisk,64);
-    bzero(TargetPartition,64);
-    strncpy(TargetPartition,_TargetPartition,strlen(_TargetPartition));
-    TargetPartition[strlen(_TargetPartition)] = '\0';
-    strncpy(TargetDisk,_TargetDisk,strlen(_TargetDisk));
-    TargetDisk[strlen(_TargetDisk)] = '\0';
 
     Title->setFont(TitleFont);
     Title->setText(tr("系统已完成安装前准备"));
     Title->setGeometry(27,17,500,50);
 
     Content->setFont(ContentFont);
-    Content->setGeometry(27,17+50,500,50);
+    Content->setGeometry(27,17+50,500,25);
+
+    Content2->setFont(ContentFont);
+    Content2->setGeometry(27,17+50+25,500,25);
 
     Start->setText(tr("Click to Start"));
     Start->setGeometry(27,17+40+50+15+70+15,200,60);
 
-    this->connect(Start,SIGNAL(clicked()),this,SLOT(Install_Start()));
+    this->connect(Start,SIGNAL(clicked()),this,SLOT(StartInstall()));
+    TargetPartition = _TargetPartition;
+    TargetDisk      = _TargetDisk;
 }
 
-void MainWorkTab::Install_Start(){
+void MainWorkTab::StartInstall(void){
     Content->setText(tr("正在准备安装文件"));
-    MainWork = new MainWorkThread(TargetPartition,TargetDisk);
-    this->connect(MainWork,SIGNAL(TotalFile(int)),this,SLOT(TotalFileDone(int)));
+    emit S_StartInstall(TargetPartition,TargetDisk);
+}
 
-    MainWork->run();
+void MainWorkTab::MountFSDone(int Status){
+    if(Status != 0){
+        QMessageBox::warning(this,"Waring",tr("挂载磁盘出错!"),QMessageBox::Yes);
+        exit(-1);
+    }
 }
 
 void MainWorkTab::TotalFileDone(int Total){
     TotalFile = Total;
     Content->setText(tr("正在复制安装文件"));
     Title->setText(tr("系统正在安装……"));
+    printf("TotalFile = %d\n",Total);
     ProgressBar = new QProgressBar(this);
     ProgressBar->setRange(0,TotalFile);
     ProgressBar->setGeometry(27,17+40+50+15+30,600,40);
     Start->hide();
     ProgressBar->show();
-    this->connect(MainWork,SIGNAL(NowCopy(int)),this,SLOT(FileCopying(int)));
-    this->connect(MainWork,SIGNAL(CopyFileDone(int)),this,SLOT(CopyDone(int)));
 }
 
 void MainWorkTab::CopyDone(int Status){
     if(Status == true){
         ProgressBar->setValue(TotalFile);
-        Content->setText(tr("系统安装完毕"));
+        Content->setText(tr("基础系统安装完毕"));
+        Content2->setText(tr("正在安装Grub......"));
     }else{
         QMessageBox::warning(this,"Waring",tr("系统安装出错!"),QMessageBox::Yes);
         exit(-1);
@@ -520,15 +486,29 @@ void MainWorkTab::CopyDone(int Status){
 }
 
 void MainWorkTab::SetGrubDone(int Status){
-    if(Status < 0){
+    if(Status != 0){
         QMessageBox::warning(this,"Waring",tr("安装 GRUB 失败!"),QMessageBox::Yes);
         exit(-1);
     }
     Content->setText(tr("GRUB 安装成功!"));
+    Content2->setText(tr("正在配置Grub......"));
+    ProgressBar->setRange(0,0);
+}
+
+void MainWorkTab::UpdateFstabDone(int Status){
+    if(Status != 0){
+        QMessageBox::warning(this,"Waring",tr("更新 /etc/fstab 失败!"),QMessageBox::Yes);
+        exit(-1);
+    }
+    Content->setText(tr("更新 /etc/fstab 成功!"));
+    Content2->setText(tr("基础系统安装完毕!"));
+    ProgressBar->setRange(0,1);
+    ProgressBar->setValue(1);
+    SetNextButtonEnable();
 }
 
 void MainWorkTab::SetUseeDone(int Status){
-    if(Status < 0){
+    if(Status != 0){
         QMessageBox::warning(this,"Waring",tr("设置用户数据失败!"),QMessageBox::Yes);
         exit(-1);
     }
@@ -536,7 +516,7 @@ void MainWorkTab::SetUseeDone(int Status){
 }
 
 void MainWorkTab::SetRootDone(int Status){
-    if(Status < 0){
+    if(Status != 0){
         QMessageBox::warning(this,"Waring",tr("Root 用户配置失败!"),QMessageBox::Yes);
         exit(-1);
     }
@@ -544,19 +524,11 @@ void MainWorkTab::SetRootDone(int Status){
 }
 
 void MainWorkTab::UpdateGrubDone(int Status){
-    if(Status < 0){
+    if(Status != 0){
         QMessageBox::warning(this,"Waring",tr("GRUB 配置失败!"),QMessageBox::Yes);
         exit(-1);
     }
     Content->setText(tr("GRUB 配置成功!"));
-}
-
-void MainWorkTab::UpdateFstabDOne(int Status){
-    if(Status < 0){
-        QMessageBox::warning(this,"Waring",tr("更新 /etc/fstab 失败!"),QMessageBox::Yes);
-        exit(-1);
-    }
-    Content->setText(tr("更新 /etc/fstab 成功!"));
 }
 
 //--------------------------------------

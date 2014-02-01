@@ -4,35 +4,54 @@
 #include <qt4/QtCore/QFile>
 #include <qt4/QtCore/QDir>
 #include <qt4/QtCore/QObject>
+#include <qt4/QtCore/QThread>
 #include <qt4/QtCore/QFileInfoList>
 
-#define _EN_LIVE_CD_    0
-#define _INSTALL_FILE_  "/squash"
+#define _EN_LIVE_CD_        0
+#define _INSTALL_FILE_      "/squash"
+#define _TMP_TOTAL_FILE_    "/tmp/.TotalFile.conf"
+#define _TMP_DISK_FILE      "/tmp/.Disk.conf"
+#define _TMP_PARTITION_FILE "/tmp/.Partition.conf"
 
-class AOSC_Installer_Core : public QObject{
+#define FAILED(x) ((x != 0) ? 1 : 0)
+#define CHECK_FAILED(x) ({ if (FAILED(x)) return;})
+
+
+class AOSC_Installer_Core : public QThread{
     Q_OBJECT
 public:
-    explicit AOSC_Installer_Core(QObject *parent = 0);
+    explicit AOSC_Installer_Core(QThread *parent = 0);
 //##### Step ######//
-    int     Check_Environment(void);
-    int     Find_Disk(char ***DP);
-    int     MainWork(char *TargetPartition);
-
+    void    run();
+    int     CheckEnvironment(void);
     //Main Step
-    int     MountFS(char *TargetPartition);
+    int     MountFS();
     bool    CopyFileToNewSystem(void);
-    int     SetGrub(char *TargetDisk);
+    int     SetGrub();
     int     SetUser(char *UserName,char *PassWord);
     int     SetRootPassWord(char *PassWord);
     int     UpdateGrub(void);
-    int     UpdateFstab(char *TargetPartition);
+    int     UpdateFstab(void);
 
     bool    qCopyDirectory(const QDir& fromDir, const QDir& toDir, bool bCoverIfFileExists);
+
+    void    TranslateQStringToChar(QString in,char *Out);
+    void    SetInstallTarget(QString _TargetPartition,QString _TargetDisk);
 signals:
+    void    MountFSDone(int);
+    void    TotalFile(int);
     void    Copyed(int);
+    void    CopyDone(int);
+    void    SetGrubDone(int);
+    void    UpdateGrubDone(int);
+    void    UpdateFstabDone(int);
+    void    SetUserDone(int);
+
 protected:
     int     NowCopy;
     int     ThisTime;
+    char    *TargetPartition;
+    char    *TargetDisk;
 };
 
 #endif

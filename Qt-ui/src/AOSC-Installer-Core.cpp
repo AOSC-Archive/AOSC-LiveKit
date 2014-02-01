@@ -2,14 +2,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <QByteArray>
 #include "AOSC-Installer-Core.h"
 
-AOSC_Installer_Core::AOSC_Installer_Core(QObject *parent):
-    QObject(parent){
+AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
+    QThread(parent){
 
 }
 
-int AOSC_Installer_Core::Check_Environment(void){
+void AOSC_Installer_Core::run(){
+#ifdef  _AOSC_LIVE_CD_
+    CHECK_FAILED(MountFS());
+#endif
+    if (CopyFileToNewSystem() != true)  return;
+    if (SetGrub() != 0)                 return;
+    if (UpdateGrub() != 0)              return;
+    if (UpdateFstab() != 0)             return;
+}
+
+int AOSC_Installer_Core::CheckEnvironment(void){
     int result = access(_INSTALL_FILE_,0);
     if(result != F_OK){
         perror("Loading Install File ");
@@ -18,34 +29,23 @@ int AOSC_Installer_Core::Check_Environment(void){
     return _EN_LIVE_CD_;
 }
 
-int AOSC_Installer_Core::Find_Disk(char ***DP){     // BUG!!!!!!!!!!!
-    int k=0;
-    system("ls /dev/sd* > /tmp/.DiskParted.info");
-    FILE *fp = fopen("/tmp/.DiskParted.info","r");
-    char *Temp = (char *)malloc(2500);    // 50 x 50
-    bzero(Temp,2500);
-    int i = 0;
-    char *DiskPath[50];
-    DiskPath[0] = (char *)malloc(64);
-    printf("Malloc OK\n");
-    bzero(DiskPath[0],64);
-    while(fscanf(fp,"%s",DiskPath[i]) != EOF){
-        printf("%s\n",DiskPath[i]);
-        DiskPath[i+1] = (char *)malloc(64);
-        bzero(DiskPath[i+1],64);
-        k++;
-    }
-    *DP = DiskPath;
-    return k;
-}
-
 bool AOSC_Installer_Core::CopyFileToNewSystem(void){
-//    system("cp -arv /mnt/* /target/");
     NowCopy = 0;
     ThisTime = 0;
     QDir    From("/mnt/");
     QDir    Dest("/target");
-    return qCopyDirectory(From,Dest,0);
+    char ExecBuff[512];
+    sprintf(ExecBuff,"ls -lR /mnt | grep ^- | wc -l > /tmp/.TotalFile.conf");
+    system(ExecBuff);
+    FILE *f = fopen(_TMP_TOTAL_FILE_,"r");
+    int Total;
+    fscanf(f,"%d",&Total);
+    sprintf(ExecBuff,"rm -rf %s",_TMP_TOTAL_FILE_);
+    system(ExecBuff);
+    emit TotalFile(Total);
+    int status = qCopyDirectory(From,Dest,0);
+    emit CopyDone(status);
+    return status;
 }
 
 /*********************************************************************/
@@ -104,42 +104,58 @@ bool AOSC_Installer_Core::qCopyDirectory(const QDir& fromDir, const QDir& toDir,
 }
 
 //#################Main Step#####################
-int AOSC_Installer_Core::MountFS(char *TargetPartition){
+int AOSC_Installer_Core::MountFS(){
     char ExecBuff[512];
     int status;
     sprintf(ExecBuff,"mount -o loop %s /mnt",_INSTALL_FILE_);
     status = system(ExecBuff);
-    if(status < 0){
+    if(status != 0){
+        emit MountFSDone(status);
         return status;
     }
     sprintf(ExecBuff,"mount %s /target",TargetPartition);
     status = system(ExecBuff);
-    if(status < 0){
-        return status;
-    }
-    return 0;
+    emit MountFSDone(status);
+    return status;
 }
 
-int AOSC_Installer_Core::SetGrub(char *TargetDisk){
+int AOSC_Installer_Core::SetGrub(){
     char ExecBuff[512];
     int status;
+#ifdef _AOSC_LIVE_CD_
     sprintf(ExecBuff,"chroot /target grub-install %s",TargetDisk);
+#else
+    sprintf(ExecBuff,"grub-install %s",TargetDisk);
+#endif
     status = system(ExecBuff);
-    if(status < 0){
-	return status;
-    }
-    return 0;
+    emit SetGrubDone(status);
+    return status;
 }
 
 int AOSC_Installer_Core::UpdateGrub(){
     char ExecBuff[512];
     int status;
-    sprintf(ExecBuff,"chroot /target grub-mkconfig -o /boot/grub/grub.cfg &");
+#ifdef _AOSC_LIVE_CD_
+    sprintf(ExecBuff,"chroot /target grub-mkconfig -o /boot/grub/grub.cfg");
+#else
+    sprintf(ExecBuff,"grub-mkconfig -o /boot/grub/grub.cfg");
+#endif
     status = system(ExecBuff);
-    if(status < 0){
-	return status;
-    }
-    return 0;
+    emit UpdateGrubDone(status);
+    return status;
+}
+
+int AOSC_Installer_Core::UpdateFstab(void){
+    char ExecBuff[512];
+    int status;
+#ifdef _AOSC_LIVE_CD_
+    sprintf(ExecBuff,"chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
+    status = system(ExecBuff);
+#else
+    status = 0;
+#endif
+    emit UpdateFstabDone(status);
+    return status;
 }
 
 int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
@@ -152,10 +168,8 @@ int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
     }
     sprintf(ExecBuff,"chroot /target /usr/bin/cpw.sh %s %s",UserName,PassWord);
     status = system(ExecBuff);
-    if(status < 0){
-        return status;
-    }
-    return 0;
+    emit SetUserDone(status);
+    return status;
 }
 
 /* 
@@ -171,13 +185,17 @@ int AOSC_Installer_Core::SetRootPassWord(char *PassWord){
 }
 */ 
 
-int AOSC_Installer_Core::UpdateFstab(char *TargetPartition){
-    char ExecBuff[512];
-    int status;
-    sprintf(ExecBuff,"chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
-    status = system(ExecBuff);
-    if(status < 0){
-	return status;
-    }
-    return 0;
+void AOSC_Installer_Core::TranslateQStringToChar(QString in, char *Out){
+    QByteArray ba = in.toLatin1();
+    strcpy(Out,ba.data());
+}
+
+void AOSC_Installer_Core::SetInstallTarget(QString _TargetPartition, QString _TargetDisk){
+    TargetPartition = new char[64];
+    bzero(TargetPartition,64);
+    TranslateQStringToChar(_TargetPartition,TargetPartition);
+
+    TargetDisk      = new char[64];
+    bzero(TargetDisk,64);
+    TranslateQStringToChar(_TargetDisk,TargetDisk);
 }
