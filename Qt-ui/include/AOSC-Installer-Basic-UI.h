@@ -46,6 +46,7 @@ signals:
 public slots:
     void NextStepClicked(void);
     void PervStepClicked(void);
+    void SetNextButtonText(QString Text);
 protected:
     QPushButton *NextStepButton;
     QPushButton *PervStepButton;
@@ -154,6 +155,7 @@ public slots:
     void SetUserDone(int);
 signals:
     void StartSetUserInformation(QString,QString,QString);
+    void AllDone(void);
 protected:
     QLabel          *Title;
 
@@ -176,6 +178,15 @@ protected:
     QString         UserPass2;
 };
 
+class DoneTab : public ProgressTabWidget{
+    Q_OBJECT
+public:
+    DoneTab(ProgressTabWidget *parent = 0);
+protected:
+    QLabel          *Title;
+    QLabel          *Content;
+};
+
 //-------------------------------------------------------
 
 
@@ -193,6 +204,7 @@ public slots:
     void PartedDone(QString, QString);
     void StartInstall(QString, QString);
     void StartSetUserInformation(QString,QString,QString);
+    void AllDone(void);
 protected:
     AOSC_Installer_Core *Core;
     char                 TargetPartition[64];
@@ -203,6 +215,7 @@ protected:
     GPartedDiskTab      *GPartedDisk;
     MainWorkTab         *MainWork;
     UserTab             *User;
+    DoneTab             *Done;
 };
 
 #endif

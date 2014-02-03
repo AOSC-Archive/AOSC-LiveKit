@@ -22,10 +22,6 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
     this->setMinimumSize(700,350);
     this->tabBar()->hide();
     //Add Welcome Tab
-    User    = new UserTab;
-    this->addTab(User,tr("User"));
-    this->connect(User,SIGNAL(StartSetUserInformation(QString,QString,QString)),this,SLOT(StartSetUserInformation(QString,QString,QString)));
-
     Welcome = new WelcomeTab;
     this->addTab(Welcome,tr("Welcome"));
     this->connect(Welcome,SIGNAL(NextSetp()),this,SLOT(NextStep()));
@@ -96,6 +92,14 @@ void ProgressTab::StartInstall(QString TargetPartition, QString TargetDisk){
     this->connect(Core,SIGNAL(UpdateGrubDone(int))  ,MainWork,SLOT(UpdateGrubDone(int)));
     this->connect(Core,SIGNAL(UpdateFstabDone(int)) ,MainWork,SLOT(UpdateFstabDone(int)));
     Core->start();
+
+    User    = new UserTab;
+    Done    = new DoneTab;
+    this->addTab(User,tr("User"));
+    this->addTab(Done,tr("Done"));
+    this->connect(User,SIGNAL(StartSetUserInformation(QString,QString,QString)),this,SLOT(StartSetUserInformation(QString,QString,QString)));
+    this->connect(User,SIGNAL(NextSetp()),this,SLOT(NextStep()));
+    this->connect(Done,SIGNAL(NextSetp()),this,SLOT(AllDone()));
 }
 
 void ProgressTab::StartSetUserInformation(QString RootPass, QString UserName, QString UserPass){
@@ -103,6 +107,10 @@ void ProgressTab::StartSetUserInformation(QString RootPass, QString UserName, QS
     this->connect(Core,SIGNAL(SetUserDone(int)),User,SLOT(SetUserDone(int)));
     Core->SetRootPassWord(RootPass);
     Core->SetUser(UserName,UserPass);
+}
+
+void ProgressTab::AllDone(){
+    exit(0);
 }
 
 //##########################################################
@@ -157,6 +165,10 @@ void ProgressTabWidget::SetPervButtonDisable(void){
 
 void ProgressTabWidget::SetPervButtonEnable(void){
     PervStepButton->setEnabled(true);
+}
+
+void ProgressTabWidget::SetNextButtonText(QString Text){
+    NextStepButton->setText(Text);
 }
 
 //#########################################################
@@ -535,6 +547,8 @@ UserTab::UserTab(ProgressTabWidget *parent):
     RootPassEdit    = new QLineEdit(this);
     RootPassEdit2   = new QLineEdit(this);
 
+    SetPervButtonDisable();
+
     RootPassEdit->setEchoMode(QLineEdit::Password);
     RootPassEdit2->setEchoMode(QLineEdit::Password);
 
@@ -622,5 +636,23 @@ void UserTab::SetUserDone(int Status){
         QMessageBox::warning(this,"Warning",tr("设置用户数据失败!"),QMessageBox::Yes);
         exit(-1);
     }
+    emit NextSetp();
+}
+//------------------------------------------------------------------
+DoneTab::DoneTab(ProgressTabWidget *parent):
+    ProgressTabWidget(parent){
+    Title   = new QLabel(this);
+    Title->setFont(TitleFont);
+    Title->setText(tr("工作圆满完成 ;-)"));
+    Title->setGeometry(27,17,500,50);
+
+    Content = new QLabel(this);
+    Content->setFont(ContentFont);
+    Content->setText(tr("请手动重启计算机来启动新系统"));
+    Content->setGeometry(27,17+50,500,25);
+
+    SetPervButtonDisable();
+    SetNextButtonText(tr("结束"));
+
 }
 
