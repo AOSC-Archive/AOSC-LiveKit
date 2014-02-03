@@ -91,12 +91,8 @@ bool AOSC_Installer_Core::qCopyDirectory(const QDir& fromDir, const QDir& toDir,
             {
                 return false;
             }else{
-                ThisTime++;
-                if(ThisTime > 128){
-                    NowCopy += ThisTime;
-                    ThisTime = 0;
-                    emit Copyed(NowCopy);
-                }
+                NowCopy++;
+                emit Copyed(NowCopy);
             }
         }
     }
@@ -146,9 +142,9 @@ int AOSC_Installer_Core::UpdateGrub(){
 }
 
 int AOSC_Installer_Core::UpdateFstab(void){
-    char ExecBuff[512];
     int status;
 #ifdef _AOSC_LIVE_CD_
+    char ExecBuff[512];
     sprintf(ExecBuff,"chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
     status = system(ExecBuff);
 #else
@@ -158,7 +154,13 @@ int AOSC_Installer_Core::UpdateFstab(void){
     return status;
 }
 
-int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
+int AOSC_Installer_Core::SetUser(QString _UserName, QString _PassWord){
+    char UserName[64];
+    char PassWord[64];
+    bzero(UserName,64);
+    bzero(PassWord,64);
+    TranslateQStringToChar(_UserName,UserName);
+    TranslateQStringToChar(_PassWord,PassWord);
     char ExecBuff[512];
     int status;
     sprintf(ExecBuff,"chroot /target usermod -l %s -md /home/%s live",UserName,UserName);
@@ -172,18 +174,18 @@ int AOSC_Installer_Core::SetUser(char *UserName, char *PassWord){
     return status;
 }
 
-/* 
-int AOSC_Installer_Core::SetRootPassWord(char *PassWord){
+
+int AOSC_Installer_Core::SetRootPassWord(QString _RootPass){
+    char RootPass[64];
+    bzero(RootPass,64);
+    TranslateQStringToChar(_RootPass,RootPass);
     char ExecBuff[256];
     int status;
-    sprintf(ExecBuff,"/usr/bin/cpw.sh root %s",PassWord);
+    sprintf(ExecBuff,"chroot /target  /usr/bin/cpw.sh root %s",RootPass);
     status = system(ExecBuff);
-    if(status < 0){
-        return status;
-    }
-    return 0;
-}
-*/ 
+    emit SetRootDone(status);
+    return status;
+} 
 
 void AOSC_Installer_Core::TranslateQStringToChar(QString in, char *Out){
     QByteArray ba = in.toLatin1();

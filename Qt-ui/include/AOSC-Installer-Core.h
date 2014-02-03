@@ -28,8 +28,8 @@ public:
     int     MountFS();
     bool    CopyFileToNewSystem(void);
     int     SetGrub();
-    int     SetUser(char *UserName,char *PassWord);
-    int     SetRootPassWord(char *PassWord);
+    int     SetUser(QString _UserName,QString _PassWord);
+    int     SetRootPassWord(QString);
     int     UpdateGrub(void);
     int     UpdateFstab(void);
 
@@ -46,6 +46,7 @@ signals:
     void    UpdateGrubDone(int);
     void    UpdateFstabDone(int);
     void    SetUserDone(int);
+    void    SetRootDone(int);
 
 protected:
     int     NowCopy;

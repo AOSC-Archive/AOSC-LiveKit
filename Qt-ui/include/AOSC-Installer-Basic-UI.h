@@ -14,6 +14,7 @@
 #include <qt4/QtCore/QString>
 #include <qt4/QtCore/QThread>
 #include <qt4/QtGui/QProgressBar>
+#include <qt4/QtGui/QLineEdit>
 #include "AOSC-Installer-Core.h"
 
 #define BUTTON_WIDTH    80
@@ -99,7 +100,7 @@ public slots:
     void ReadyToGo(void);
 protected:
     QLabel          *Title;
-    QLabel          *Waring;
+    QLabel          *Warning;
     QLabel          *Content;
     QLabel          *Content2;
     QLabel          *Content3;
@@ -130,8 +131,6 @@ public slots:
     void FileCopying(int);
     void CopyDone(int);
     void SetGrubDone(int);
-    void SetUseeDone(int);
-    void SetRootDone(int);
     void UpdateGrubDone(int);
     void UpdateFstabDone(int);
 protected:
@@ -144,6 +143,39 @@ protected:
     QString         TargetPartition;
     QString         TargetDisk;
 };
+
+class UserTab : public ProgressTabWidget{
+    Q_OBJECT
+public:
+    explicit UserTab(ProgressTabWidget *parent = 0);
+public slots:
+    void SetUserInformation(void);
+    void SetRootDone(int);
+    void SetUserDone(int);
+signals:
+    void StartSetUserInformation(QString,QString,QString);
+protected:
+    QLabel          *Title;
+
+    QLabel          *RootPassTitle;
+    QLabel          *RootPassTitle2;
+    QLineEdit       *RootPassEdit;
+    QLineEdit       *RootPassEdit2;
+
+    QLabel          *UserNameTitle;
+    QLabel          *UserPassTitle;
+    QLabel          *UserPassTitle2;
+    QLineEdit       *UserNameEdit;
+    QLineEdit       *UserPassEdit;
+    QLineEdit       *UserPassEdit2;
+
+    QString         RootPass;
+    QString         RootPass2;
+    QString         UserName;
+    QString         UserPass;
+    QString         UserPass2;
+};
+
 //-------------------------------------------------------
 
 
@@ -160,6 +192,7 @@ public slots:
     void AskShow(void);
     void PartedDone(QString, QString);
     void StartInstall(QString, QString);
+    void StartSetUserInformation(QString,QString,QString);
 protected:
     AOSC_Installer_Core *Core;
     char                 TargetPartition[64];
@@ -169,6 +202,7 @@ protected:
     ReadingTab          *Reading;
     GPartedDiskTab      *GPartedDisk;
     MainWorkTab         *MainWork;
+    UserTab             *User;
 };
 
 #endif
