@@ -9,7 +9,6 @@ INCLUDEPATH += . include
 CONFIG += debug_and_release
 CONFIG(debug, debug|release) {
 	TARGET = AOSC-Installer
-	DEFINES	+= _AOSC_LIVE_CD_
 } else {
 	TARGET = AOSC-Installer
 	DEFINES	+= _AOSC_LIVE_CD_
