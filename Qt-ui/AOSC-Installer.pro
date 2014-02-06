@@ -6,6 +6,15 @@ TEMPLATE = app
 TARGET = AOSC-Installer
 DEPENDPATH += . include src
 INCLUDEPATH += . include
+CONFIG += debug_and_release
+CONFIG(debug, debug|release) {
+	TARGET = AOSC-Installer
+	DEFINES	+= _AOSC_LIVE_CD_
+} else {
+	TARGET = AOSC-Installer
+	DEFINES	+= _AOSC_LIVE_CD_
+	QMAKE_POST_LINK += cp cpw.sh /usr/bin/cpw.sh & cp GNU_License.html /usr/share/ulinst/data/GNU_License.html & cp AOSC-Installer /usr/bin/
+}
 
 # Input
 HEADERS += include/AOSC-Installer-Basic-UI.h \

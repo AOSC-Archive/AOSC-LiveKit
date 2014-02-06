@@ -35,7 +35,7 @@ bool AOSC_Installer_Core::CopyFileToNewSystem(void){
     QDir    From("/mnt/");
     QDir    Dest("/target");
     char ExecBuff[512];
-    sprintf(ExecBuff,"ls -lR /mnt | grep ^- | wc -l > /tmp/.TotalFile.conf");
+    sprintf(ExecBuff,"ls -lR /mnt | grep ^- | wc -l > %s",_TMP_TOTAL_FILE_);
     system(ExecBuff);
     FILE *f = fopen(_TMP_TOTAL_FILE_,"r");
     int Total;
@@ -101,42 +101,35 @@ bool AOSC_Installer_Core::qCopyDirectory(const QDir& fromDir, const QDir& toDir,
 
 //#################Main Step#####################
 int AOSC_Installer_Core::MountFS(){
-    char ExecBuff[512];
     int status;
-    sprintf(ExecBuff,"mount -o loop %s /mnt",_INSTALL_FILE_);
-    status = system(ExecBuff);
+    status = execl("/usr/bin/mount","mount","-o","loop",_INSTALL_FILE_,"/mnt",NULL);
     if(status != 0){
         emit MountFSDone(status);
         return status;
     }
-    sprintf(ExecBuff,"mount %s /target",TargetPartition);
-    status = system(ExecBuff);
+    status = execl("/usr/bin/mount","mount",TargetPartition,"/target",NULL);
     emit MountFSDone(status);
     return status;
 }
 
 int AOSC_Installer_Core::SetGrub(){
-    char ExecBuff[512];
     int status;
 #ifdef _AOSC_LIVE_CD_
-    sprintf(ExecBuff,"chroot /target grub-install %s",TargetDisk);
+    status = execl("/usr/bin/chroot","chroot","/target","grub-install",TargetDisk,NULL);
 #else
-    sprintf(ExecBuff,"grub-install %s",TargetDisk);
+    status = execl("/usr/bin/grub-install","grub-install",TargetDisk,NULL);
 #endif
-    status = system(ExecBuff);
     emit SetGrubDone(status);
     return status;
 }
 
 int AOSC_Installer_Core::UpdateGrub(){
-    char ExecBuff[512];
     int status;
 #ifdef _AOSC_LIVE_CD_
-    sprintf(ExecBuff,"chroot /target grub-mkconfig -o /boot/grub/grub.cfg");
+    status = execl("/usr/bin/chroot","chroot","/target","grub-mkconfig","-o","/boot/grub/grub.cfg",NULL);
 #else
-    sprintf(ExecBuff,"grub-mkconfig -o /boot/grub/grub.cfg");
+    status = execl("/usr/bin/grub-mkconfig","grub-mkconfig","-o","/boot/grub/grub.cfg",NULL);
 #endif
-    status = system(ExecBuff);
     emit UpdateGrubDone(status);
     return status;
 }
@@ -144,7 +137,7 @@ int AOSC_Installer_Core::UpdateGrub(){
 int AOSC_Installer_Core::UpdateFstab(void){
     int status;
 #ifdef _AOSC_LIVE_CD_
-    char ExecBuff[512];
+    char ExecBuff[128];
     sprintf(ExecBuff,"chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
     status = system(ExecBuff);
 #else
@@ -161,7 +154,7 @@ int AOSC_Installer_Core::SetUser(QString _UserName, QString _PassWord){
     bzero(PassWord,64);
     TranslateQStringToChar(_UserName,UserName);
     TranslateQStringToChar(_PassWord,PassWord);
-    char ExecBuff[512];
+    char ExecBuff[128];
     int status;
     sprintf(ExecBuff,"chroot /target usermod -l %s -md /home/%s live",UserName,UserName);
     status = system(ExecBuff);
