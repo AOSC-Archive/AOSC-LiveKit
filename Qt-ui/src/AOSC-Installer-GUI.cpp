@@ -358,7 +358,7 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
 
 void GPartedDiskTab::StartPartiting(){
     emit AskHide();
-    system("gparted");
+    system("sudo gparted");
     //-----------------------------------------------
     //Read DiskPartiting-----------------------------
     //-----------------------------------------------
@@ -436,7 +436,7 @@ void GPartedDiskTab::ReadyToGo(){
         if(result == QMessageBox::Yes){
             char ExecBuff[512];
             bzero(ExecBuff,512);
-            sprintf(ExecBuff,"mkfs.ext4 %s",TargetPartition);
+            sprintf(ExecBuff,"sudo mkfs.ext4 %s",TargetPartition);
             result = system(ExecBuff);
             if(result != 0){
                 QMessageBox::warning(this,"Warning",tr("OMG, 格式化分区失败!"),QMessageBox::Yes);
