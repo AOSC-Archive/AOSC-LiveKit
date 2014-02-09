@@ -506,7 +506,7 @@ void MainWorkTab::TotalFileDone(int Total){
 }
 
 void MainWorkTab::CopyDone(int Status){
-    if(Status == true){
+    if(Status == 0){
         ProgressBar->setValue(TotalFile);
         Content->setText(tr("基础系统安装完毕"));
         Content2->setText(tr("正在安装Grub......"));
