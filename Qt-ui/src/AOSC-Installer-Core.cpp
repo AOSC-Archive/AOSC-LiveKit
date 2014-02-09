@@ -101,7 +101,7 @@ int AOSC_Installer_Core::UpdateFstab(void){
     int status;
 #ifdef _AOSC_LIVE_CD_
     char ExecBuff[128];
-    sprintf(ExecBuff,"sudo echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
+    sprintf(ExecBuff,"echo %s / ext4 defaults 1 1 | sudo tee -a /target/etc/fstab",TargetPartition);
     status = system(ExecBuff);
 #else
     status = 0;
