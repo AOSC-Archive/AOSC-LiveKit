@@ -12,9 +12,9 @@ AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
 
 void AOSC_Installer_Core::run(){
 #ifdef  _AOSC_LIVE_CD_
-    CHECK_FAILED(MountFS());
+    if (MountFS() != 0)                 return;
 #endif
-    if (CopyFileToNewSystem() != true)  return;
+    if (CopyFileToNewSystem() != 0)     return;
     if (SetGrub() != 0)                 return;
     if (UpdateGrub() != 0)              return;
     if (UpdateFstab() != 0)             return;
@@ -32,104 +32,63 @@ int AOSC_Installer_Core::CheckEnvironment(void){
 bool AOSC_Installer_Core::CopyFileToNewSystem(void){
     NowCopy = 0;
     ThisTime = 0;
-    QDir    From("/mnt/");
-    QDir    Dest("/target");
-    char ExecBuff[512];
-    sprintf(ExecBuff,"ls -lR /mnt | grep ^- | wc -l > %s",_TMP_TOTAL_FILE_);
+    char ExecBuff[128];
+    sprintf(ExecBuff,"sudo du -s /mnt/squash > %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
-    FILE *f = fopen(_TMP_TOTAL_FILE_,"r");
+    FILE *f = fopen(_TMP_TOTAL_SIZE_,"r");
     int Total;
+    int TargetSize;
     fscanf(f,"%d",&Total);
-    sprintf(ExecBuff,"rm -rf %s",_TMP_TOTAL_FILE_);
+    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
+    sprintf(ExecBuff,"sudo du -s /target > %s",_TMP_TARGET_SIZE_);
+    fclose(f);
+    fopen(_TMP_TARGET_SIZE_,"r");
+    fscanf(f,"%d",&TargetSize);
     emit TotalFile(Total);
-    int status = qCopyDirectory(From,Dest,0);
+    emit SFSizeStart(TargetSize);
+    sprintf(ExecBuff,"cp -arv %s %s",_INSTALL_FILE_FROM_,_INSTALL_FILE_DEST_);
+    int status = system(ExecBuff);
     emit CopyDone(status);
     return status;
-}
-
-/*********************************************************************/
-  /*功能：拷贝文件夹
-    qCopyDirectory -- 拷贝目录
-    fromDir : 源目录
-    toDir   : 目标目录
-    bCoverIfFileExists : ture:同名时覆盖  false:同名时返回false,终止拷贝
-    返回: ture拷贝成功 false:拷贝未完成*/
-/***********************************************************************/
-bool AOSC_Installer_Core::qCopyDirectory(const QDir& fromDir, const QDir& toDir, bool bCoverIfFileExists)
-{
-    QDir formDir_ = fromDir;
-    QDir toDir_ = toDir;
-
-    if(!toDir_.exists())
-    {
-        if(!toDir_.mkdir(toDir.absolutePath()))
-            return false;
-    }
-
-    QFileInfoList fileInfoList = formDir_.entryInfoList();
-    foreach(QFileInfo fileInfo, fileInfoList)
-    {
-        if(fileInfo.fileName() == "." || fileInfo.fileName() == "..")
-            continue;
-
-        //拷贝子目录
-        if(fileInfo.isDir())
-        {
-            //递归调用拷贝
-            if(!qCopyDirectory(fileInfo.filePath(), toDir_.filePath(fileInfo.fileName()),true))
-                return false;
-        }
-        //拷贝子文件
-        else
-        {
-            if(bCoverIfFileExists && toDir_.exists(fileInfo.fileName()))
-            {
-                toDir_.remove(fileInfo.fileName());
-            }
-            if(!QFile::copy(fileInfo.filePath(), toDir_.filePath(fileInfo.fileName())))
-            {
-                return false;
-            }else{
-                NowCopy++;
-                emit Copyed(NowCopy);
-            }
-        }
-    }
-    return true;
+    return 0;
 }
 
 //#################Main Step#####################
 int AOSC_Installer_Core::MountFS(){
     int status;
-    status = execl("/usr/bin/mount","mount","-o","loop",_INSTALL_FILE_,"/mnt",NULL);
-    if(status != 0){
-        emit MountFSDone(status);
-        return status;
-    }
-    status = execl("/usr/bin/mount","mount",TargetPartition,"/target",NULL);
+    char ExecBuff[128];
+    sprintf(ExecBuff,"sudo mount %s /target",TargetPartition);
+    status = system(ExecBuff);
     emit MountFSDone(status);
     return status;
 }
 
 int AOSC_Installer_Core::SetGrub(){
     int status;
+    char ExecBuff[128];
+    system("sudo mount --bind /dev /target/dev");
+    system("sudo mount --bind /proc /target/proc");
+    system("sudo mount --bind /sys /target/sys");
 #ifdef _AOSC_LIVE_CD_
-    status = execl("/usr/bin/chroot","chroot","/target","grub-install",TargetDisk,NULL);
+    sprintf(ExecBuff,"sudo chroot /target grub-install %s",TargetDisk);
 #else
-    status = execl("/usr/bin/grub-install","grub-install",TargetDisk,NULL);
+    sprintf(ExecBuff,"sudo grub-install %s",TargetDisk);
 #endif
+    status = system(ExecBuff);
     emit SetGrubDone(status);
     return status;
 }
 
 int AOSC_Installer_Core::UpdateGrub(){
     int status;
+    char ExecBuff[128];
 #ifdef _AOSC_LIVE_CD_
-    status = execl("/usr/bin/chroot","chroot","/target","grub-mkconfig","-o","/boot/grub/grub.cfg",NULL);
+    sprintf(ExecBuff,"sudo chroot /target grub-mkconfig -o /boot/grub/grub.cfg");
 #else
-    status = execl("/usr/bin/grub-mkconfig","grub-mkconfig","-o","/boot/grub/grub.cfg",NULL);
+    sprintf(ExecBuff,"sudo grub-mkconfig -o /boot/grub/grub.cfg");
 #endif
+    status = system(ExecBuff);
     emit UpdateGrubDone(status);
     return status;
 }
@@ -138,7 +97,7 @@ int AOSC_Installer_Core::UpdateFstab(void){
     int status;
 #ifdef _AOSC_LIVE_CD_
     char ExecBuff[128];
-    sprintf(ExecBuff,"chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
+    sprintf(ExecBuff,"sudo chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
     status = system(ExecBuff);
 #else
     status = 0;
@@ -156,12 +115,12 @@ int AOSC_Installer_Core::SetUser(QString _UserName, QString _PassWord){
     TranslateQStringToChar(_PassWord,PassWord);
     char ExecBuff[128];
     int status;
-    sprintf(ExecBuff,"chroot /target usermod -l %s -md /home/%s live",UserName,UserName);
+    sprintf(ExecBuff,"sudo chroot /target usermod -l %s -md /home/%s live",UserName,UserName);
     status = system(ExecBuff);
     if(status < 0){
         return status;
     }
-    sprintf(ExecBuff,"chroot /target /usr/bin/cpw.sh %s %s",UserName,PassWord);
+    sprintf(ExecBuff,"sudo chroot /target /usr/bin/cpw.sh %s %s",UserName,PassWord);
     status = system(ExecBuff);
     emit SetUserDone(status);
     return status;
@@ -174,7 +133,7 @@ int AOSC_Installer_Core::SetRootPassWord(QString _RootPass){
     TranslateQStringToChar(_RootPass,RootPass);
     char ExecBuff[256];
     int status;
-    sprintf(ExecBuff,"chroot /target  /usr/bin/cpw.sh root %s",RootPass);
+    sprintf(ExecBuff,"sudo chroot /target  /usr/bin/cpw.sh root %s",RootPass);
     status = system(ExecBuff);
     emit SetRootDone(status);
     return status;
@@ -193,4 +152,42 @@ void AOSC_Installer_Core::SetInstallTarget(QString _TargetPartition, QString _Ta
     TargetDisk      = new char[64];
     bzero(TargetDisk,64);
     TranslateQStringToChar(_TargetDisk,TargetDisk);
+}
+
+//----------------------
+
+StatisticsFileSize::StatisticsFileSize(QThread *parent):
+    QThread(parent){
+
+}
+
+void StatisticsFileSize::GetReady(int _Size){
+    Size = _Size;
+    this->start();
+}
+
+void StatisticsFileSize::run(){
+    char ExecBuff[128];
+    int  NowSize;
+    sprintf(ExecBuff,"sudo du -s %s > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
+    system(ExecBuff);
+    fp = fopen(_TMP_TOTAL_SIZE_,"r");
+    while(1){
+        sleep(2);
+        fscanf(fp,"%d",&NowSize);
+        emit Copyed(NowSize-Size);
+        printf("Debug >> Now Copying Files Size ==  %d\n",NowSize-Size);
+        fclose(fp);     //!
+        system(ExecBuff);
+        fp = fopen(_TMP_TOTAL_SIZE_,"r");       //!
+    }
+}
+
+void StatisticsFileSize::CopyDone(){
+    fclose(fp);
+    fp = NULL;
+    char ExecBuff[128];
+    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
+    system(ExecBuff);
+    this->terminate();
 }

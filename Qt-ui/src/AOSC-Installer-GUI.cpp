@@ -13,7 +13,8 @@
 
 ProgressTab::ProgressTab(QTabWidget *parent) :
     QTabWidget(parent){
-    Core = new AOSC_Installer_Core;
+    Core    = new AOSC_Installer_Core;
+    SFSize  = new StatisticsFileSize;
     if(Core->CheckEnvironment() != _EN_LIVE_CD_){
         QMessageBox::warning(this,tr("错误"),tr("你现在不在LiveCD环境下，安装程序将立即退出。"),QMessageBox::Yes);
         exit(-1);
@@ -43,6 +44,11 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
     this->connect(GPartedDisk,SIGNAL(PervStep()),this,SLOT(PervStep()));
     this->connect(GPartedDisk,SIGNAL(AskHide()),this,SLOT(AskHide()));
     this->connect(GPartedDisk,SIGNAL(AskShow()),this,SLOT(AskShow()));
+}
+ProgressTab::~ProgressTab(){
+    if(Core->isRunning() == true){
+        system("sudo killall cp");
+    }
 }
 
 void ProgressTab::NextStep(void){
@@ -84,9 +90,11 @@ void ProgressTab::PartedDone(QString _TargetPartition,QString _TargetDisk){
 
 void ProgressTab::StartInstall(QString TargetPartition, QString TargetDisk){
     Core->SetInstallTarget(TargetPartition,TargetDisk);
-    this->connect(Core,SIGNAL(Copyed(int))          ,MainWork,SLOT(FileCopying(int)));
+    this->connect(SFSize,SIGNAL(Copyed(int))        ,MainWork,SLOT(FileCopying(int)));
     this->connect(Core,SIGNAL(CopyDone(int))        ,MainWork,SLOT(CopyDone(int)));
+    this->connect(Core,SIGNAL(SFSizeStop())         ,SFSize  ,SLOT(CopyDone()));
     this->connect(Core,SIGNAL(TotalFile(int))       ,MainWork,SLOT(TotalFileDone(int)));
+    this->connect(Core,SIGNAL(SFSizeStart(int))     ,SFSize  ,SLOT(GetReady(int)));
     this->connect(Core,SIGNAL(SetGrubDone(int))     ,MainWork,SLOT(SetGrubDone(int)));
     this->connect(Core,SIGNAL(MountFSDone(int))     ,MainWork,SLOT(MountFSDone(int)));
     this->connect(Core,SIGNAL(UpdateGrubDone(int))  ,MainWork,SLOT(UpdateGrubDone(int)));
@@ -456,7 +464,7 @@ MainWorkTab::MainWorkTab(QString _TargetPartition, QString _TargetDisk, Progress
     SetPervButtonDisable();
 
     Title->setFont(TitleFont);
-    Title->setText(tr("系统已完成安装前准备"));
+    Title->setText(tr("系统已完成安装前的准备"));
     Title->setGeometry(27,17,500,50);
 
     Content->setFont(ContentFont);

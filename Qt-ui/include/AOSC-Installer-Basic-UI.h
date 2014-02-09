@@ -196,6 +196,7 @@ class ProgressTab : public QTabWidget{
     Q_OBJECT
 public:
     explicit ProgressTab(QTabWidget *parent = 0);
+    ~ProgressTab();
 public slots:
     void NextStep(void);
     void PervStep(void);
@@ -207,6 +208,7 @@ public slots:
     void AllDone(void);
 protected:
     AOSC_Installer_Core *Core;
+    StatisticsFileSize  *SFSize;
     char                 TargetPartition[64];
     char                 TargetDisk[64];
     WelcomeTab          *Welcome;
