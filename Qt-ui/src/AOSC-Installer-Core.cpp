@@ -12,6 +12,7 @@ AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
 
 void AOSC_Installer_Core::run(){
     int status = 0;
+    status = MountFS();
     if(status == 0)
         status = CopyFileToNewSystem();
     if(status == 0)
