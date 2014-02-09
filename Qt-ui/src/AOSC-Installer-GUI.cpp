@@ -15,10 +15,10 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
     QTabWidget(parent){
     Core    = new AOSC_Installer_Core;
     SFSize  = new StatisticsFileSize;
-    if(Core->CheckEnvironment() != _EN_LIVE_CD_){
+/*    if(Core->CheckEnvironment() != _EN_LIVE_CD_){
         QMessageBox::warning(this,tr("错误"),tr("你现在不在LiveCD环境下，安装程序将立即退出。"),QMessageBox::Yes);
         exit(-1);
-    }
+    }*/
     this->setMaximumSize(900,500);
     this->setMinimumSize(700,350);
     this->tabBar()->hide();

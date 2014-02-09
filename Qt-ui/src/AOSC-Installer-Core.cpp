@@ -11,13 +11,15 @@ AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
 }
 
 void AOSC_Installer_Core::run(){
-#ifdef  _AOSC_LIVE_CD_
-    if (MountFS() != 0)                 return;
-#endif
-    if (CopyFileToNewSystem() != 0)     return;
-    if (SetGrub() != 0)                 return;
-    if (UpdateGrub() != 0)              return;
-    if (UpdateFstab() != 0)             return;
+    int status = 0;
+    if(status == 0)
+        status = CopyFileToNewSystem();
+    if(status == 0)
+        status = SetGrub();
+    if (status == 0)
+        status = UpdateGrub();
+    if(status == 0)
+        UpdateFstab();
 }
 
 int AOSC_Installer_Core::CheckEnvironment(void){
@@ -33,15 +35,15 @@ bool AOSC_Installer_Core::CopyFileToNewSystem(void){
     NowCopy = 0;
     ThisTime = 0;
     char ExecBuff[128];
-    sprintf(ExecBuff,"sudo du -s /mnt/squash > %s",_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"du -s /mnt/squash > %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     FILE *f = fopen(_TMP_TOTAL_SIZE_,"r");
     int Total;
     int TargetSize;
     fscanf(f,"%d",&Total);
-    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"rm -rf %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
-    sprintf(ExecBuff,"sudo du -s /target > %s",_TMP_TARGET_SIZE_);
+    sprintf(ExecBuff,"du -s /target > %s",_TMP_TARGET_SIZE_);
     fclose(f);
     fopen(_TMP_TARGET_SIZE_,"r");
     fscanf(f,"%d",&TargetSize);
@@ -50,8 +52,8 @@ bool AOSC_Installer_Core::CopyFileToNewSystem(void){
     sprintf(ExecBuff,"cp -arv %s %s",_INSTALL_FILE_FROM_,_INSTALL_FILE_DEST_);
     int status = system(ExecBuff);
     emit CopyDone(status);
+    emit SFSizeStop();
     return status;
-    return 0;
 }
 
 //#################Main Step#####################
@@ -65,6 +67,7 @@ int AOSC_Installer_Core::MountFS(){
 }
 
 int AOSC_Installer_Core::SetGrub(){
+    printf("Now Setup Grub!\n");
     int status;
     char ExecBuff[128];
     system("sudo mount --bind /dev /target/dev");
@@ -169,7 +172,7 @@ void StatisticsFileSize::GetReady(int _Size){
 void StatisticsFileSize::run(){
     char ExecBuff[128];
     int  NowSize;
-    sprintf(ExecBuff,"sudo du -s %s 2>/dev/null > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"du -s %s 2>/dev/null > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     fp = fopen(_TMP_TOTAL_SIZE_,"r");
     while(1){
@@ -187,7 +190,7 @@ void StatisticsFileSize::CopyDone(){
     fclose(fp);
     fp = NULL;
     char ExecBuff[128];
-    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"rm -rf %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     this->terminate();
 }
