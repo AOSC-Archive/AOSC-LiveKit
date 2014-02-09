@@ -36,21 +36,21 @@ bool AOSC_Installer_Core::CopyFileToNewSystem(void){
     NowCopy = 0;
     ThisTime = 0;
     char ExecBuff[128];
-    sprintf(ExecBuff,"du -s /mnt/squash > %s",_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"sudo du -s /mnt/squash > %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     FILE *f = fopen(_TMP_TOTAL_SIZE_,"r");
     int Total;
     int TargetSize;
     fscanf(f,"%d",&Total);
-    sprintf(ExecBuff,"rm -rf %s",_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
-    sprintf(ExecBuff,"du -s /target > %s",_TMP_TARGET_SIZE_);
+    sprintf(ExecBuff,"sudo du -s /target > %s",_TMP_TARGET_SIZE_);
     fclose(f);
     fopen(_TMP_TARGET_SIZE_,"r");
     fscanf(f,"%d",&TargetSize);
     emit TotalFile(Total);
     emit SFSizeStart(TargetSize);
-    sprintf(ExecBuff,"cp -arv %s %s",_INSTALL_FILE_FROM_,_INSTALL_FILE_DEST_);
+    sprintf(ExecBuff,"sudo cp -arv %s %s",_INSTALL_FILE_FROM_,_INSTALL_FILE_DEST_);
     int status = system(ExecBuff);
     emit CopyDone(status);
     emit SFSizeStop();
@@ -90,7 +90,7 @@ int AOSC_Installer_Core::UpdateGrub(){
 #ifdef _AOSC_LIVE_CD_
     sprintf(ExecBuff,"sudo chroot /target grub-mkconfig -o /boot/grub/grub.cfg");
 #else
-    sprintf(ExecBuff,"sudo grub-mkconfig -o /boot/grub/grub.cfg");
+    sprintf(ExecBuff,"sudo chroot /target grub-mkconfig -o /boot/grub/grub.cfg");
 #endif
     status = system(ExecBuff);
     emit UpdateGrubDone(status);
@@ -101,7 +101,7 @@ int AOSC_Installer_Core::UpdateFstab(void){
     int status;
 #ifdef _AOSC_LIVE_CD_
     char ExecBuff[128];
-    sprintf(ExecBuff,"sudo chroot /target echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
+    sprintf(ExecBuff,"sudo echo \"%s / ext4 defaults 1 1\" > /target/etc/fstab",TargetPartition);
     status = system(ExecBuff);
 #else
     status = 0;
@@ -173,7 +173,7 @@ void StatisticsFileSize::GetReady(int _Size){
 void StatisticsFileSize::run(){
     char ExecBuff[128];
     int  NowSize;
-    sprintf(ExecBuff,"du -s %s 2>/dev/null > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"sudo du -s %s 2>/dev/null > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     fp = fopen(_TMP_TOTAL_SIZE_,"r");
     while(1){
@@ -191,7 +191,7 @@ void StatisticsFileSize::CopyDone(){
     fclose(fp);
     fp = NULL;
     char ExecBuff[128];
-    sprintf(ExecBuff,"rm -rf %s",_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     this->terminate();
 }

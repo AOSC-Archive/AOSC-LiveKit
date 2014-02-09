@@ -13,7 +13,7 @@
 #define _TMP_TARGET_SIZE_   "/tmp/.TargetSize.conf"
 #define _TMP_DISK_FILE      "/tmp/.Disk.conf"
 #define _TMP_PARTITION_FILE "/tmp/.Partition.conf"
-#define _INSTALL_FILE_FROM_ "/mnt/squash/*"
+#define _INSTALL_FILE_FROM_ "/mnt/squash/."
 #define _INSTALL_FILE_DEST_ "/target"
 
 class AOSC_Installer_Core : public QThread{
