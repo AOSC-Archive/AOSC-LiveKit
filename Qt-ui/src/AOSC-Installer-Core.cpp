@@ -169,7 +169,7 @@ void StatisticsFileSize::GetReady(int _Size){
 void StatisticsFileSize::run(){
     char ExecBuff[128];
     int  NowSize;
-    sprintf(ExecBuff,"sudo du -s %s > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
+    sprintf(ExecBuff,"sudo du -s %s 2>/dev/null > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     fp = fopen(_TMP_TOTAL_SIZE_,"r");
     while(1){
