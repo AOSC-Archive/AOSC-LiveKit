@@ -70,12 +70,13 @@ int AOSC_Installer_Core::MountFS(){
 int AOSC_Installer_Core::SetGrub(){
     int status;
     char ExecBuff[128];
-//    system("sudo mount --bind /dev /target/dev");
+    system("sudo mount --bind /dev /target/dev");
     system("sudo mount --bind /proc /target/proc");
     system("sudo mount --bind /sys /target/sys");
+    system("sudo mount --bind /dev/pts /target/dev/pts")
     sleep(10);
 #ifdef _AOSC_LIVE_CD_
-    sprintf(ExecBuff,"sudo chroot /target grub-install %s",TargetDisk);
+    sprintf(ExecBuff,"sudo chroot /target grub-install /dev/sda --target=i386-pc --verify %s",TargetDisk);
 #else
     sprintf(ExecBuff,"sudo grub-install %s",TargetDisk);
 #endif
