@@ -68,12 +68,12 @@ int AOSC_Installer_Core::MountFS(){
 }
 
 int AOSC_Installer_Core::SetGrub(){
-    printf("Now Setup Grub!\n");
     int status;
     char ExecBuff[128];
-    system("sudo mount --bind /dev /target/dev");
+//    system("sudo mount --bind /dev /target/dev");
     system("sudo mount --bind /proc /target/proc");
     system("sudo mount --bind /sys /target/sys");
+    sleep(10);
 #ifdef _AOSC_LIVE_CD_
     sprintf(ExecBuff,"sudo chroot /target grub-install %s",TargetDisk);
 #else
@@ -90,7 +90,7 @@ int AOSC_Installer_Core::UpdateGrub(){
 #ifdef _AOSC_LIVE_CD_
     sprintf(ExecBuff,"sudo chroot /target grub-mkconfig -o /boot/grub/grub.cfg");
 #else
-    sprintf(ExecBuff,"sudo chroot /target grub-mkconfig -o /boot/grub/grub.cfg");
+    sprintf(ExecBuff,"grub-mkconfig -o /boot/grub/grub.cfg");
 #endif
     status = system(ExecBuff);
     emit UpdateGrubDone(status);
@@ -158,6 +158,11 @@ void AOSC_Installer_Core::SetInstallTarget(QString _TargetPartition, QString _Ta
     TranslateQStringToChar(_TargetDisk,TargetDisk);
 }
 
+void AOSC_Installer_Core::AllDone(){
+    system("sync");
+    system("umount -R /target");
+}
+
 //----------------------
 
 StatisticsFileSize::StatisticsFileSize(QThread *parent):
@@ -182,14 +187,18 @@ void StatisticsFileSize::run(){
         emit Copyed(NowSize-Size);
         printf("Debug >> Now Copying Files Size ==  %d\n",NowSize-Size);
         fclose(fp);     //!
+        fp = NULL;
         system(ExecBuff);
         fp = fopen(_TMP_TOTAL_SIZE_,"r");       //!
     }
 }
 
 void StatisticsFileSize::CopyDone(){
-    fclose(fp);
-    fp = NULL;
+    this->terminate();
+    if(fp != NULL){
+        fclose(fp);
+        fp = NULL;
+    }
     char ExecBuff[128];
     sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);

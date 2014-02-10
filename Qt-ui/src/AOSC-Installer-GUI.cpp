@@ -118,6 +118,7 @@ void ProgressTab::StartSetUserInformation(QString RootPass, QString UserName, QS
 }
 
 void ProgressTab::AllDone(){
+    Core->AllDone();
     exit(0);
 }
 

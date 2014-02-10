@@ -37,7 +37,7 @@ public:
     void    TranslateQStringToChar(QString in,char *Out);
     void    SetInstallTarget(QString _TargetPartition,QString _TargetDisk);
 
-    void    test();
+    void    AllDone(void);
 signals:
     void    MountFSDone(int);
     void    TotalFile(int);
