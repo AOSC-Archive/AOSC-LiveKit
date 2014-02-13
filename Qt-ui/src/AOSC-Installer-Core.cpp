@@ -76,7 +76,7 @@ int AOSC_Installer_Core::SetGrub(){
     system("sudo mount --bind /dev/pts /target/dev/pts")
     sleep(10);
 #ifdef _AOSC_LIVE_CD_
-    sprintf(ExecBuff,"sudo chroot /target grub-install /dev/sda --target=i386-pc --verify %s",TargetDisk);
+    sprintf(ExecBuff,"sudo chroot /target grub-install --target=i386-pc %s",TargetDisk);
 #else
     sprintf(ExecBuff,"sudo grub-install %s",TargetDisk);
 #endif
