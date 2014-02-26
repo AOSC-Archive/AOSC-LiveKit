@@ -1,0 +1,20 @@
+#!/bin/bash
+whiptail --title "CentralPoint/Non-GUI Distribution Installer" --yesno "This installer is designed for CentralPoint or other Community Distribution \nusing bash or virtual terminal as default interface. \n\n\nDo you want to continue?" 15 80
+exitstatus=$?
+if [ $exitstatus = 0 ]
+then
+	install-staging
+else
+	whiptail --title "Huh?" --yesno "Are you sure that you want to quit?" 8 40
+	exitstatus=$?
+	if [ $exitstatus = 0 ]
+	then
+		exit 0
+		echo "(Exit status was $exitstatus)"
+	else
+		install-prepare
+		echo "(Exit status was $exitstatus)"
+	fi
+fi 
+echo "(Exit status was $exitstatus)"
+
