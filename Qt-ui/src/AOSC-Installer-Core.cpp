@@ -95,7 +95,7 @@ int AOSC_Installer_Core::SetGrub(){
             emit SetGrubDone(-1);
             return -1;
         }
-        if(system("sudo chroot /target grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=grub --recheck") != 0){
+        if(system("sudo chroot /target grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=AOSC-GRUB --recheck") != 0){
             emit SetGrubDone(-1);
             return -1;
         }
