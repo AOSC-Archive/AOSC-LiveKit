@@ -73,7 +73,7 @@ int AOSC_Installer_Core::SetGrub(){
     system("sudo mount --bind /dev /target/dev");
     system("sudo mount --bind /proc /target/proc");
     system("sudo mount --bind /sys /target/sys");
-    system("sudo mount --bind /dev/pts /target/dev/pts")
+    system("sudo mount --bind /dev/pts /target/dev/pts");
     sleep(10);
 #ifdef _AOSC_LIVE_CD_
     sprintf(ExecBuff,"sudo chroot /target grub-install --target=i386-pc %s",TargetDisk);
@@ -119,16 +119,19 @@ int AOSC_Installer_Core::SetUser(QString _UserName, QString _PassWord){
     TranslateQStringToChar(_UserName,UserName);
     TranslateQStringToChar(_PassWord,PassWord);
     char ExecBuff[128];
-    int status;
     sprintf(ExecBuff,"sudo chroot /target usermod -l %s -md /home/%s live",UserName,UserName);
-    status = system(ExecBuff);
-    if(status < 0){
-        return status;
-    }
+    Exth = new ExecThread;
+    this->connect(Exth,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
+    Exth->SetType(SET_USER);
+    Exth->SetExecBuff(ExecBuff);
+    Exth->start();
     sprintf(ExecBuff,"sudo chroot /target /usr/bin/cpw.sh %s %s",UserName,PassWord);
-    status = system(ExecBuff);
-    emit SetUserDone(status);
-    return status;
+    Exth2 = new ExecThread;
+    this->connect(Exth2,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
+    Exth2->SetType(SET_USER);
+    Exth2->SetExecBuff(ExecBuff);
+    Exth2->start();
+    return 0;
 }
 
 
@@ -137,11 +140,13 @@ int AOSC_Installer_Core::SetRootPassWord(QString _RootPass){
     bzero(RootPass,64);
     TranslateQStringToChar(_RootPass,RootPass);
     char ExecBuff[256];
-    int status;
     sprintf(ExecBuff,"sudo chroot /target  /usr/bin/cpw.sh root %s",RootPass);
-    status = system(ExecBuff);
-    emit SetRootDone(status);
-    return status;
+    Exth3 = new ExecThread;
+    this->connect(Exth3,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
+    Exth3->SetType(SET_ROOT);
+    Exth3->SetExecBuff(ExecBuff);
+    Exth3->start();
+    return 0;
 } 
 
 void AOSC_Installer_Core::TranslateQStringToChar(QString in, char *Out){
@@ -162,6 +167,10 @@ void AOSC_Installer_Core::SetInstallTarget(QString _TargetPartition, QString _Ta
 void AOSC_Installer_Core::AllDone(){
     system("sync");
     system("umount -R /target");
+}
+
+void AOSC_Installer_Core::WorkDone(int status, int type){
+    emit SetDone(status);
 }
 
 //----------------------
@@ -204,4 +213,21 @@ void StatisticsFileSize::CopyDone(){
     sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
     system(ExecBuff);
     this->terminate();
+}
+
+ExecThread::ExecThread(QThread *parent):
+    QThread(parent){
+}
+void ExecThread::SetExecBuff(char *Buff){
+    if(Buff != NULL)    strcpy(ExecBuff,Buff);
+}
+void ExecThread::SetType(int Type){
+    ActionType=Type;
+}
+
+void ExecThread::run(){
+    int result = -1;
+    if(ExecBuff != NULL)
+        result = system(ExecBuff);
+    emit WorkDone(result,ActionType);
 }

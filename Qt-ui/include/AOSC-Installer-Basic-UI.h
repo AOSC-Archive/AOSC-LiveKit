@@ -22,6 +22,24 @@
 #define WIDTH_SPACE     10
 #define HEIGHT_SPACE    5
 
+#define BASIC_TITLE_X   150
+#define BASIC_TITLE_Y   100
+#define BASIC_TITLE_W   500
+#define BASIC_TITLE_H   70
+
+#define EDITLINE_HEIGTH   45
+
+#define BASIC_TITLE_CONTENT_SPACE   70
+
+class Th : public QThread{
+    Q_OBJECT
+public:
+    explicit Th(QThread *parent = 0);
+    void run();
+signals:
+    void ST(void);
+};
+
 class ProgressTabWidget : public QWidget{
     Q_OBJECT
 public:
@@ -148,7 +166,7 @@ protected:
 class UserTab : public ProgressTabWidget{
     Q_OBJECT
 public:
-    explicit UserTab(ProgressTabWidget *parent = 0);
+    explicit UserTab(int x,ProgressTabWidget *parent = 0);
 public slots:
     void SetUserInformation(void);
     void SetRootDone(int);
@@ -182,7 +200,10 @@ class DoneTab : public ProgressTabWidget{
     Q_OBJECT
 public:
     DoneTab(ProgressTabWidget *parent = 0);
+public slots:
+    void SetDone(int);
 protected:
+    int NowStep;
     QLabel          *Title;
     QLabel          *Content;
 };
@@ -206,6 +227,10 @@ public slots:
     void StartInstall(QString, QString);
     void StartSetUserInformation(QString,QString,QString);
     void AllDone(void);
+    void resizeEvent(QResizeEvent *);
+    void AddTabs(void);
+signals:
+    void Resized(int,int);
 protected:
     AOSC_Installer_Core *Core;
     StatisticsFileSize  *SFSize;

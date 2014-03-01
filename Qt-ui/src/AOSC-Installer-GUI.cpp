@@ -11,17 +11,35 @@
 #include <qt4/QtCore/QTextStream>
 #include <qt4/QtCore/QByteArray>
 
+Th::Th(QThread *parent):
+    QThread(parent){
+
+}
+
+void Th::run(){
+    sleep(1);
+    emit ST();
+    this->terminate();
+}
+
 ProgressTab::ProgressTab(QTabWidget *parent) :
     QTabWidget(parent){
     Core    = new AOSC_Installer_Core;
     SFSize  = new StatisticsFileSize;
-/*    if(Core->CheckEnvironment() != _EN_LIVE_CD_){
-        QMessageBox::warning(this,tr("错误"),tr("你现在不在LiveCD环境下，安装程序将立即退出。"),QMessageBox::Yes);
-        exit(-1);
-    }*/
-    this->setMaximumSize(900,500);
-    this->setMinimumSize(700,350);
+/*    this->setMaximumSize(900,500);
+    this->setMinimumSize(700,350);*/
+    this->showFullScreen();
     this->tabBar()->hide();
+
+    Th *t = new Th;
+    connect(t,SIGNAL(ST()),this,SLOT(AddTabs()));
+    t->start();
+
+    this->show();
+}
+
+void ProgressTab::AddTabs(){
+    printf("Now Size = %d\n",this->width());
     //Add Welcome Tab
     Welcome = new WelcomeTab;
     this->addTab(Welcome,tr("Welcome"));
@@ -45,10 +63,15 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
     this->connect(GPartedDisk,SIGNAL(AskHide()),this,SLOT(AskHide()));
     this->connect(GPartedDisk,SIGNAL(AskShow()),this,SLOT(AskShow()));
 }
+
 ProgressTab::~ProgressTab(){
     if(Core->isRunning() == true){
         system("sudo killall cp");
     }
+}
+
+void ProgressTab::resizeEvent(QResizeEvent *){
+    this->resize(this->width(),this->height());
 }
 
 void ProgressTab::NextStep(void){
@@ -101,7 +124,7 @@ void ProgressTab::StartInstall(QString TargetPartition, QString TargetDisk){
     this->connect(Core,SIGNAL(UpdateFstabDone(int)) ,MainWork,SLOT(UpdateFstabDone(int)));
     Core->start();
 
-    User    = new UserTab;
+    User    = new UserTab(this->width());
     Done    = new DoneTab;
     this->addTab(User,tr("User"));
     this->addTab(Done,tr("Done"));
@@ -111,8 +134,9 @@ void ProgressTab::StartInstall(QString TargetPartition, QString TargetDisk){
 }
 
 void ProgressTab::StartSetUserInformation(QString RootPass, QString UserName, QString UserPass){
-    this->connect(Core,SIGNAL(SetRootDone(int)),User,SLOT(SetRootDone(int)));
-    this->connect(Core,SIGNAL(SetUserDone(int)),User,SLOT(SetUserDone(int)));
+    this->connect(Core,SIGNAL(SetDone(int)),    Done,SLOT(SetDone(int)));
+//    this->connect(Core,SIGNAL(SetRootDone(int)),User,SLOT(SetRootDone(int)));
+//    this->connect(Core,SIGNAL(SetUserDone(int)),User,SLOT(SetUserDone(int)));
     Core->SetRootPassWord(RootPass);
     Core->SetUser(UserName,UserPass);
 }
@@ -133,11 +157,11 @@ ProgressTabWidget::ProgressTabWidget(QWidget *parent) :
     PervStepButton->setText(tr("后退"));
     connect(NextStepButton,SIGNAL(clicked()),this,SLOT(NextStepClicked()));
     connect(PervStepButton,SIGNAL(clicked()),this,SLOT(PervStepClicked()));
-    TitleFont.setPointSize(27);
+    TitleFont.setPointSize(37);
     TitleFont.setBold(true);
-    SecondaryTitleFont.setPointSize(15);
+    SecondaryTitleFont.setPointSize(27);
     SecondaryTitleFont.setBold(true);
-    ContentFont.setPointSize(10);
+    ContentFont.setPointSize(20);
 }
 
 void ProgressTabWidget::resizeEvent(QResizeEvent *){
@@ -189,11 +213,11 @@ WelcomeTab::WelcomeTab(ProgressTabWidget *parent) :
 
     Title->setText(tr("诶，你好!"));
     Title->setFont(TitleFont);
-    Title->setGeometry(27,17,27*6,50);
+    Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,BASIC_TITLE_W,BASIC_TITLE_H);
 
     Content->setText(tr("感谢尝试安同开源社区最新的发行版!\n\n你准备好将发行版安装到你亲爱的电脑上了么?"));
     Content->setFont(ContentFont);
-    Content->setGeometry(27,27+50,600,50);
+    Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE,BASIC_TITLE_W,BASIC_TITLE_H);
 
     SetPervButtonHide();
 }
@@ -214,9 +238,9 @@ GetStartedTab::GetStartedTab(ProgressTabWidget *parent):
     SecondaryTitle->setText(tr("我们接下来需要做这些事情……"));
     Content->setText(tr(" - 进行大量的阅读（托腮 \n\n - 将磁盘分区\n\n - 让我们认识一下你\n\n - 开始安装\n\n - 尽情享用!"));
 
-    Title->setGeometry(27,17,27*11,50);
-    SecondaryTitle->setGeometry(27,15+40,600,50);
-    Content->setGeometry(27,27+70,600,200);
+    Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,BASIC_TITLE_W,BASIC_TITLE_H);
+    SecondaryTitle->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE,BASIC_TITLE_W,BASIC_TITLE_H);
+    Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+BASIC_TITLE_CONTENT_SPACE,BASIC_TITLE_W,BASIC_TITLE_H+250);
 }
 
 //--------------------------------------------------------------
@@ -236,7 +260,7 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
 
     Title->setFont(TitleFont);
     Title->setText(tr("阅读时间!"));
-    Title->setGeometry(27,17,500,50);
+    Title->setGeometry(27,17,BASIC_TITLE_W,BASIC_TITLE_H);
 
     Content->setFont(ContentFont);
     Content->setText(tr("我保证会乖乖地遵守此许可协议!"));
@@ -326,31 +350,34 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     sprintf(ExecBuff,"rm -rf %s",_TMP_DISK_FILE);
     system(ExecBuff);
     //Done
+
+    QFont D1;
+    D1.setPointSize(10);
+
     Title->setFont(TitleFont);
     Title->setText(tr("磁盘分区中……"));
-    Title->setGeometry(27,17,500,50);
+    Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,BASIC_TITLE_W,BASIC_TITLE_H);
 
     Warning->setText(tr("<h2><font color=red>这事儿很重要，请检查清楚再继续!</font></h2>"));
-    Warning->setGeometry(27,17+40,600,50);
+    Warning->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE,BASIC_TITLE_W,BASIC_TITLE_H);
 
-    StartPartitingButton->setGeometry(27,17+40+50+15,200,70);
+    StartPartitingButton->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+55,BASIC_TITLE_W,BASIC_TITLE_H);
     StartPartitingButton->setText(tr("点击我打开磁盘分区软件"));
 
-    Content->setFont(ContentFont);
+    Content->setFont(D1);
     Content->setText(tr("请选择你的主分区"));
-    Content->setGeometry(27,17+40+50+15+70+15,120,30);
-    Content2->setFont(ContentFont);
+    Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+55+75,BASIC_TITLE_W,BASIC_TITLE_H);
+    Content2->setFont(D1);
     Content2->setText(tr("格式化"));
-    Content2->setGeometry(100+27+10+25+10+5,17+40+50+15+70+15,90,30);
-    CheckBox->setGeometry(100+27+10+10+10+5,17+40+50+15+70+15+3,25,25);
+    Content2->setGeometry(BASIC_TITLE_X+100+10+25+25,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+9,90,30);
+    CheckBox->setGeometry(BASIC_TITLE_X+100+10+25,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+5+9,25,25);
 
-    Content3->setFont(ContentFont);
+    Content3->setFont(D1);
     Content3->setText(tr("请选择你的引导设备"));
-    Content3->setGeometry(100+27+10+25+150,17+40+50+15+70+15,150,30);
-    DiskComboBox->setGeometry(100+27+10+25+150,17+40+50+15+70+15+20+15,200,30);
+    Content3->setGeometry(BASIC_TITLE_X+100+10+25+150,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+55+85+10,150,30);
+    DiskComboBox->setGeometry(BASIC_TITLE_X+100+10+25+150,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35,200,30);
 
-
-    DiskPartitingComboBox->setGeometry(27,17+40+50+15+70+20+15+15,200,30);
+    DiskPartitingComboBox->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35,200,30);
 
     this->connect(DiskPartitingComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentDiskPartition(QString)));
     this->connect(DiskComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentDisk(QString)));
@@ -466,16 +493,16 @@ MainWorkTab::MainWorkTab(QString _TargetPartition, QString _TargetDisk, Progress
 
     Title->setFont(TitleFont);
     Title->setText(tr("系统已完成安装前的准备"));
-    Title->setGeometry(27,17,500,50);
+    Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,700,BASIC_TITLE_H);
 
     Content->setFont(ContentFont);
-    Content->setGeometry(27,17+50,500,25);
+    Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE,BASIC_TITLE_W,BASIC_TITLE_H);
 
     Content2->setFont(ContentFont);
-    Content2->setGeometry(27,17+50+25,500,25);
+    Content2->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+25,BASIC_TITLE_W,BASIC_TITLE_H);;
 
     Start->setText(tr("Click to Start"));
-    Start->setGeometry(27,17+40+50+15+70+15,200,60);
+    Start->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140,200,50);
 
     this->connect(Start,SIGNAL(clicked()),this,SLOT(StartInstall()));
     TargetPartition = _TargetPartition;
@@ -501,7 +528,7 @@ void MainWorkTab::TotalFileDone(int Total){
     printf("TotalFile = %d\n",Total);
     ProgressBar = new QProgressBar(this);
     ProgressBar->setRange(0,TotalFile);
-    ProgressBar->setGeometry(27,17+40+50+15+30,600,40);
+    ProgressBar->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+40+15+30,this->width(),40);
     Start->hide();
     ProgressBar->show();
 }
@@ -548,7 +575,7 @@ void MainWorkTab::UpdateGrubDone(int Status){
 }
 
 //--------------------------------------
-UserTab::UserTab(ProgressTabWidget *parent):
+UserTab::UserTab(int x, ProgressTabWidget *parent):
     ProgressTabWidget(parent){
     Title           = new QLabel(this);
     RootPassTitle   = new QLabel(this);
@@ -563,27 +590,27 @@ UserTab::UserTab(ProgressTabWidget *parent):
 
     Title->setFont(TitleFont);
     Title->setText(tr("告诉我们你是谁"));
-    Title->setGeometry(27,15,500,50);
+    Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,BASIC_TITLE_W,BASIC_TITLE_H);
 
     RootPassTitle->setFont(ContentFont);
     RootPassTitle->setText(tr("设置Root的密码"));
-    RootPassTitle->setGeometry(27,50+15+50,100,25);
+    RootPassTitle->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+15+50,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
 
-    RootPassEdit->setGeometry(27,50+15+50+25,300-27,25);
+    RootPassEdit->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
 
     RootPassTitle2->setFont(ContentFont);
     RootPassTitle2->setText(tr("再次输入密码"));
-    RootPassTitle2->setGeometry(27,50+15+50+25+25,100,25);
+    RootPassTitle2->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH*2,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
 
-    RootPassEdit2->setGeometry(27,50+15+50+25+25+25,300-27,25);
+    RootPassEdit2->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH*3,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
 
 
     UserNameTitle = new QLabel(this);
     UserNameEdit  = new QLineEdit(this);
     UserNameTitle->setFont(ContentFont);
     UserNameTitle->setText(tr("设置你主用户的用户名"));
-    UserNameTitle->setGeometry(27+300,50+15+50,200,25);
-    UserNameEdit->setGeometry(27+300,50+15+50+25,300-27,25);
+    UserNameTitle->setGeometry(BASIC_TITLE_X+x/2,BASIC_TITLE_Y+15+50,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
+    UserNameEdit->setGeometry(BASIC_TITLE_X+x/2,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
 
     UserPassTitle = new QLabel(this);
     UserPassTitle2= new QLabel(this);
@@ -595,10 +622,10 @@ UserTab::UserTab(ProgressTabWidget *parent):
     UserPassTitle->setText(tr("设置你主用户的密码"));
     UserPassTitle2->setFont(ContentFont);
     UserPassTitle2->setText(tr("再次输入密码"));
-    UserPassTitle->setGeometry(27+300,50+15+50+25+25,300-27,25);
-    UserPassEdit->setGeometry(27+300,50+15+50+25+25+25,300-27,25);
-    UserPassTitle2->setGeometry(27+300,50+15+50+25+25+25+25,300-27,25);
-    UserPassEdit2->setGeometry(27+300,50+15+50+25+25+25+25+25,300-27,25);
+    UserPassTitle->setGeometry(BASIC_TITLE_X+x/2,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH*2,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
+    UserPassEdit->setGeometry(BASIC_TITLE_X+x/2,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH*3,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
+    UserPassTitle2->setGeometry(BASIC_TITLE_X+x/2,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH*4,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
+    UserPassEdit2->setGeometry(BASIC_TITLE_X+x/2,BASIC_TITLE_Y+15+50+EDITLINE_HEIGTH*5,x/2-(BASIC_TITLE_X*2),EDITLINE_HEIGTH);
 
     this->connect(NextStepButton,SIGNAL(clicked()),this,SLOT(SetUserInformation()));
 }
@@ -645,23 +672,37 @@ void UserTab::SetUserDone(int Status){
         QMessageBox::warning(this,"Warning",tr("设置用户数据失败!"),QMessageBox::Yes);
         exit(-1);
     }
-    emit NextSetp();
 }
 //------------------------------------------------------------------
 DoneTab::DoneTab(ProgressTabWidget *parent):
     ProgressTabWidget(parent){
+    NowStep=0;
     Title   = new QLabel(this);
     Title->setFont(TitleFont);
-    Title->setText(tr("工作圆满完成 ;-)"));
-    Title->setGeometry(27,17,500,50);
+    //Title->setText(tr("工作圆满完成 ;-)"));
+    Title->setText(tr("正在进行最终配置....."));
+    Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,BASIC_TITLE_W,BASIC_TITLE_H);
 
     Content = new QLabel(this);
     Content->setFont(ContentFont);
-    Content->setText(tr("请手动重启计算机来启动新系统"));
-    Content->setGeometry(27,17+50,500,25);
+    //Content->setText(tr("请手动重启计算机来启动新系统"));
+    Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+50,BASIC_TITLE_W,BASIC_TITLE_H);
 
     SetPervButtonDisable();
+    SetNextButtonDisable();
     SetNextButtonText(tr("结束"));
+}
 
+void DoneTab::SetDone(int status){
+    NowStep++;
+    if(status != 0){
+        QMessageBox::warning(this,tr("Warning"),tr("配置环节出现致命错误"),QMessageBox::Yes);
+        exit(0);
+    }
+    if(NowStep == 3){
+        Title->setText(tr("工作圆满完成 ;-)"));
+        Content->setText(tr("请手动重启计算机来启动新系统"));
+        SetNextButtonEnable();
+    }
 }
 

@@ -1,7 +1,9 @@
 #include <iostream>
+#include <unistd.h>
 #include <qt4/QtCore/QCoreApplication>
 #include <qt4/QtGui/QApplication>
 #include <qt4/QtCore/QTextCodec>
+#include <QThread>
 #include "AOSC-Installer-Basic-UI.h"
 #include "AOSC-Installer-Core.h"
 
@@ -27,10 +29,12 @@ int main(int argc, char* argv[])
     if (qobject_cast<QApplication *>(app.data())) {
         ProgressTab *Tab = new ProgressTab;
         Tab->show();
+
     } else {
        // start non-GUI version...
 	cout << "Hehe" << endl;
     }
 
-    return app->exec();
+    int result = app->exec();
+    return result;
 }

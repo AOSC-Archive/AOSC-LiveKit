@@ -16,6 +16,23 @@
 #define _INSTALL_FILE_FROM_ "/mnt/squash/."
 #define _INSTALL_FILE_DEST_ "/target"
 
+#define SET_USER    1
+#define SET_ROOT    2
+
+class ExecThread : public QThread{
+    Q_OBJECT
+public:
+    explicit ExecThread(QThread *parent = 0);
+    void SetType(int Type);
+    void SetExecBuff(char *Buff);
+    void run();
+signals:
+    void WorkDone(int,int);
+protected:
+    char *ExecBuff;
+    int ActionType;
+};
+
 class AOSC_Installer_Core : public QThread{
     Q_OBJECT
 public:
@@ -52,11 +69,18 @@ signals:
     void    SFSizeStart(int);
     void    SFSizeStop();
 
+    void    SetDone(int);
+public slots:
+    void WorkDone(int,int);
+
 protected:
     int     NowCopy;
     int     ThisTime;
     char    *TargetPartition;
     char    *TargetDisk;
+    ExecThread  *Exth;
+    ExecThread  *Exth2;
+    ExecThread  *Exth3;
 };
 
 class StatisticsFileSize : public QThread{
