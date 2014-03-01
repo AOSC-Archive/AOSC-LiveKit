@@ -112,28 +112,36 @@ public:
     explicit GPartedDiskTab(ProgressTabWidget *parent = 0);
 signals:
     void PartedDone(QString,QString);
+    void IsEFIDevice(QString);
 public slots:
     void SetCurrentDiskPartition(QString);
     void SetCurrentDisk(QString);
+    void SetCurrentEfiPartition(QString);
     void StartPartiting(void);
     void ReadyToGo(void);
+    void iseficlicked(int);
 protected:
     QLabel          *Title;
     QLabel          *Warning;
     QLabel          *Content;
     QLabel          *Content2;
     QLabel          *Content3;
+    QLabel          *Content4;
     QCheckBox       *CheckBox;
+    QCheckBox       *isefi;
     QPushButton     *StartPartitingButton;
     QComboBox       *DiskComboBox;
     QComboBox       *DiskPartitingComboBox;
+    QComboBox       *EfiDiskPartiting;
     char            *DiskPath;
     char            *DiskPartitingPath;
     int              DiskCount;
     int              DiskPartitingCount;
     QString          CurrentDiskPartition;
     QString          CurrentDisk;
+    QString          CurrentEfiPartition;
     FILE            *fp;
+    int              efi;
 };
 //------------------------------------------------------
 class MainWorkTab : public ProgressTabWidget{

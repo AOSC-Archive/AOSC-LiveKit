@@ -72,12 +72,15 @@ signals:
     void    SetDone(int);
 public slots:
     void WorkDone(int,int);
+    void IsEfiDevice(QString);
 
 protected:
     int     NowCopy;
+    int     isEfi;
     int     ThisTime;
     char    *TargetPartition;
     char    *TargetDisk;
+    char    *TargetEfiPartiton;
     ExecThread  *Exth;
     ExecThread  *Exth2;
     ExecThread  *Exth3;

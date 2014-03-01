@@ -7,7 +7,7 @@
 
 AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
     QThread(parent){
-
+    isEfi = 0;
 }
 
 void AOSC_Installer_Core::run(){
@@ -74,15 +74,35 @@ int AOSC_Installer_Core::SetGrub(){
     system("sudo mount --bind /proc /target/proc");
     system("sudo mount --bind /sys /target/sys");
     system("sudo mount --bind /dev/pts /target/dev/pts");
-    sleep(10);
+    if(isEfi == 0){
 #ifdef _AOSC_LIVE_CD_
-    sprintf(ExecBuff,"sudo chroot /target grub-install --target=i386-pc %s",TargetDisk);
+        sprintf(ExecBuff,"sudo chroot /target grub-install --target=i386-pc %s",TargetDisk);
 #else
-    sprintf(ExecBuff,"sudo grub-install %s",TargetDisk);
+        sprintf(ExecBuff,"sudo grub-install %s",TargetDisk);
 #endif
-    status = system(ExecBuff);
-    emit SetGrubDone(status);
-    return status;
+        status = system(ExecBuff);
+        emit SetGrubDone(status);
+        return status;
+    }else{
+        if(access("/target/efi",F_OK) < 0){
+            if(system("sudo mkdir /target/efi") != 0){
+                emit SetGrubDone(-1);
+                return -1;
+            }
+        }
+        sprintf(ExecBuff,"sudo mount %s /target/efi",TargetEfiPartiton);
+        if(system(ExecBuff) != 0){
+            emit SetGrubDone(-1);
+            return -1;
+        }
+        if(system("sudo chroot /target grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=grub --recheck") != 0){
+            emit SetGrubDone(-1);
+            return -1;
+        }
+        emit SetGrubDone(0);
+        return 0;
+    }
+    return 0;
 }
 
 int AOSC_Installer_Core::UpdateGrub(){
@@ -162,6 +182,14 @@ void AOSC_Installer_Core::SetInstallTarget(QString _TargetPartition, QString _Ta
     TargetDisk      = new char[64];
     bzero(TargetDisk,64);
     TranslateQStringToChar(_TargetDisk,TargetDisk);
+}
+
+void AOSC_Installer_Core::IsEfiDevice(QString _target){
+    TargetEfiPartiton = new char[64];
+    bzero(TargetEfiPartiton,64);
+    TranslateQStringToChar(_target,TargetEfiPartiton);
+
+    isEfi = 1;
 }
 
 void AOSC_Installer_Core::AllDone(){

@@ -40,6 +40,8 @@ ProgressTab::ProgressTab(QTabWidget *parent) :
 
 void ProgressTab::AddTabs(){
     printf("Now Size = %d\n",this->width());
+    GPartedDisk = new GPartedDiskTab;
+    this->addTab(GPartedDisk,tr("GPartedDisk"));
     //Add Welcome Tab
     Welcome = new WelcomeTab;
     this->addTab(Welcome,tr("Welcome"));
@@ -305,15 +307,22 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     Content                 = new QLabel(this);
     Content2                = new QLabel(this);
     Content3                = new QLabel(this);
+    Content4                = new QLabel(this);
     CheckBox                = new QCheckBox(this);
+    isefi                   = new QCheckBox(this);
     DiskPartitingComboBox   = new QComboBox(this);
     DiskComboBox            = new QComboBox(this);
+    EfiDiskPartiting        = new QComboBox(this);
     StartPartitingButton    = new QPushButton(this);
     DiskPath                = new char[64];
     DiskPartitingPath       = new char[64];
 
-    this->connect(StartPartitingButton,SIGNAL(clicked()),this,SLOT(StartPartiting()));
+    efi = 0;
 
+    this->connect(StartPartitingButton,SIGNAL(clicked()),this,SLOT(StartPartiting()));
+    this->connect(isefi,SIGNAL(stateChanged(int)),this,SLOT(iseficlicked(int)));
+
+    EfiDiskPartiting->hide();
     //-----------------------------------------------
     //Read DiskPartiting-----------------------------
     //-----------------------------------------------
@@ -372,6 +381,12 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     Content2->setGeometry(BASIC_TITLE_X+100+10+25+25,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+9,90,30);
     CheckBox->setGeometry(BASIC_TITLE_X+100+10+25,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+5+9,25,25);
 
+    Content4->setFont(D1);
+    Content4->setText(tr("是否为EFI设备"));
+    Content4->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+70,90,30);
+    isefi->setGeometry(BASIC_TITLE_X+100,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+70+5,25,25);
+    EfiDiskPartiting->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35+70,200,30);
+
     Content3->setFont(D1);
     Content3->setText(tr("请选择你的引导设备"));
     Content3->setGeometry(BASIC_TITLE_X+100+10+25+150,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+55+85+10,150,30);
@@ -382,6 +397,31 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     this->connect(DiskPartitingComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentDiskPartition(QString)));
     this->connect(DiskComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentDisk(QString)));
     this->connect(NextStepButton,SIGNAL(clicked()),this,SLOT(ReadyToGo()));
+}
+
+void GPartedDiskTab::iseficlicked(int status){
+    if(status == 2){
+        efi = 1;
+        EfiDiskPartiting->show();
+        EfiDiskPartiting->clear();
+        int DiskPartitingCount = 0;
+        char ExecBuff[64];
+        sprintf(ExecBuff,"ls /dev/sd?? > %s",_TMP_PARTITION_FILE);
+        system(ExecBuff);
+        fp = fopen(_TMP_PARTITION_FILE,"r");
+        EfiDiskPartiting->insertItem(-1,tr("---"));
+        bzero(DiskPartitingPath,64);
+        while(fscanf(fp,"%s",DiskPartitingPath) != EOF){
+            EfiDiskPartiting->insertItem(DiskCount,tr(DiskPartitingPath));
+            bzero(DiskPartitingPath,64);
+            DiskPartitingCount ++;
+        }
+        sprintf(ExecBuff,"rm -rf %s",_TMP_PARTITION_FILE);
+        system(ExecBuff);
+    }else{
+        efi = 0;
+        EfiDiskPartiting->hide();
+    }
 }
 
 void GPartedDiskTab::StartPartiting(){
@@ -434,6 +474,10 @@ void GPartedDiskTab::SetCurrentDisk(QString Now){
     CurrentDisk = Now;
 }
 
+void GPartedDiskTab::SetCurrentEfiPartition(QString Now){
+    CurrentEfiPartition = Now;
+}
+
 void GPartedDiskTab::ReadyToGo(){
     char TargetDisk[50];
     bzero(TargetDisk,50);
@@ -455,6 +499,12 @@ void GPartedDiskTab::ReadyToGo(){
         QMessageBox::warning(this,"Warning",tr("请选择引导设备"),QMessageBox::Yes);
         return;
     }
+    if(efi == 1){
+        if(CurrentEfiPartition == ""){
+            QMessageBox::warning(this,"Warning",tr("请选择一EFI个分区"),QMessageBox::Yes);
+            return;
+        }
+    }
     int result;
     result = QMessageBox::question(this,"Question",tr("确定开始安装?"),QMessageBox::Yes|QMessageBox::No);
     if(result == QMessageBox::No)
@@ -474,6 +524,7 @@ void GPartedDiskTab::ReadyToGo(){
             return;
         }
     }
+    if(efi == 1)    emit IsEFIDevice(CurrentEfiPartition);
     emit PartedDone(CurrentDiskPartition,CurrentDisk);
 }
 
