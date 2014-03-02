@@ -159,11 +159,11 @@ ProgressTabWidget::ProgressTabWidget(QWidget *parent) :
     PervStepButton->setText(tr("后退"));
     connect(NextStepButton,SIGNAL(clicked()),this,SLOT(NextStepClicked()));
     connect(PervStepButton,SIGNAL(clicked()),this,SLOT(PervStepClicked()));
-    TitleFont.setPointSize(37);
+    TitleFont.setPointSize(32);
     TitleFont.setBold(true);
-    SecondaryTitleFont.setPointSize(27);
+    SecondaryTitleFont.setPointSize(24);
     SecondaryTitleFont.setBold(true);
-    ContentFont.setPointSize(20);
+    ContentFont.setPointSize(12);
 }
 
 void ProgressTabWidget::resizeEvent(QResizeEvent *){
@@ -272,11 +272,11 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
     VBoxLayout->addSpacing(100);
     VBoxLayout->addWidget(Browser);
     VBoxLayout->addLayout(HBoxLayout);
-    HBoxLayout->addStretch(500);
+    HBoxLayout->addStretch(600);
     HBoxLayout->addWidget(Content);
-    HBoxLayout->addStretch(60);
+    HBoxLayout->addStretch(30);
     HBoxLayout->addWidget(CheckBox);
-    VBoxLayout->addSpacing(70);
+    VBoxLayout->addSpacing(60);
 
     QFile file("/usr/share/ulinst/data/GNU_License.html");
     if(!file.open(QFile::ReadOnly | QFile::Text)){
@@ -579,7 +579,7 @@ void MainWorkTab::TotalFileDone(int Total){
     printf("TotalFile = %d\n",Total);
     ProgressBar = new QProgressBar(this);
     ProgressBar->setRange(0,TotalFile);
-    ProgressBar->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+40+15+30,this->width(),40);
+    ProgressBar->setGeometry(12,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+40+15+30,this->width()-24,40);
     Start->hide();
     ProgressBar->show();
 }
