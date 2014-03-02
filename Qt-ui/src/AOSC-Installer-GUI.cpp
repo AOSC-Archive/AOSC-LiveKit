@@ -20,28 +20,28 @@ void Th::run(){
     sleep(1);
     emit ST();
     this->terminate();
-}
+} 
 
 ProgressTab::ProgressTab(QTabWidget *parent) :
     QTabWidget(parent){
     Core    = new AOSC_Installer_Core;
     SFSize  = new StatisticsFileSize;
-/*    this->setMaximumSize(900,500);
-    this->setMinimumSize(700,350);*/
-    this->showFullScreen();
+/*    this->setMaximumSize(700,350);
+    this->setMinimumSize(700,350); */
+    this->showFullScreen(); 
     this->tabBar()->hide();
 
     Th *t = new Th;
     connect(t,SIGNAL(ST()),this,SLOT(AddTabs()));
     t->start();
 
-    this->show();
-}
+    this->show(); 
+} 
 
 void ProgressTab::AddTabs(){
     printf("Now Size = %d\n",this->width());
-    GPartedDisk = new GPartedDiskTab;
-    this->addTab(GPartedDisk,tr("GPartedDisk"));
+/*    GPartedDisk = new GPartedDiskTab;
+    this->addTab(GPartedDisk,tr("GPartedDisk")); */
     //Add Welcome Tab
     Welcome = new WelcomeTab;
     this->addTab(Welcome,tr("Welcome"));
@@ -269,14 +269,14 @@ ReadingTab::ReadingTab(ProgressTabWidget *parent):
 
     this->setLayout(VBoxLayout);
 
-    VBoxLayout->addSpacing(60);
+    VBoxLayout->addSpacing(100);
     VBoxLayout->addWidget(Browser);
     VBoxLayout->addLayout(HBoxLayout);
     HBoxLayout->addStretch(500);
     HBoxLayout->addWidget(Content);
-    HBoxLayout->addStretch(10);
+    HBoxLayout->addStretch(60);
     HBoxLayout->addWidget(CheckBox);
-    VBoxLayout->addSpacing(30);
+    VBoxLayout->addSpacing(70);
 
     QFile file("/usr/share/ulinst/data/GNU_License.html");
     if(!file.open(QFile::ReadOnly | QFile::Text)){
