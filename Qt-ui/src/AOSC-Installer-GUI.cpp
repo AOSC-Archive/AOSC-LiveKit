@@ -42,6 +42,12 @@ void ProgressTab::AddTabs(){
     printf("Now Size = %d\n",this->width());
 /*    GPartedDisk = new GPartedDiskTab;
     this->addTab(GPartedDisk,tr("GPartedDisk")); */
+
+    User    = new UserTab(this->width());
+    Done    = new DoneTab;
+    this->addTab(User,tr("User"));
+    this->addTab(Done,tr("Done"));
+    this->connect(User,SIGNAL(StartSetUserInformation(QString,QString,QString)),this,SLOT(StartSetUserInformation(QString,QString,QString)));
     //Add Welcome Tab
     Welcome = new WelcomeTab;
     this->addTab(Welcome,tr("Welcome"));

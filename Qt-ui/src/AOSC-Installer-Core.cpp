@@ -146,12 +146,14 @@ int AOSC_Installer_Core::SetUser(QString _UserName, QString _PassWord){
     Exth->SetExecBuff(ExecBuff);
     Exth->start();
     sprintf(ExecBuff,"sudo chroot /target /usr/bin/cpw.sh %s %s",UserName,PassWord);
-    Exth2 = new ExecThread;
+    /*Exth2 = new ExecThread;
     this->connect(Exth2,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
     Exth2->SetType(SET_USER);
     Exth2->SetExecBuff(ExecBuff);
-    Exth2->start();
-    return 0;
+    Exth2->start();*/
+    int result = system(ExecBuff);
+    emit SetDone(result);
+    return result;
 }
 
 
@@ -160,13 +162,16 @@ int AOSC_Installer_Core::SetRootPassWord(QString _RootPass){
     bzero(RootPass,64);
     TranslateQStringToChar(_RootPass,RootPass);
     char ExecBuff[256];
-    sprintf(ExecBuff,"sudo chroot /target  /usr/bin/cpw.sh root %s",RootPass);
+    sprintf(ExecBuff,"chroot /target  /usr/bin/cpw.sh root %s",RootPass);/*
     Exth3 = new ExecThread;
     this->connect(Exth3,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
     Exth3->SetType(SET_ROOT);
     Exth3->SetExecBuff(ExecBuff);
     Exth3->start();
-    return 0;
+        printf("First\n");*/
+    int result = system(ExecBuff);
+    emit SetDone(result);
+    return result;
 } 
 
 void AOSC_Installer_Core::TranslateQStringToChar(QString in, char *Out){
@@ -256,6 +261,7 @@ void ExecThread::SetType(int Type){
 void ExecThread::run(){
     int result = -1;
     if(ExecBuff != NULL)
-        result = system(ExecBuff);
+        result = system("ls");
+    printf("Result = %d\n",result);
     emit WorkDone(result,ActionType);
 }
