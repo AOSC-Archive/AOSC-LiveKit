@@ -189,8 +189,8 @@ void AOSC_Installer_Core::IsEfiDevice(QString _target){
 }
 
 void AOSC_Installer_Core::AllDone(){
-    system("sync");
-    system("umount -R /target");
+    system("sudo sync");
+    system("sudo umount -R /target");
 }
 
 void AOSC_Installer_Core::WorkDone(int status, int type){

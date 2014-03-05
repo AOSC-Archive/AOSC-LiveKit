@@ -730,16 +730,17 @@ DoneTab::DoneTab(ProgressTabWidget *parent):
     NowStep=0;
     Title   = new QLabel(this);
     Title->setFont(TitleFont);
-    Title->setText(tr("正在进行最终配置..."));
+    Title->setText(tr("工作圆满完成 ;-)"));
     Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,BASIC_TITLE_W,BASIC_TITLE_H);
 
     Content = new QLabel(this);
     Content->setFont(ContentFont);
-    //Content->setText(tr("请手动重启计算机来启动新系统"));
+    
+//Content->setText(tr("请稍候……目前完成按钮可能不能使用，这是因为还有部分配置正在运行。\n\n请手动重启计算机来启动新系统"));
     Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+50,BASIC_TITLE_W,BASIC_TITLE_H);
 
     SetPervButtonDisable();
-    SetNextButtonText(tr("结束"));
+    SetNextButtonText(tr("完成"));
 }
 
 void DoneTab::SetDone(int status){
