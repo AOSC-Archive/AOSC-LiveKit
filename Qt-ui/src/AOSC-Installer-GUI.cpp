@@ -730,8 +730,7 @@ DoneTab::DoneTab(ProgressTabWidget *parent):
     NowStep=0;
     Title   = new QLabel(this);
     Title->setFont(TitleFont);
-    //Title->setText(tr("工作圆满完成 ;-)"));
-    Title->setText(tr("正在进行最终配置....."));
+    Title->setText(tr("正在进行最终配置..."));
     Title->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y,BASIC_TITLE_W,BASIC_TITLE_H);
 
     Content = new QLabel(this);
@@ -740,7 +739,6 @@ DoneTab::DoneTab(ProgressTabWidget *parent):
     Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+50,BASIC_TITLE_W,BASIC_TITLE_H);
 
     SetPervButtonDisable();
-    SetNextButtonDisable();
     SetNextButtonText(tr("结束"));
 }
 

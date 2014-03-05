@@ -131,6 +131,7 @@ int AOSC_Installer_Core::UpdateFstab(void){
     return status;
 }
 
+
 int AOSC_Installer_Core::SetUser(QString _UserName, QString _PassWord){
     char UserName[64];
     char PassWord[64];
@@ -139,21 +140,16 @@ int AOSC_Installer_Core::SetUser(QString _UserName, QString _PassWord){
     TranslateQStringToChar(_UserName,UserName);
     TranslateQStringToChar(_PassWord,PassWord);
     char ExecBuff[128];
+    int status;
     sprintf(ExecBuff,"sudo chroot /target usermod -l %s -md /home/%s live",UserName,UserName);
-    Exth = new ExecThread;
-    this->connect(Exth,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
-    Exth->SetType(SET_USER);
-    Exth->SetExecBuff(ExecBuff);
-    Exth->start();
+    status = system(ExecBuff);
+    if(status < 0){
+        return status;
+    }
     sprintf(ExecBuff,"sudo chroot /target /usr/bin/cpw.sh %s %s",UserName,PassWord);
-    /*Exth2 = new ExecThread;
-    this->connect(Exth2,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
-    Exth2->SetType(SET_USER);
-    Exth2->SetExecBuff(ExecBuff);
-    Exth2->start();*/
-    int result = system(ExecBuff);
-    emit SetDone(result);
-    return result;
+    status = system(ExecBuff);
+    emit SetDone(status);
+    return status;
 }
 
 
@@ -162,16 +158,11 @@ int AOSC_Installer_Core::SetRootPassWord(QString _RootPass){
     bzero(RootPass,64);
     TranslateQStringToChar(_RootPass,RootPass);
     char ExecBuff[256];
-    sprintf(ExecBuff,"sudo chroot /target  /usr/bin/cpw.sh root %s",RootPass);/*
-    Exth3 = new ExecThread;
-    this->connect(Exth3,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
-    Exth3->SetType(SET_ROOT);
-    Exth3->SetExecBuff(ExecBuff);
-    Exth3->start();
-        printf("First\n");*/
-    int result = system(ExecBuff);
-    emit SetDone(result);
-    return result;
+    int status;
+    sprintf(ExecBuff,"sudo chroot /target  /usr/bin/cpw.sh root %s",RootPass);
+    status = system(ExecBuff);
+    emit SetDone(status);
+    return status;
 } 
 
 void AOSC_Installer_Core::TranslateQStringToChar(QString in, char *Out){
@@ -261,7 +252,6 @@ void ExecThread::SetType(int Type){
 void ExecThread::run(){
     int result = -1;
     if(ExecBuff != NULL)
-        result = system("ls");
-    printf("Result = %d\n",result);
+        result = system(ExecBuff);
     emit WorkDone(result,ActionType);
 }
