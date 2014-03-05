@@ -1,5 +1,5 @@
 #!/bin/bash
-whiptail --title "Installation Stage" --msgbox "We are now ready to install `lsb_release -i` to `cat $TARGET`, press OK to start." 8 65
+whiptail --title "Installation Stage" --msgbox "We are now ready to install `lsb_release -i` to `cat $TARGET`, press OK to start. Good luck." 8 65
 mkdir /target
 mount `cat $TARGET` /target
 install-copy

@@ -1,5 +1,5 @@
 #!/bin/bash
-whiptail --title "System Installation Complete!" --infobox "Installation has successfully completed,\n your computer will be now restarted" 15 75
+whiptail --title "System Installation Complete!" --infobox "Installation has successfully completed,\n your computer will be now restarted, announces Misaka." 15 75
 sleep 5
 sync
 reboot

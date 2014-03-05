@@ -5,7 +5,7 @@ mount --bind /proc /target/proc
 mount --bind /sys /target/sys
 mount -vt devpts devpts /target/dev/pts -o gid=5,mode=620
 
-whiptail --title "Post-Copy Configuration" --inputbox "Plese tell me the device name of the boot disk" 12 65 2> $BOOT
+whiptail --title "Post-Copy Configuration" --inputbox "Plese tell Misaka the device name of the boot disk" 12 65 2> $BOOT
 whiptail --title "Post-Copy Configuration" --infobox "Installing GRUB to `cat $BOOT`" 12 65
 chroot /target grub-install --target=i386-pc `cat $BOOT`
 chroot /target grub-mkconfig -o /boot/grub/grub.cfg
