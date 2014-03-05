@@ -162,7 +162,7 @@ int AOSC_Installer_Core::SetRootPassWord(QString _RootPass){
     bzero(RootPass,64);
     TranslateQStringToChar(_RootPass,RootPass);
     char ExecBuff[256];
-    sprintf(ExecBuff,"chroot /target  /usr/bin/cpw.sh root %s",RootPass);/*
+    sprintf(ExecBuff,"sudo chroot /target  /usr/bin/cpw.sh root %s",RootPass);/*
     Exth3 = new ExecThread;
     this->connect(Exth3,SIGNAL(WorkDone(int,int)),this,SLOT(WorkDone(int,int)));
     Exth3->SetType(SET_ROOT);
