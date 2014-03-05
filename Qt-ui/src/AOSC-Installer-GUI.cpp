@@ -736,7 +736,7 @@ DoneTab::DoneTab(ProgressTabWidget *parent):
     Content = new QLabel(this);
     Content->setFont(ContentFont);
     
-//Content->setText(tr("请稍候……目前完成按钮可能不能使用，这是因为还有部分配置正在运行。\n\n请手动重启计算机来启动新系统"));
+    Content->setText(tr("\n\n请稍候……目前完成按钮可能不能使用，还有部分配置正在运行。\n\n请手动重启计算机来启动新系统"));
     Content->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+50,BASIC_TITLE_W,BASIC_TITLE_H);
 
     SetPervButtonDisable();
