@@ -61,6 +61,7 @@ void ProgressTab::AddTabs(){
     GPartedDisk = new GPartedDiskTab;
     this->addTab(GPartedDisk,tr("GPartedDisk"));
     this->connect(GPartedDisk,SIGNAL(PartedDone(QString,QString)),this,SLOT(PartedDone(QString,QString)));
+    this->connect(GPartedDisk,SIGNAL(IsEFIDevice(QString)),Core,SLOT(IsEfiDevice(QString)));
     this->connect(GPartedDisk,SIGNAL(PervStep()),this,SLOT(PervStep()));
     this->connect(GPartedDisk,SIGNAL(AskHide()),this,SLOT(AskHide()));
     this->connect(GPartedDisk,SIGNAL(AskShow()),this,SLOT(AskShow()));
