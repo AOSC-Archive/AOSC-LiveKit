@@ -332,6 +332,8 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     char ExecBuff[64];
     sprintf(ExecBuff,"ls /dev/sd?? > %s",_TMP_PARTITION_FILE);
     system(ExecBuff);
+    sprintf(ExecBuff,"ls /dev/sd??? >> %s",_TMP_PARTITION_FILE);
+    system(ExecBuff);
     fp = fopen(_TMP_PARTITION_FILE,"r");
     DiskPartitingComboBox->insertItem(-1,tr("---"));
     bzero(DiskPartitingPath,64);
@@ -408,6 +410,8 @@ void GPartedDiskTab::iseficlicked(int status){
         int DiskPartitingCount = 0;
         char ExecBuff[64];
         sprintf(ExecBuff,"ls /dev/sd?? > %s",_TMP_PARTITION_FILE);
+        system(ExecBuff);
+        sprintf(ExecBuff,"ls /dev/sd??? >> %s",_TMP_PARTITION_FILE);
         system(ExecBuff);
         fp = fopen(_TMP_PARTITION_FILE,"r");
         EfiDiskPartiting->insertItem(-1,tr("---"));
@@ -492,6 +496,12 @@ void GPartedDiskTab::ReadyToGo(){
     strncpy(TargetDisk,ba.data(),strlen(ba.data()));
     TargetDisk[strlen(ba.data())] = '\0';
 
+    // umount TargetPartition before you do anything
+    char ExecBuff[512];
+    bzero(ExecBuff,512);
+    sprintf(ExecBuff,"sudo umount %s",TargetPartition);
+    system(ExecBuff);
+
     if(strlen(TargetPartition) == 0){
         QMessageBox::warning(this,"Warning",tr("请选择一个分区"),QMessageBox::Yes);
         return;
@@ -505,6 +515,9 @@ void GPartedDiskTab::ReadyToGo(){
             QMessageBox::warning(this,"Warning",tr("请选择一EFI个分区"),QMessageBox::Yes);
             return;
         }
+        // umount target EFIPartition
+        sprintf(ExecBuff,"sudo umount %s",TargetPartition);
+        system(ExecBuff);
     }
     int result;
     result = QMessageBox::question(this,"Question",tr("确定开始安装?"),QMessageBox::Yes|QMessageBox::No);
@@ -513,8 +526,6 @@ void GPartedDiskTab::ReadyToGo(){
     if(CheckBox->isChecked() == true){
         result = QMessageBox::question(this,"Questing",tr("你确定要格式化此分区?"),QMessageBox::Yes|QMessageBox::No);
         if(result == QMessageBox::Yes){
-            char ExecBuff[512];
-            bzero(ExecBuff,512);
             sprintf(ExecBuff,"sudo mkfs.ext4 %s",TargetPartition);
             result = system(ExecBuff);
             if(result != 0){
