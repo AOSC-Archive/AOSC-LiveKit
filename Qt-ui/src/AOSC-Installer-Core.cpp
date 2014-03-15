@@ -8,6 +8,7 @@
 AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
     QThread(parent){
     isEfi = 0;
+    system("umount /target");
 }
 
 void AOSC_Installer_Core::run(){
