@@ -8,7 +8,7 @@
 AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
     QThread(parent){
     isEfi = 0;
-    system("umount /target");
+    system("sudo umount -R /target");
 }
 
 void AOSC_Installer_Core::run(){
