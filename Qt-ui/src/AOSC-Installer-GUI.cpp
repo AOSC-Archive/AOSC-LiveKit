@@ -62,6 +62,7 @@ void ProgressTab::AddTabs(){
     this->addTab(GPartedDisk,tr("GPartedDisk"));
     this->connect(GPartedDisk,SIGNAL(PartedDone(QString,QString)),this,SLOT(PartedDone(QString,QString)));
     this->connect(GPartedDisk,SIGNAL(IsEFIDevice(QString)),Core,SLOT(IsEfiDevice(QString)));
+    this->connect(GPartedDisk,SIGNAL(CurrentFileSystemChanged(QSting)),Core,SLOT(CurrentFileSystemChanged(QString)));
     this->connect(GPartedDisk,SIGNAL(PervStep()),this,SLOT(PervStep()));
     this->connect(GPartedDisk,SIGNAL(AskHide()),this,SLOT(AskHide()));
     this->connect(GPartedDisk,SIGNAL(AskShow()),this,SLOT(AskShow()));
@@ -309,21 +310,26 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     Content2                = new QLabel(this);
     Content3                = new QLabel(this);
     Content4                = new QLabel(this);
+    FormatSwitchLabel       = new QLabel(this);
     CheckBox                = new QCheckBox(this);
     isefi                   = new QCheckBox(this);
     DiskPartitingComboBox   = new QComboBox(this);
     DiskComboBox            = new QComboBox(this);
     EfiDiskPartiting        = new QComboBox(this);
+    FormatSwitch            = new QComboBox(this);
     StartPartitingButton    = new QPushButton(this);
     DiskPath                = new char[64];
     DiskPartitingPath       = new char[64];
 
-    efi = 0;
-
     this->connect(StartPartitingButton,SIGNAL(clicked()),this,SLOT(StartPartiting()));
+    efi = 0;
+    isFileSystemChanged = 0;
     this->connect(isefi,SIGNAL(stateChanged(int)),this,SLOT(iseficlicked(int)));
+    this->connect(CheckBox,SIGNAL(stateChanged(int)),this,SLOT(FormatClicked(int)));
 
     EfiDiskPartiting->hide();
+    FormatSwitch->hide();
+    FormatSwitchLabel->hide();
     //-----------------------------------------------
     //Read DiskPartiting-----------------------------
     //-----------------------------------------------
@@ -362,6 +368,13 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     sprintf(ExecBuff,"rm -rf %s",_TMP_DISK_FILE);
     system(ExecBuff);
     //Done
+    FormatSwitch->clear();
+    FormatSwitch->insertItem(-1,tr("---"));
+    FormatSwitch->insertItem(0,tr("ext2"));
+    FormatSwitch->insertItem(1,tr("ext3"));
+    FormatSwitch->insertItem(2,tr("ext4"));
+    FormatSwitch->insertItem(3,tr("btrfs"));
+    FormatSwitch->insertItem(4,tr("xfs"));
 
     QFont D1;
     D1.setPointSize(10);
@@ -390,6 +403,11 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     isefi->setGeometry(BASIC_TITLE_X+100,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+70+5,25,25);
     EfiDiskPartiting->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35+70,200,30);
 
+    FormatSwitchLabel->setFont(D1);
+    FormatSwitchLabel->setText(tr("选择分区文件系统"));
+    FormatSwitchLabel->setGeometry(BASIC_TITLE_X+100+10+25+150,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35+35,90,30);
+    FormatSwitch->setGeometry(BASIC_TITLE_X+100+10+25+150,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35+70,200,30);
+
     Content3->setFont(D1);
     Content3->setText(tr("请选择你的引导设备"));
     Content3->setGeometry(BASIC_TITLE_X+100+10+25+150,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+55+85+10,150,30);
@@ -399,6 +417,7 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
 
     this->connect(DiskPartitingComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentDiskPartition(QString)));
     this->connect(DiskComboBox,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentDisk(QString)));
+    this->connect(FormatSwitch,SIGNAL(currentIndexChanged(QString)),this,SLOT(SetCurrentFormatFileSystem(QString)));
     this->connect(NextStepButton,SIGNAL(clicked()),this,SLOT(ReadyToGo()));
 }
 
@@ -427,6 +446,23 @@ void GPartedDiskTab::iseficlicked(int status){
         efi = 0;
         EfiDiskPartiting->hide();
     }
+}
+
+void GPartedDiskTab::FormatClicked(int status){
+    if(status == 2){
+        isFileSystemChanged = 1;
+        FormatSwitch->show();
+        FormatSwitchLabel->show();
+    }
+    else{
+        isFileSystemChanged = 0;
+        FormatSwitch->hide();
+        FormatSwitchLabel->hide();
+    }
+}
+
+void GPartedDiskTab::SetCurrentFormatFileSystem(QString Current){
+    CurrentFormatFileSystem = Current;
 }
 
 void GPartedDiskTab::StartPartiting(){
@@ -488,6 +524,7 @@ void GPartedDiskTab::ReadyToGo(){
     bzero(TargetDisk,50);
     char TargetPartition[50];
     bzero(TargetPartition,50);
+    char CurrentFileSystem[50];
     QByteArray ba = CurrentDiskPartition.toLatin1();
     strncpy(TargetPartition,ba.data(),strlen(ba.data()));
     TargetPartition[strlen(ba.data())] = '\0';
@@ -520,22 +557,33 @@ void GPartedDiskTab::ReadyToGo(){
         system(ExecBuff);
     }
     int result;
-    result = QMessageBox::question(this,"Question",tr("确定开始安装?"),QMessageBox::Yes|QMessageBox::No);
-    if(result == QMessageBox::No)
-        return;
     if(CheckBox->isChecked() == true){
+        ba = CurrentFormatFileSystem.toLatin1();
+        strncpy(CurrentFileSystem,ba.data(),strlen(ba.data()));
+        CurrentFileSystem[strlen(ba.data())] = '\0';
+        if(strlen(CurrentFileSystem) == 0){
+            QMessageBox::warning(this,tr("Warning"),tr("请选择分区文件系统"),QMessageBox::Yes);
+            return;
+        }
         result = QMessageBox::question(this,"Questing",tr("你确定要格式化此分区?"),QMessageBox::Yes|QMessageBox::No);
         if(result == QMessageBox::Yes){
-            sprintf(ExecBuff,"sudo mkfs.ext4 %s",TargetPartition);
+            sprintf(ExecBuff,"sudo mkfs.%s %s",CurrentFileSystem,TargetPartition);
             result = system(ExecBuff);
             if(result != 0){
                 QMessageBox::warning(this,"Warning",tr("OMG, 格式化分区失败!"),QMessageBox::Yes);
                 return;
             }
+            emit CurrentFileSystemChanged(CurrentFormatFileSystem);
         }else{
             return;
         }
+    }else{
+        result = QMessageBox::warning(this,tr("Warning"),tr("如果不格式化分区，我们不保证系统能够正常工作，继续？"),QMessageBox::Yes|QMessageBox::No);
+        if(result == QMessageBox::No)   return;
     }
+    result = QMessageBox::question(this,"Question",tr("确定开始安装?"),QMessageBox::Yes|QMessageBox::No);
+    if(result == QMessageBox::No)
+        return;
     if(efi == 1)    emit IsEFIDevice(CurrentEfiPartition);
     emit PartedDone(CurrentDiskPartition,CurrentDisk);
 }

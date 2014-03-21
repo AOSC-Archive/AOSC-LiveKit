@@ -9,6 +9,8 @@ AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
     QThread(parent){
     isEfi = 0;
     system("sudo umount -R /target");
+    CurrentFileSystem = new char[128];
+    sprintf(CurrentFileSystem,"ext4");
 }
 
 void AOSC_Installer_Core::run(){
@@ -106,6 +108,10 @@ int AOSC_Installer_Core::SetGrub(){
     return 0;
 }
 
+void AOSC_Installer_Core::CurrentFileSystemChanged(QString FileSystem){
+    TranslateQStringToChar(FileSystem,CurrentFileSystem);
+}
+
 int AOSC_Installer_Core::UpdateGrub(){
     int status;
     char ExecBuff[128];
@@ -123,7 +129,7 @@ int AOSC_Installer_Core::UpdateFstab(void){
     int status;
 #ifdef _AOSC_LIVE_CD_
     char ExecBuff[128];
-    sprintf(ExecBuff,"echo %s / ext4 defaults 1 1 | sudo tee -a /target/etc/fstab",TargetPartition);
+    sprintf(ExecBuff,"echo %s / %s defaults 1 1 | sudo tee -a /target/etc/fstab",CurrentFileSystem,TargetPartition);
     status = system(ExecBuff);
 #else
     status = 0;
