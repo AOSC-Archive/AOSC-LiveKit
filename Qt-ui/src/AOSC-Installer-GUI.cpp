@@ -62,7 +62,7 @@ void ProgressTab::AddTabs(){
     this->addTab(GPartedDisk,tr("GPartedDisk"));
     this->connect(GPartedDisk,SIGNAL(PartedDone(QString,QString)),this,SLOT(PartedDone(QString,QString)));
     this->connect(GPartedDisk,SIGNAL(IsEFIDevice(QString)),Core,SLOT(IsEfiDevice(QString)));
-    this->connect(GPartedDisk,SIGNAL(CurrentFileSystemChanged(QSting)),Core,SLOT(CurrentFileSystemChanged(QString)));
+    this->connect(GPartedDisk,SIGNAL(CurrentFileSystemChanged(QString)),Core,SLOT(CurrentFileSystemChanged(QString)));
     this->connect(GPartedDisk,SIGNAL(PervStep()),this,SLOT(PervStep()));
     this->connect(GPartedDisk,SIGNAL(AskHide()),this,SLOT(AskHide()));
     this->connect(GPartedDisk,SIGNAL(AskShow()),this,SLOT(AskShow()));
@@ -311,6 +311,7 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     Content3                = new QLabel(this);
     Content4                = new QLabel(this);
     FormatSwitchLabel       = new QLabel(this);
+    EFISwitchLabel          = new QLabel(this);
     CheckBox                = new QCheckBox(this);
     isefi                   = new QCheckBox(this);
     DiskPartitingComboBox   = new QComboBox(this);
@@ -330,6 +331,7 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     EfiDiskPartiting->hide();
     FormatSwitch->hide();
     FormatSwitchLabel->hide();
+    EFISwitchLabel->hide();
     //-----------------------------------------------
     //Read DiskPartiting-----------------------------
     //-----------------------------------------------
@@ -398,9 +400,12 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
     CheckBox->setGeometry(BASIC_TITLE_X+100+10+25,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+5+9,25,25);
 
     Content4->setFont(D1);
+    EFISwitchLabel->setFont(D1);
     Content4->setText(tr("是否为EFI设备"));
+    EFISwitchLabel->setText(tr("选择你的EFI分区"));
     Content4->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+70,90,30);
     isefi->setGeometry(BASIC_TITLE_X+100,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+70+5,25,25);
+    EFISwitchLabel->setGeometry(BASIC_TITLE_X+100+25,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35+35,120,30);
     EfiDiskPartiting->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140+35+70,200,30);
 
     FormatSwitchLabel->setFont(D1);
@@ -424,6 +429,7 @@ GPartedDiskTab::GPartedDiskTab(ProgressTabWidget *parent):
 void GPartedDiskTab::iseficlicked(int status){
     if(status == 2){
         efi = 1;
+        EFISwitchLabel->show();
         EfiDiskPartiting->show();
         EfiDiskPartiting->clear();
         int DiskPartitingCount = 0;
@@ -444,6 +450,7 @@ void GPartedDiskTab::iseficlicked(int status){
         system(ExecBuff);
     }else{
         efi = 0;
+        EFISwitchLabel->hide();
         EfiDiskPartiting->hide();
     }
 }
