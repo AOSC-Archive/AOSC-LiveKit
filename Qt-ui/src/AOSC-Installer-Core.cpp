@@ -9,7 +9,7 @@ AOSC_Installer_Core::AOSC_Installer_Core(QThread *parent):
     QThread(parent){
     isEfi = 0;
     system("sudo umount -R /target");
-    CurrentFileSystem = new char[128];
+    CurrentFileSystem = new char[64];
     sprintf(CurrentFileSystem,"ext4");
 }
 

@@ -10,6 +10,7 @@
 #include <qt4/QtCore/QFile>
 #include <qt4/QtCore/QTextStream>
 #include <qt4/QtCore/QByteArray>
+#include <QProcess>
 
 Th::Th(QThread *parent):
     QThread(parent){
@@ -606,6 +607,7 @@ MainWorkTab::MainWorkTab(QString _TargetPartition, QString _TargetDisk, Progress
     Content     = new QLabel(this);
     Content2    = new QLabel(this);
     Start       = new QPushButton(this);
+    EditFstab   = new QPushButton(this);
     SetNextButtonDisable();
     SetPervButtonDisable();
 
@@ -621,6 +623,9 @@ MainWorkTab::MainWorkTab(QString _TargetPartition, QString _TargetDisk, Progress
 
     Start->setText(tr("Click to Start"));
     Start->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140,200,50);
+    EditFstab->setText(tr("我要自行修改Fstab"));
+    EditFstab->setGeometry(BASIC_TITLE_X,BASIC_TITLE_Y+BASIC_TITLE_CONTENT_SPACE+140,150,25);
+    EditFstab->hide();
 
     this->connect(Start,SIGNAL(clicked()),this,SLOT(StartInstall()));
     TargetPartition = _TargetPartition;
@@ -629,7 +634,10 @@ MainWorkTab::MainWorkTab(QString _TargetPartition, QString _TargetDisk, Progress
 
 void MainWorkTab::StartInstall(void){
     Content->setText(tr("正在准备安装文件"));
-    emit S_StartInstall(TargetPartition,TargetDisk);
+    Start->hide();
+    EditFstab->show();
+//    emit S_StartInstall(TargetPartition,TargetDisk);
+    ManualEditFstab();
 }
 
 void MainWorkTab::MountFSDone(int Status){
@@ -670,6 +678,14 @@ void MainWorkTab::SetGrubDone(int Status){
     Content->setText(tr("GRUB 安装成功!"));
     Content2->setText(tr("正在配置Grub......"));
     ProgressBar->setRange(0,0);
+}
+
+void MainWorkTab::ManualEditFstab(){
+    QProcess *FstabEditor = new QProcess(this);
+    QString Program = "sudo";
+    QStringList ArgList;
+    ArgList << "gvim" << "/target/etc/fstab";
+    FstabEditor->start(Program,ArgList);
 }
 
 void MainWorkTab::UpdateFstabDone(int Status){

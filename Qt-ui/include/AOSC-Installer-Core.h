@@ -73,6 +73,7 @@ signals:
 public slots:
     void WorkDone(int,int);
     void IsEfiDevice(QString);
+    void CurrentFileSystemChanged(QString);
 
 protected:
     int     NowCopy;
@@ -81,6 +82,7 @@ protected:
     char    *TargetPartition;
     char    *TargetDisk;
     char    *TargetEfiPartiton;
+    char    *CurrentFileSystem;
     ExecThread  *Exth;
     ExecThread  *Exth2;
     ExecThread  *Exth3;

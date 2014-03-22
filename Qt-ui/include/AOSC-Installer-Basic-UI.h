@@ -113,11 +113,14 @@ public:
 signals:
     void PartedDone(QString,QString);
     void IsEFIDevice(QString);
+    void CurrentFileSystemChanged(QString);
 public slots:
     void SetCurrentDiskPartition(QString);
     void SetCurrentDisk(QString);
     void SetCurrentEfiPartition(QString);
+    void SetCurrentFormatFileSystem(QString);
     void StartPartiting(void);
+    void FormatClicked(int status);
     void ReadyToGo(void);
     void iseficlicked(int);
 protected:
@@ -133,6 +136,9 @@ protected:
     QComboBox       *DiskComboBox;
     QComboBox       *DiskPartitingComboBox;
     QComboBox       *EfiDiskPartiting;
+    QComboBox       *FormatSwitch;
+    QLabel          *FormatSwitchLabel;
+    QLabel          *EFISwitchLabel;
     char            *DiskPath;
     char            *DiskPartitingPath;
     int              DiskCount;
@@ -140,8 +146,10 @@ protected:
     QString          CurrentDiskPartition;
     QString          CurrentDisk;
     QString          CurrentEfiPartition;
+    QString          CurrentFormatFileSystem;
     FILE            *fp;
     int              efi;
+    int              isFileSystemChanged;
 };
 //------------------------------------------------------
 class MainWorkTab : public ProgressTabWidget{
@@ -160,10 +168,12 @@ public slots:
     void SetGrubDone(int);
     void UpdateGrubDone(int);
     void UpdateFstabDone(int);
+    void ManualEditFstab(void);
 protected:
     QLabel          *Title;
     QLabel          *Content;
     QLabel          *Content2;
+    QPushButton     *EditFstab;
     QPushButton     *Start;
     QProgressBar    *ProgressBar;
     int             TotalFile;
