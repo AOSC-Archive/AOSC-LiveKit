@@ -628,6 +628,7 @@ MainWorkTab::MainWorkTab(QString _TargetPartition, QString _TargetDisk, Progress
     EditFstab->hide();
 
     this->connect(Start,SIGNAL(clicked()),this,SLOT(StartInstall()));
+    this->connect(EditFstab,SIGNAL(clicked()),this,SLOT(ManualEditFstab()));
     TargetPartition = _TargetPartition;
     TargetDisk      = _TargetDisk;
 }
@@ -636,8 +637,7 @@ void MainWorkTab::StartInstall(void){
     Content->setText(tr("正在准备安装文件"));
     Start->hide();
     EditFstab->show();
-//    emit S_StartInstall(TargetPartition,TargetDisk);
-    ManualEditFstab();
+    emit S_StartInstall(TargetPartition,TargetDisk);
 }
 
 void MainWorkTab::MountFSDone(int Status){
@@ -694,6 +694,7 @@ void MainWorkTab::UpdateFstabDone(int Status){
         exit(-1);
     }
     Content->setText(tr("更新 /etc/fstab 成功!"));
+    EditFstab->show();
     Content2->setText(tr("基础系统安装完毕!"));
     ProgressBar->setRange(0,1);
     ProgressBar->setValue(1);
