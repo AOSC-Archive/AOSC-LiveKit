@@ -12,3 +12,4 @@ GetStartTab::~GetStartTab()
 {
     delete ui;
 }
+//如果说这都要我打注释也太不近人情了

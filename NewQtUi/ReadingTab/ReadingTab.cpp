@@ -14,6 +14,6 @@ ReadingTab::~ReadingTab()
     delete ui;
 }
 
-void ReadingTab::SLOT_IAgreeCheckBoxClicked(bool status){
+void ReadingTab::SLOT_IAgreeCheckBoxClicked(bool status){       //  其实就是转发信号【话说我可以用namespace的】
     emit SIGNAL_IAgreeCheckBoxClicked(status);
 }

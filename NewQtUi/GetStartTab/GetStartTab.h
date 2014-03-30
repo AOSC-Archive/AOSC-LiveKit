@@ -19,4 +19,4 @@ private:
     Ui::GetStartTab *ui;
 };
 
-#endif // GETSTARTTAB_H
+#endif

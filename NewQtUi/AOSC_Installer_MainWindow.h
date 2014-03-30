@@ -18,6 +18,7 @@ class AOSC_Installer_MainWindow : public QMainWindow
 public:
     explicit AOSC_Installer_MainWindow(QWidget *parent = 0);
     ~AOSC_Installer_MainWindow();
+    void SetAllButtonEnable(void);
     void CheckButtonDisable(void);
 public slots:
     void SLOT_NextButtonClicked(void);
