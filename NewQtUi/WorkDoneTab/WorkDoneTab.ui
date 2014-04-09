@@ -31,6 +31,24 @@
     <string>完成安装</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>100</y>
+     <width>421</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>我们正在执行一些后续步骤来完成安装......</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

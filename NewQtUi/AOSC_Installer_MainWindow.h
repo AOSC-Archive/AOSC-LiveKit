@@ -5,6 +5,8 @@
 #include <QTabWidget>
 #include <QTableWidgetItem>
 #include <QHBoxLayout>
+#include <QString>
+#include <QMessageBox>
 #include "GetStartTab/GetStartTab.h"
 #include "ReadingTab/ReadingTab.h"
 #include "PartedDiskTab/PartedDiskTab.h"
@@ -31,6 +33,8 @@ public slots:
     void SLOT_NextButtonClicked(void);
     void SLOT_PervButtonClicked(void);
     void SLOT_IAgreeCheckBoxClicked(bool);
+    void SLOT_MyDeviceIsEFI(QString,bool);
+    void SLOT_INeedFormatMyPartiton(QString,int,bool);
 
 private:
     Ui::AOSC_Installer_MainWindow *ui;

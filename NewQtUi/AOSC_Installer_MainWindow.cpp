@@ -12,7 +12,8 @@ AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QWidget *parent) :
     this->connect(ui->NextStepButton,SIGNAL(clicked()),this,SLOT(SLOT_NextButtonClicked()));
     this->connect(ui->PervStepButton,SIGNAL(clicked()),this,SLOT(SLOT_PervButtonClicked()));
     this->connect(Reading,SIGNAL(SIGNAL_IAgreeCheckBoxClicked(bool)),this,SLOT(SLOT_IAgreeCheckBoxClicked(bool)));
-
+    this->connect(PartedDisk,SIGNAL(SIG_AskForHide()),this,SLOT(hide()));
+    this->connect(PartedDisk,SIGNAL(SIG_AskForShow()),this,SLOT(show()));
     ui->PervStepButton->hide();
     MainTab->tabBar()->setHidden(true);     //  Qt5大法好！
 }
@@ -59,7 +60,7 @@ void AOSC_Installer_MainWindow::CheckButtonDisable(){
             ui->NextStepButton->setDisabled(true);
     }
     else if(MainTab->currentWidget()==GetStart)ui->PervStepButton->hide();
-/*    else if(MainTab->currentWidget()==WorkProcess){
+/*    else if(MainTab->currentWidget()==WorkProcess){       // 当发布时这里的注释去掉
         ui->NextStepButton->setDisabled(true);
         ui->PervStepButton->setDisabled(true);
     }*/
@@ -68,6 +69,26 @@ void AOSC_Installer_MainWindow::CheckButtonDisable(){
 }
 
 void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
+    if(MainTab->currentWidget()==PartedDisk){                   //  如果是分区相关，则判断
+        int result = PartedDisk->CheckInput();
+            if(result == -1){
+                QMessageBox::warning(this,tr("警告"),tr("严重错误！"),QMessageBox::Yes);
+            }else if(result == NO_DISK_SELECT){
+                QMessageBox::warning(this,tr("警告"),tr("请选择安装的硬盘"),QMessageBox::Yes);
+            }else if(result == NO_EFI_PARTITION_SELECT){
+                QMessageBox::warning(this,tr("警告"),tr("请选择你的EFI分区"),QMessageBox::Yes);
+            }else if(result == NO_PARTITION_SELECT){
+                QMessageBox::warning(this,tr("警告"),tr("请选择安装的分区"),QMessageBox::Yes);
+            }else if(result == NO_FILESYSTEM_TYPE_SELECT){
+                QMessageBox::warning(this,tr("警告"),tr("请选择格式化分区的文件系统"),QMessageBox::Yes);
+            }else if(result == NO_FORMAT){
+                if(QMessageBox::warning(this,tr("警告"),tr("您确定不格式化就安装系统，这可能会导致安装失败"),QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
+                    return;
+                }result = 0;
+            }
+            if(result != 0)
+                return;
+        }
     MainTab->setCurrentIndex(MainTab->currentIndex()+1);        //  跳转到下一步
     SetAllButtonEnable();                                       //  将按钮全部激活
     CheckButtonDisable();                                       //  检查同时disable某些按钮
@@ -82,4 +103,12 @@ void AOSC_Installer_MainWindow::SLOT_PervButtonClicked(){
 void AOSC_Installer_MainWindow::SLOT_IAgreeCheckBoxClicked(bool status){   //  配置Reading发回的那个同意协议的按钮的状态
     if(status == true)  ui->NextStepButton->setEnabled(true);
     else                ui->NextStepButton->setDisabled(true);
+}
+
+void AOSC_Installer_MainWindow::SLOT_MyDeviceIsEFI(QString Partition, bool Status){
+
+}
+
+void AOSC_Installer_MainWindow::SLOT_INeedFormatMyPartiton(QString Partition, int Type, bool Status){
+
 }
