@@ -49,7 +49,6 @@ static char *partition_print_flags (PedPartition const *part)
 {                                                                                   
     char *res = xstrdup("");
     if (!part) { return res; }
-
     PedPartitionFlag flag;
     size_t res_buf_len = 1;
     char const *sep = "";
