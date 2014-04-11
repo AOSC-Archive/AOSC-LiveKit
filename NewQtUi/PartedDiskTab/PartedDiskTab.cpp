@@ -141,3 +141,19 @@ int PartedDiskTab::CheckInput(){
     }
     return -1;
 }
+
+int PartedDiskTab::isEFIDevice(){
+    return ui->MyDeviceIsEFICheckBox->isChecked();
+}
+
+QString PartedDiskTab::GetTargetPartition(){
+    return ui->DiskPartitionSelect->currentText();
+}
+
+QString PartedDiskTab::GetTargetDisk(){
+    return ui->DiskSelect->currentText();
+}
+
+QString PartedDiskTab::GetEFIPartition(){
+    return ui->MyDeviceIsEFIComboBox->currentText();
+}

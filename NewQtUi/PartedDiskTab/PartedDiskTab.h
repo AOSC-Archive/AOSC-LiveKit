@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QProcess>
+#include <QString>
 #include <stdio.h>
 #include <string.h>
 #include <QDebug>
@@ -30,6 +31,12 @@ public:
     void UpdatePartitionMap(void);
     void UpdateEFIPartitionMap(void);
     int CheckInput(void);
+    int isEFIDevice(void);
+    QString GetTargetDisk(void);
+    QString GetTargetPartition(void);
+    QString GetEFIPartition(void);
+
+
 
 signals:
     void SIG_FormatDiskPartition(QString,int,bool);
