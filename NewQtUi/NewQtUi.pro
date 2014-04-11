@@ -15,6 +15,7 @@ HEADERS += AOSC_Installer_MainWindow.h \
     ConfigureUserTab/ConfigureUserTab.h \
     WorkDoneTab/WorkDoneTab.h \
     WorkProcessTab/WorkProcessTab.h
+
 FORMS += AOSC_Installer_MainWindow.ui \
     GetStartTab/GetStartTab.ui \
     ReadingTab/ReadingTab.ui \
@@ -29,3 +30,4 @@ SOURCES += AOSC_Installer_MainWindow.cpp main.cpp \
     ConfigureUserTab/ConfigureUserTab.cpp \
     WorkDoneTab/WorkDoneTab.cpp \
     WorkProcessTab/WorkProcessTab.cpp
+

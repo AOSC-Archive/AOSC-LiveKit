@@ -6,7 +6,9 @@
 #include <QTableWidgetItem>
 #include <QHBoxLayout>
 #include <QString>
+#include <QStringList>
 #include <QMessageBox>
+#include <QThread>
 #include "GetStartTab/GetStartTab.h"
 #include "ReadingTab/ReadingTab.h"
 #include "PartedDiskTab/PartedDiskTab.h"
@@ -14,16 +16,39 @@
 #include "ConfigureUserTab/ConfigureUserTab.h"
 #include "WorkDoneTab/WorkDoneTab.h"
 
+#define _INSTALL_FILE_      "/squash"
+#define _INSTALL_FILE_FROM_ "/mnt/squash/"
+#define _INSTALL_FILE_DEST_ "/target"
+#define _TMP_TOTAL_SIZE_    "/tmp/.TotleFile.tmp"
+
 namespace Ui {
 class AOSC_Installer_MainWindow;
+class StatisticsFileSize;
 }
+
+class StatisticsFileSize : public QThread{
+    Q_OBJECT
+public:
+    explicit StatisticsFileSize(QThread *parent = 0);
+    void run();
+signals:
+    void Copyed(int);
+    void TotalFile(int);
+public slots:
+    void CopyDone();
+    void GetReady(int);
+protected:
+    int NowSize;
+    char ExecBuff[128];
+    FILE *fp;
+    int Size;
+};
 
 class AOSC_Installer_MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
-    explicit AOSC_Installer_MainWindow(QWidget *parent = 0);
+    explicit AOSC_Installer_MainWindow(QMainWindow *parent = 0);
     ~AOSC_Installer_MainWindow();
     void BuildObject(void);             //  为对象分配内存空间
     void AddToTabWidget(void);          //  将对象载入总tab里面
@@ -33,19 +58,31 @@ public slots:
     void SLOT_NextButtonClicked(void);
     void SLOT_PervButtonClicked(void);
     void SLOT_IAgreeCheckBoxClicked(bool);
-    void SLOT_MyDeviceIsEFI(QString,bool);
-    void SLOT_INeedFormatMyPartiton(QString,int,bool);
+    void SLOT_MountSquashfsDone(int);
+    void SLOT_StartInstall(void);
+    void SLOT_MountTargetDone(int);
+    void SLOT_TotalFiles(int);
+    void SLOT_NowCopyed(int);
+    void SLOT_CopyFileDone(int);
 
 private:
+    int                 AllFiles;
     Ui::AOSC_Installer_MainWindow *ui;
-    QHBoxLayout     *layout;
-    QTabWidget      *MainTab;
-    GetStartTab     *GetStart;
-    ReadingTab      *Reading;
-    PartedDiskTab   *PartedDisk;
-    WorkProcessTab  *WorkProcess;
-    ConfigureUserTab*ConfigureUser;
-    WorkDoneTab     *WorkDone;
+    QHBoxLayout         *layout;
+    QTabWidget          *MainTab;
+    GetStartTab         *GetStart;
+    ReadingTab          *Reading;
+    PartedDiskTab       *PartedDisk;
+    WorkProcessTab      *WorkProcess;
+    ConfigureUserTab    *ConfigureUser;
+    WorkDoneTab         *WorkDone;
+    StatisticsFileSize  *StatisticsFiles;
+    QProcess            *SizeFile;
+    QProcess            *MountTarget;
+    QProcess            *MountSquashfs;
+    QProcess            *MountEFIPartition;
+    QProcess            *CopyFile;
+    QProcess            *SetGrub;
 
 };
 

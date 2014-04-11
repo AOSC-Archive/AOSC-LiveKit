@@ -14,6 +14,15 @@ class WorkProcessTab : public QWidget
 public:
     explicit WorkProcessTab(QWidget *parent = 0);
     ~WorkProcessTab();
+    void SetTotalFiles(int);
+    void SetNowCopyed(int);
+    void SetProcessBarShow(bool);
+    void SetLabelText(QString);
+public slots:
+    void SLOT_StartButtonClicked(void);
+
+signals:
+    void SIG_StartButtonClicked(void);
 
 private:
     Ui::WorkProcessTab *ui;

@@ -2,18 +2,24 @@
 #include "ui_AOSC_Installer_MainWindow.h"
 #include <QTabBar>
 
-AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QWidget *parent) :
+AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
     ui(new Ui::AOSC_Installer_MainWindow)
 {
     BuildObject();
     AddToTabWidget();
-//##########链接基本的信号与槽#############3
+/*    MountSquashfs = new QProcess(this);       // Mount Squashfs....
+    this->connect(MountSquashfs,SIGNAL(finished(int)),this,SLOT(SLOT_MountSquashfsDone(int)));
+    QStringList ArgList;
+    ArgList << "mount" << _INSTALL_FILE_ << _INSTALL_FILE_FROM_ ;
+    MountSquashfs->start("sudo",ArgList);*/
+//##########链接基本的信号与槽#############
     this->connect(ui->NextStepButton,SIGNAL(clicked()),this,SLOT(SLOT_NextButtonClicked()));
     this->connect(ui->PervStepButton,SIGNAL(clicked()),this,SLOT(SLOT_PervButtonClicked()));
     this->connect(Reading,SIGNAL(SIGNAL_IAgreeCheckBoxClicked(bool)),this,SLOT(SLOT_IAgreeCheckBoxClicked(bool)));
     this->connect(PartedDisk,SIGNAL(SIG_AskForHide()),this,SLOT(hide()));
     this->connect(PartedDisk,SIGNAL(SIG_AskForShow()),this,SLOT(show()));
+    this->connect(WorkProcess,SIGNAL(SIG_StartButtonClicked()),this,SLOT(SLOT_StartInstall()));
     ui->PervStepButton->hide();
     MainTab->tabBar()->setHidden(true);     //  Qt5大法好！
 }
@@ -45,6 +51,9 @@ void AOSC_Installer_MainWindow::AddToTabWidget(){
 AOSC_Installer_MainWindow::~AOSC_Installer_MainWindow()
 {
     delete ui;
+    system("sudo umount -Rf /target");
+    system("sudo umount -Rf /mnt/squash/");
+    printf("析构函数被调用\n");
 }
 
 void AOSC_Installer_MainWindow::SetAllButtonEnable(){
@@ -105,10 +114,123 @@ void AOSC_Installer_MainWindow::SLOT_IAgreeCheckBoxClicked(bool status){   //  �
     else                ui->NextStepButton->setDisabled(true);
 }
 
-void AOSC_Installer_MainWindow::SLOT_MyDeviceIsEFI(QString Partition, bool Status){
+void AOSC_Installer_MainWindow::SLOT_MountSquashfsDone(int Status){
+    if(Status != 0){
+        QMessageBox::warning(this,tr("错误！"),tr("安装程序遇到致命错误，强制退出"),QMessageBox::Yes);
+        delete this;
+    }
+}
+
+void AOSC_Installer_MainWindow::SLOT_StartInstall(){
+    MountTarget = new QProcess(this);
+    this->connect(MountTarget,SIGNAL(finished(int)),this,SLOT(SLOT_MountTargetDone(int)));
+
+    QStringList List;
+    List << "mount" << PartedDisk->GetTargetPartition() << _INSTALL_FILE_DEST_;
+    //debug
+    printf("Install To %s\n",PartedDisk->GetTargetPartition().toUtf8().data());
+
+    MountTarget->start("sudo",List);
+}
+
+void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
+    if(Status != 0){
+        QMessageBox::warning(this,tr("严重错误"),tr("挂载目标分区失败，请确认目标分区是否在使用中！"),QMessageBox::Yes);
+        exit(0);
+    }else{
+        if(system("sudo mount --bind /dev /target/dev")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载dev列表到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
+        if(system("sudo mount --bind /proc /target/proc")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载proc到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
+        if(system("sudo mount --bind /sys /target/sys")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
+        if(system("sudo mount --bind /dev/pts /target/dev/pts")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
+        StatisticsFiles = new StatisticsFileSize();
+        this->connect(StatisticsFiles,SIGNAL(TotalFile(int)),this,SLOT(SLOT_TotalFiles(int)));
+        this->connect(StatisticsFiles,SIGNAL(Copyed(int)),this,SLOT(SLOT_NowCopyed(int)));
+        StatisticsFiles->start();
+        WorkProcess->SetProcessBarShow(true);
+        WorkProcess->SetLabelText(tr("准备安装中"));
+    }
+}
+
+void AOSC_Installer_MainWindow::SLOT_TotalFiles(int TotalFile){
+    WorkProcess->SetTotalFiles(TotalFile);
+    AllFiles = TotalFile;
+    WorkProcess->SetLabelText(tr("安装基础系统中....."));
+    CopyFile = new QProcess(this);
+    this->connect(CopyFile,SIGNAL(finished(int)),this,SLOT(SLOT_CopyFileDone(int)));
+    QStringList ArgList;
+    ArgList << "cp" << _INSTALL_FILE_DEST_ << PartedDisk->GetTargetPartition();
+}
+
+void AOSC_Installer_MainWindow::SLOT_NowCopyed(int NowCopyed){
+    WorkProcess->SetNowCopyed(NowCopyed);
+}
+
+void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
+    if(Status != 0){
+        StatisticsFiles->CopyDone();
+        QMessageBox::warning(this,tr("错误"),tr("复制文件出现错误！"),QMessageBox::Yes);
+        delete this;
+    }else{
+        WorkProcess->SetLabelText(tr("设置Grub"));
+        //........
+        QMessageBox::warning(this,tr("嗯"),tr("这里就先停下了，因为后面还没写"));
+    }
+}
+
+
+//----------------------
+
+StatisticsFileSize::StatisticsFileSize(QThread *parent):
+    QThread(parent){
 
 }
 
-void AOSC_Installer_MainWindow::SLOT_INeedFormatMyPartiton(QString Partition, int Type, bool Status){
+void StatisticsFileSize::GetReady(int _Size){
+    Size = _Size;
+    this->start();
+}
 
+void StatisticsFileSize::run(){
+    sprintf(ExecBuff,"sudo find %s | wc -l > %s",_INSTALL_FILE_FROM_,_TMP_TOTAL_SIZE_);
+    fp = fopen(_TMP_TOTAL_SIZE_,"r");
+    fscanf(fp,"%d",&NowSize);
+    emit TotalFile(NowSize);
+    fclose(fp);
+
+    sprintf(ExecBuff,"sudo find %s | wc -l > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
+    system(ExecBuff);
+    fp = fopen(_TMP_TOTAL_SIZE_,"r");
+    while(1){
+        sleep(2);
+        fscanf(fp,"%d",&NowSize);
+        emit Copyed(NowSize);
+        printf("Debug >> Now Copyed Files Size ==  %d\n",NowSize);
+        fclose(fp);     //!
+        fp = NULL;
+        system(ExecBuff);
+        fp = fopen(_TMP_TOTAL_SIZE_,"r");       //!
+    }
+}
+
+void StatisticsFileSize::CopyDone(){
+    this->terminate();
+    if(fp != NULL){
+        fclose(fp);
+        fp = NULL;
+    }
+    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_TOTAL_SIZE_);
+    system(ExecBuff);
+    this->terminate();
 }
