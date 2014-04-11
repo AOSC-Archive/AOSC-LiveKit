@@ -1,5 +1,9 @@
 #include "WorkProcessTab.h"
 #include "ui_WorkProcessTab.h"
+#include <QByteArray>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QMoveEvent>
 
 WorkProcessTab::WorkProcessTab(QWidget *parent) :
     QWidget(parent),

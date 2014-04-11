@@ -17,9 +17,10 @@
 #include "WorkDoneTab/WorkDoneTab.h"
 
 #define _INSTALL_FILE_      "/squash"
-#define _INSTALL_FILE_FROM_ "/mnt/squash/"
+#define _INSTALL_FILE_FROM_ "/usr"
 #define _INSTALL_FILE_DEST_ "/target"
-#define _TMP_TOTAL_SIZE_    "/tmp/.TotleFile.tmp"
+#define _TMP_TOTAL_SIZE_    "/tmp/TotleFile.tmp"
+#define _TMP_NOW_SIZE       "/tmp/NowSize.tmp"
 
 namespace Ui {
 class AOSC_Installer_MainWindow;
@@ -54,6 +55,9 @@ public:
     void AddToTabWidget(void);          //  将对象载入总tab里面
     void SetAllButtonEnable(void);
     void CheckButtonDisable(void);
+    void closeEvent(QCloseEvent *);
+signals:
+    void SIG_StartCopyFile(void);
 public slots:
     void SLOT_NextButtonClicked(void);
     void SLOT_PervButtonClicked(void);
@@ -64,9 +68,11 @@ public slots:
     void SLOT_TotalFiles(int);
     void SLOT_NowCopyed(int);
     void SLOT_CopyFileDone(int);
+    void SLOT_SetGrubDone(int);
 
 private:
     int                 AllFiles;
+    int                 fh;
     Ui::AOSC_Installer_MainWindow *ui;
     QHBoxLayout         *layout;
     QTabWidget          *MainTab;

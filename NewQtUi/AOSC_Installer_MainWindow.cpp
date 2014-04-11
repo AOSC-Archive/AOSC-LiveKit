@@ -1,6 +1,12 @@
 #include "AOSC_Installer_MainWindow.h"
 #include "ui_AOSC_Installer_MainWindow.h"
 #include <QTabBar>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+       #include <fcntl.h>
+ #include <unistd.h>
 
 AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
@@ -20,6 +26,7 @@ AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     this->connect(PartedDisk,SIGNAL(SIG_AskForHide()),this,SLOT(hide()));
     this->connect(PartedDisk,SIGNAL(SIG_AskForShow()),this,SLOT(show()));
     this->connect(WorkProcess,SIGNAL(SIG_StartButtonClicked()),this,SLOT(SLOT_StartInstall()));
+    this->connect(this,SIGNAL(SIG_StartCopyFile()),WorkProcess,SLOT(SLOT_StartCopyFile()));
     ui->PervStepButton->hide();
     MainTab->tabBar()->setHidden(true);     //  Qt5大法好！
 }
@@ -39,6 +46,10 @@ void AOSC_Installer_MainWindow::BuildObject(){
     ui->CenterProcess->setLayout(layout);   //  装载Layout
 }
 
+void AOSC_Installer_MainWindow::closeEvent(QCloseEvent *){
+    delete this;
+}
+
 void AOSC_Installer_MainWindow::AddToTabWidget(){
     MainTab->addTab(GetStart,tr("准备开始"));//   准备开始吧
     MainTab->addTab(Reading,tr("阅读协议"));
@@ -54,6 +65,7 @@ AOSC_Installer_MainWindow::~AOSC_Installer_MainWindow()
     system("sudo umount -Rf /target");
     system("sudo umount -Rf /mnt/squash/");
     printf("析构函数被调用\n");
+    exit(0);
 }
 
 void AOSC_Installer_MainWindow::SetAllButtonEnable(){
@@ -129,15 +141,15 @@ void AOSC_Installer_MainWindow::SLOT_StartInstall(){
     List << "mount" << PartedDisk->GetTargetPartition() << _INSTALL_FILE_DEST_;
     //debug
     printf("Install To %s\n",PartedDisk->GetTargetPartition().toUtf8().data());
-
-    MountTarget->start("sudo",List);
+    this->SLOT_MountTargetDone(0);
+//    MountTarget->start("sudo",List);
 }
 
 void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
     if(Status != 0){
         QMessageBox::warning(this,tr("严重错误"),tr("挂载目标分区失败，请确认目标分区是否在使用中！"),QMessageBox::Yes);
         exit(0);
-    }else{
+    }else{/*
         if(system("sudo mount --bind /dev /target/dev")!=0){
             QMessageBox::warning(this,tr("严重错误"),tr("挂载dev列表到目标安装位置失败"),QMessageBox::Yes);
             delete this;
@@ -153,7 +165,7 @@ void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
         if(system("sudo mount --bind /dev/pts /target/dev/pts")!=0){
             QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
             delete this;
-        }
+        }*/
         StatisticsFiles = new StatisticsFileSize();
         this->connect(StatisticsFiles,SIGNAL(TotalFile(int)),this,SLOT(SLOT_TotalFiles(int)));
         this->connect(StatisticsFiles,SIGNAL(Copyed(int)),this,SLOT(SLOT_NowCopyed(int)));
@@ -170,9 +182,11 @@ void AOSC_Installer_MainWindow::SLOT_TotalFiles(int TotalFile){
     CopyFile = new QProcess(this);
     this->connect(CopyFile,SIGNAL(finished(int)),this,SLOT(SLOT_CopyFileDone(int)));
     QStringList ArgList;
-    ArgList << "cp" << _INSTALL_FILE_DEST_ << PartedDisk->GetTargetPartition();
+    ArgList << "cp" << "-arv" << _INSTALL_FILE_FROM_ << _INSTALL_FILE_DEST_;
+    CopyFile->setStandardOutputFile(_TMP_TOTAL_SIZE_);
+    CopyFile->start("sudo",ArgList);
+    emit SIG_StartCopyFile();
 }
-
 void AOSC_Installer_MainWindow::SLOT_NowCopyed(int NowCopyed){
     WorkProcess->SetNowCopyed(NowCopyed);
 }
@@ -180,12 +194,43 @@ void AOSC_Installer_MainWindow::SLOT_NowCopyed(int NowCopyed){
 void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
     if(Status != 0){
         StatisticsFiles->CopyDone();
+        printf("Status = %d\n",Status);
         QMessageBox::warning(this,tr("错误"),tr("复制文件出现错误！"),QMessageBox::Yes);
         delete this;
     }else{
+        delete CopyFile;
         WorkProcess->SetLabelText(tr("设置Grub"));
-        //........
-        QMessageBox::warning(this,tr("嗯"),tr("这里就先停下了，因为后面还没写"));
+        SetGrub = new QProcess(this);
+        this->connect(SetGrub,SIGNAL(finished(int)),this,SLOT(SLOT_SetGrubDone(int)));
+        if(PartedDisk->isEFIDevice() == false){
+            SetGrub->start("sudo",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=i386-pc" << PartedDisk->GetTargetDisk());
+        }
+        else{
+            if(access("/target/efi",F_OK) < 0){
+                if(system("sudo mkdir /target/efi") != 0){
+                    QMessageBox::warning(this,tr("致命错误"),tr("建立EFI目标目录失败"));
+                    delete this;
+                    exit(0);
+                }
+            }
+            sprintf(ExecBuff,"sudo mount %s /target/efi",TargetEfiPartiton);
+            if(system(ExecBuff) != 0){
+                QMessageBox::warning(this,tr("致命错误"),tr("挂载EFI分区失败"));
+                delete this;
+                exit(0);
+            }
+            SetGrub->start("sudo",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
+        }
+    }
+}
+
+void AOSC_Installer_MainWindow::SLOT_SetGrubDone(int Status){
+    if(Status != 0){
+        QMessageBox(this,tr("致命错误"),tr("为您设置Grub失败"),QMessageBox::Yes);
+        delete this;
+        exit(-1);
+    }else{
+
     }
 }
 
@@ -203,24 +248,25 @@ void StatisticsFileSize::GetReady(int _Size){
 }
 
 void StatisticsFileSize::run(){
-    sprintf(ExecBuff,"sudo find %s | wc -l > %s",_INSTALL_FILE_FROM_,_TMP_TOTAL_SIZE_);
-    fp = fopen(_TMP_TOTAL_SIZE_,"r");
+    sprintf(ExecBuff,"find %s | wc -l > %s",_INSTALL_FILE_FROM_,_TMP_NOW_SIZE);
+    system(ExecBuff);
+    printf("Execed!\n");
+    fp = fopen(_TMP_NOW_SIZE,"r");
     fscanf(fp,"%d",&NowSize);
     emit TotalFile(NowSize);
     fclose(fp);
-
-    sprintf(ExecBuff,"sudo find %s | wc -l > %s",_INSTALL_FILE_DEST_,_TMP_TOTAL_SIZE_);
-    system(ExecBuff);
-    fp = fopen(_TMP_TOTAL_SIZE_,"r");
+    fp = NULL;
+    printf("Fclosed!\n");
+    sprintf(ExecBuff,"cat %s | wc -l > %s",_TMP_TOTAL_SIZE_,_TMP_NOW_SIZE);
     while(1){
         sleep(2);
+        system(ExecBuff);
+        fp = fopen(_TMP_NOW_SIZE,"r");       //!
         fscanf(fp,"%d",&NowSize);
         emit Copyed(NowSize);
         printf("Debug >> Now Copyed Files Size ==  %d\n",NowSize);
         fclose(fp);     //!
         fp = NULL;
-        system(ExecBuff);
-        fp = fopen(_TMP_TOTAL_SIZE_,"r");       //!
     }
 }
 

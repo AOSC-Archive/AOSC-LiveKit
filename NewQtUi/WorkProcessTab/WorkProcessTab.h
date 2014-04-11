@@ -26,6 +26,7 @@ signals:
 
 private:
     Ui::WorkProcessTab *ui;
+    QByteArray Data;
 };
 
 #endif // WORKPROCESSTAB_H
