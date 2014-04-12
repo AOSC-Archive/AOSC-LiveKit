@@ -17,7 +17,7 @@
 #include "WorkDoneTab/WorkDoneTab.h"
 
 #define _INSTALL_FILE_      "/squash"
-#define _INSTALL_FILE_FROM_ "/usr"
+//#define _INSTALL_FILE_FROM_ "/mnt/squash/*"
 #define _INSTALL_FILE_DEST_ "/target"
 #define _TMP_TOTAL_SIZE_    "/tmp/TotleFile.tmp"
 #define _TMP_NOW_SIZE       "/tmp/NowSize.tmp"
@@ -40,6 +40,7 @@ public slots:
     void GetReady(int);
 protected:
     int NowSize;
+    int AllSize;
     char ExecBuff[128];
     FILE *fp;
     int Size;
@@ -69,6 +70,12 @@ public slots:
     void SLOT_NowCopyed(int);
     void SLOT_CopyFileDone(int);
     void SLOT_SetGrubDone(int);
+    void SLOT_UpdateGrubDone(int);
+
+    void SLOT_SetUserNameDone(int);
+    void SLOT_SetUserPassDone(int);
+    void SLOT_SetRootPassDone(int);
+    void SLOT_DoPostInstDone(int);
 
 private:
     int                 AllFiles;
@@ -89,6 +96,12 @@ private:
     QProcess            *MountEFIPartition;
     QProcess            *CopyFile;
     QProcess            *SetGrub;
+    QProcess            *UpDateGrub;
+
+    QProcess            *SetUserName;
+    QProcess            *SetUserPass;
+    QProcess            *SetRootPass;
+    QProcess            *DoPostInst;
 
 };
 

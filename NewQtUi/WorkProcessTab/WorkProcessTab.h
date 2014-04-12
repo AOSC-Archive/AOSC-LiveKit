@@ -20,6 +20,7 @@ public:
     void SetLabelText(QString);
 public slots:
     void SLOT_StartButtonClicked(void);
+    void SLOT_CopyDone(int);
 
 signals:
     void SIG_StartButtonClicked(void);

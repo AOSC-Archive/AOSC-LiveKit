@@ -41,3 +41,7 @@ void WorkProcessTab::SetProcessBarShow(bool s){
 void WorkProcessTab::SetLabelText(QString s){
     ui->NowCOntentLabel->setText(s);
 }
+
+void WorkProcessTab::SLOT_CopyDone(int){
+    ui->MainProcessBar->setRange(0,0);
+}
