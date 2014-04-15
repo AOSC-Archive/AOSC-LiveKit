@@ -175,8 +175,8 @@
    <widget class="QPushButton" name="PervStepButton">
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>550</y>
+      <x>570</x>
+      <y>546</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -193,9 +193,9 @@
    <widget class="QPushButton" name="NextStepButton">
     <property name="geometry">
      <rect>
-      <x>690</x>
-      <y>550</y>
-      <width>91</width>
+      <x>685</x>
+      <y>546</y>
+      <width>90</width>
       <height>31</height>
      </rect>
     </property>
@@ -214,7 +214,7 @@
       <x>175</x>
       <y>40</y>
       <width>600</width>
-      <height>505</height>
+      <height>501</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -234,7 +234,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

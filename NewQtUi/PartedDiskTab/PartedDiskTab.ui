@@ -21,7 +21,7 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>30</x>
      <y>30</y>
      <width>160</width>
      <height>40</height>
@@ -72,7 +72,7 @@
   <widget class="QComboBox" name="DiskSelect">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>30</x>
      <y>290</y>
      <width>111</width>
      <height>31</height>
@@ -87,15 +87,16 @@
   <widget class="QCheckBox" name="FormatCheckBox">
    <property name="geometry">
     <rect>
-     <x>410</x>
+     <x>430</x>
      <y>260</y>
-     <width>151</width>
+     <width>121</width>
      <height>20</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>13</pointsize>
+     <family>Sans Serif</family>
+     <pointsize>11</pointsize>
     </font>
    </property>
    <property name="text">
@@ -113,7 +114,8 @@
    </property>
    <property name="font">
     <font>
-     <pointsize>13</pointsize>
+     <family>Sans Serif</family>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="text">
@@ -123,11 +125,17 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>170</x>
      <y>270</y>
      <width>101</width>
      <height>16</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Select Parititon</string>
@@ -146,19 +154,20 @@
   <widget class="QCheckBox" name="MyDeviceIsEFICheckBox">
    <property name="geometry">
     <rect>
-     <x>410</x>
+     <x>418</x>
      <y>330</y>
-     <width>141</width>
+     <width>131</width>
      <height>20</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <pointsize>13</pointsize>
+     <family>Sans Serif</family>
+     <pointsize>11</pointsize>
     </font>
    </property>
    <property name="text">
-    <string>It's a EFI system</string>
+    <string> It's a EFI system</string>
    </property>
   </widget>
   <widget class="QComboBox" name="MyDeviceIsEFIComboBox">
@@ -174,11 +183,17 @@
   <widget class="QLabel" name="MyDeviceIsEFILabel">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>320</x>
      <y>360</y>
-     <width>121</width>
+     <width>111</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>EFI System Parition</string>
@@ -187,11 +202,17 @@
   <widget class="QLabel" name="FileSystemTypeLabel">
    <property name="geometry">
     <rect>
-     <x>350</x>
+     <x>366</x>
      <y>295</y>
-     <width>81</width>
+     <width>71</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>10</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>File System</string>
