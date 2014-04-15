@@ -18,7 +18,7 @@
     <rect>
      <x>40</x>
      <y>30</y>
-     <width>150</width>
+     <width>201</width>
      <height>40</height>
     </rect>
    </property>
@@ -28,7 +28,7 @@
     </font>
    </property>
    <property name="text">
-    <string>构建系统</string>
+    <string>Building System</string>
    </property>
   </widget>
   <widget class="QProgressBar" name="MainProcessBar">

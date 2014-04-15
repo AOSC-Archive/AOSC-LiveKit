@@ -30,7 +30,7 @@
     </font>
    </property>
    <property name="text">
-    <string>诶！您好！</string>
+    <string>Hi There!</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -38,7 +38,7 @@
     <rect>
      <x>40</x>
      <y>90</y>
-     <width>330</width>
+     <width>381</width>
      <height>30</height>
     </rect>
    </property>
@@ -48,7 +48,7 @@
     </font>
    </property>
    <property name="text">
-    <string>感谢尝试安同开源社区最新的发行版!</string>
+    <string>Thanks for checking out our newest distribution!</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -66,7 +66,7 @@
     </font>
    </property>
    <property name="text">
-    <string>你准备好将发行版安装到你亲爱的电脑上了么?</string>
+    <string>Are you ready to install it to your dear computer?</string>
    </property>
   </widget>
  </widget>

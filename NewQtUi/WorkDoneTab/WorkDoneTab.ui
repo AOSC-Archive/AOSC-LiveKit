@@ -28,7 +28,7 @@
     </font>
    </property>
    <property name="text">
-    <string>完成安装</string>
+    <string>Finalizing...</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -46,7 +46,7 @@
     </font>
    </property>
    <property name="text">
-    <string>我们正在执行一些后续步骤来完成安装......</string>
+    <string>We are working on the last few stages of installation...</string>
    </property>
   </widget>
  </widget>

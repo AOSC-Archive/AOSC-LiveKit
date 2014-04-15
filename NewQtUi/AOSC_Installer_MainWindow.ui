@@ -43,7 +43,7 @@
      <rect>
       <x>30</x>
       <y>120</y>
-      <width>80</width>
+      <width>131</width>
       <height>20</height>
      </rect>
     </property>
@@ -53,7 +53,7 @@
      </font>
     </property>
     <property name="text">
-     <string>准备开始</string>
+     <string>Prepare for Installation</string>
     </property>
    </widget>
    <widget class="QLabel" name="ReadingLabel">
@@ -61,7 +61,7 @@
      <rect>
       <x>30</x>
       <y>180</y>
-      <width>80</width>
+      <width>131</width>
       <height>20</height>
      </rect>
     </property>
@@ -71,7 +71,7 @@
      </font>
     </property>
     <property name="text">
-     <string>阅读协议</string>
+     <string>License Agreement</string>
     </property>
    </widget>
    <widget class="QLabel" name="PartedLabel">
@@ -79,7 +79,7 @@
      <rect>
       <x>30</x>
       <y>240</y>
-      <width>80</width>
+      <width>131</width>
       <height>20</height>
      </rect>
     </property>
@@ -89,7 +89,7 @@
      </font>
     </property>
     <property name="text">
-     <string>分区磁盘</string>
+     <string>Partitioning</string>
     </property>
    </widget>
    <widget class="QLabel" name="InstallSystemLabel">
@@ -97,7 +97,7 @@
      <rect>
       <x>30</x>
       <y>300</y>
-      <width>80</width>
+      <width>131</width>
       <height>20</height>
      </rect>
     </property>
@@ -107,7 +107,7 @@
      </font>
     </property>
     <property name="text">
-     <string>建立系统</string>
+     <string>Building System</string>
     </property>
    </widget>
    <widget class="QLabel" name="SetUserLabel">
@@ -115,7 +115,7 @@
      <rect>
       <x>30</x>
       <y>360</y>
-      <width>80</width>
+      <width>131</width>
       <height>20</height>
      </rect>
     </property>
@@ -125,7 +125,7 @@
      </font>
     </property>
     <property name="text">
-     <string>设置用户</string>
+     <string>Set-up User</string>
     </property>
    </widget>
    <widget class="QLabel" name="AllDoneLabel">
@@ -133,7 +133,7 @@
      <rect>
       <x>30</x>
       <y>420</y>
-      <width>80</width>
+      <width>131</width>
       <height>20</height>
      </rect>
     </property>
@@ -143,7 +143,7 @@
      </font>
     </property>
     <property name="text">
-     <string>完成安装</string>
+     <string>Finalizing</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -169,7 +169,7 @@
      </font>
     </property>
     <property name="text">
-     <string>安装步骤</string>
+     <string>Steps</string>
     </property>
    </widget>
    <widget class="QPushButton" name="PervStepButton">
@@ -187,7 +187,7 @@
      </font>
     </property>
     <property name="text">
-     <string>后退</string>
+     <string>Back</string>
     </property>
    </widget>
    <widget class="QPushButton" name="NextStepButton">
@@ -205,7 +205,7 @@
      </font>
     </property>
     <property name="text">
-     <string>前进</string>
+     <string>Forward</string>
     </property>
    </widget>
    <widget class="QFrame" name="CenterProcess">
@@ -234,7 +234,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>

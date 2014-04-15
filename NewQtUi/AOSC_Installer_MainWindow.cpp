@@ -52,12 +52,12 @@ void AOSC_Installer_MainWindow::closeEvent(QCloseEvent *){
 }
 
 void AOSC_Installer_MainWindow::AddToTabWidget(){
-    MainTab->addTab(GetStart,tr("准备开始"));//   准备开始吧
-    MainTab->addTab(Reading,tr("阅读协议"));
-    MainTab->addTab(PartedDisk,tr("分区磁盘"));
-    MainTab->addTab(WorkProcess,tr("构建系统"));
-    MainTab->addTab(ConfigureUser,tr("配置用户"));
-    MainTab->addTab(WorkDone,tr("安装完成"));
+    MainTab->addTab(GetStart,tr("Prepare for Installation"));//   准备开始吧
+    MainTab->addTab(Reading,tr("License Agreement"));
+    MainTab->addTab(PartedDisk,tr("Partitioning"));
+    MainTab->addTab(WorkProcess,tr("Building System"));
+    MainTab->addTab(ConfigureUser,tr("Set-up User"));
+    MainTab->addTab(WorkDone,tr("Finalizing"));
 }
 
 AOSC_Installer_MainWindow::~AOSC_Installer_MainWindow()
@@ -65,7 +65,7 @@ AOSC_Installer_MainWindow::~AOSC_Installer_MainWindow()
     delete ui;
     system("sudo umount -Rf /target");
     system("sudo umount -Rf /mnt/squash/");
-    printf("析构函数被调用\n");
+    printf("Destructor called.\n");
     exit(0);
 }
 
@@ -95,17 +95,17 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
     if(MainTab->currentWidget()==PartedDisk){                   //  如果是分区相关，则判断
         result = PartedDisk->CheckInput();
         if(result == -1){
-            QMessageBox::warning(this,tr("警告"),tr("严重错误！"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Critial Error!"),QMessageBox::Yes);
         }else if(result == NO_DISK_SELECT){
-            QMessageBox::warning(this,tr("警告"),tr("请选择安装的硬盘"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Please select your target Disk before proceeding."),QMessageBox::Yes);
         }else if(result == NO_EFI_PARTITION_SELECT){
-            QMessageBox::warning(this,tr("警告"),tr("请选择你的EFI分区"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Please select your EFI System Partition befor proceeding."),QMessageBox::Yes);
         }else if(result == NO_PARTITION_SELECT){
-            QMessageBox::warning(this,tr("警告"),tr("请选择安装的分区"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Please select your target partition before proceeding."),QMessageBox::Yes);
         }else if(result == NO_FILESYSTEM_TYPE_SELECT){
-            QMessageBox::warning(this,tr("警告"),tr("请选择格式化分区的文件系统"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Please select File System to format the parition!"),QMessageBox::Yes);
         }else if(result == NO_FORMAT){
-            if(QMessageBox::warning(this,tr("警告"),tr("您确定不格式化就安装系统，这可能会导致安装失败"),QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
+            if(QMessageBox::warning(this,tr("Warning"),tr("Are you sure that you want to start the installation without formatting? This can lead to serious problem afterwards..."),QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
                 return;
             }result = 0;
         }
@@ -114,15 +114,15 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
     }else if(MainTab->currentWidget()==ConfigureUser){
         result = ConfigureUser->CheckInput();
         if(result == NO_ROOT_PASS){
-            QMessageBox::warning(this,tr("警告"),tr("请输入Root的新密码"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Please input a new password for root."),QMessageBox::Yes);
         }else if(result == NO_USER_NAME){
-            QMessageBox::warning(this,tr("警告"),tr("请输入新的用户名"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Please input a username for the base user."),QMessageBox::Yes);
         }else if(result == NO_USER_PASS){
-            QMessageBox::warning(this,tr("警告"),tr("请输入新用户的新密码"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Please input a new password for the base user."),QMessageBox::Yes);
         }else if(result == ROOT_PASS_NOT_MATCH){
-            QMessageBox::warning(this,tr("警告"),tr("Root密码密码不一致，请检查"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Root password does not match, please double check."),QMessageBox::Yes);
         }else if(result == USER_PASS_NOT_MATCH){
-            QMessageBox::warning(this,tr("警告"),tr("新用户的密码密码不一致，请检查"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Base user password does not match, please double check."),QMessageBox::Yes);
         }
         if(result != 0) return;
         SetUserName = new QProcess(this);
@@ -149,7 +149,7 @@ void AOSC_Installer_MainWindow::SLOT_IAgreeCheckBoxClicked(bool status){   //  �
 
 void AOSC_Installer_MainWindow::SLOT_MountSquashfsDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("错误！"),tr("安装程序遇到致命错误，强制退出"),QMessageBox::Yes);
+        QMessageBox::warning(this,tr("Error"),tr("Installation has encountered a critical error and must exit now."),QMessageBox::Yes);
         delete this;
         exit(-1);
     }
@@ -169,7 +169,7 @@ void AOSC_Installer_MainWindow::SLOT_StartInstall(){
 
 void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("严重错误"),tr("挂载目标分区失败，请确认目标分区是否在使用中！"),QMessageBox::Yes);
+        QMessageBox::warning(this,tr("Critical Error"),tr("Failed to mount target partition! Please check if it is corrupted or already mounted."),QMessageBox::Yes);
         exit(0);
     }else{/*
         if(system("sudo mount --bind /dev /target/dev")!=0){
@@ -193,14 +193,14 @@ void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
         this->connect(StatisticsFiles,SIGNAL(Copyed(int)),this,SLOT(SLOT_NowCopyed(int)));
         StatisticsFiles->start();
         WorkProcess->SetProcessBarShow(true);
-        WorkProcess->SetLabelText(tr("准备安装中"));
+        WorkProcess->SetLabelText(tr("Preparing for Installation..."));
     }
 }
 
 void AOSC_Installer_MainWindow::SLOT_TotalFiles(int TotalFile){
     WorkProcess->SetTotalFiles(TotalFile);
     AllFiles = TotalFile;
-    WorkProcess->SetLabelText(tr("安装基础系统中....."));
+    WorkProcess->SetLabelText(tr("Copying system files..."));
     CopyFile = new QProcess(this);
     this->connect(CopyFile,SIGNAL(finished(int)),this,SLOT(SLOT_CopyFileDone(int)));
     this->connect(CopyFile,SIGNAL(finished(int)),StatisticsFiles,SLOT(CopyDone()));
@@ -219,10 +219,10 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
     if(Status != 0){
         StatisticsFiles->CopyDone();
         printf("Status = %d\n",Status);
-        QMessageBox::warning(this,tr("错误"),tr("复制文件出现错误！"),QMessageBox::Yes);
+        QMessageBox::warning(this,tr("Error"),tr("Error occurred while copying files! Sad."),QMessageBox::Yes);
         delete this;
     }else{
-        WorkProcess->SetLabelText(tr("安装Grub"));
+        WorkProcess->SetLabelText(tr("Installing and configuring GRUB..."));
         SetGrub = new QProcess(this);
         this->connect(SetGrub,SIGNAL(finished(int)),this,SLOT(SLOT_SetGrubDone(int)));
         if(PartedDisk->isEFIDevice() == false){
@@ -232,14 +232,14 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
             char ExecBuff[128];
             if(access("/target/efi",F_OK) < 0){
                 if(system("sudo mkdir /target/efi") != 0){
-                    QMessageBox::warning(this,tr("致命错误"),tr("建立EFI目标目录失败"));
+                    QMessageBox::warning(this,tr("Critical Error"),tr("Failed while trying to create directory for ESP to mount."));
                     delete this;
                     exit(0);
                 }
             }
             sprintf(ExecBuff,"sudo mount %s /target/efi",PartedDisk->GetEFIPartition().toUtf8().data());
             if(system(ExecBuff) != 0){
-                QMessageBox::warning(this,tr("致命错误"),tr("挂载EFI分区失败"));
+                QMessageBox::warning(this,tr("Critical Error"),tr("Failed mounting ESP"));
                 delete this;
                 exit(0);
             }
@@ -250,31 +250,31 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
 
 void AOSC_Installer_MainWindow::SLOT_SetGrubDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("致命错误"),tr("为您设置Grub失败"));
+        QMessageBox::warning(this,tr("Critical Error"),tr("Failed installing GRUB!"));
         delete this;
         exit(-1);
     }else{
         UpDateGrub = new QProcess(this);
         this->connect(UpDateGrub,SIGNAL(finished(int)),this,SLOT(SLOT_UpdateGrubDone(int)));
-        WorkProcess->SetLabelText(tr("更新grub"));
+        WorkProcess->SetLabelText(tr("Updating GRUB..."));
         UpDateGrub->start("sudo",QStringList()<<"chroot"<<_INSTALL_FILE_DEST_<<"grub-mkconfig"<<"-o"<<"/target/boot/grub/grub.cfg");
     }
 }
 
 void AOSC_Installer_MainWindow::SLOT_UpdateGrubDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("致命错误"),tr("更新grub失败，您的系统可能无法正常被启动"),QMessageBox::Yes);
+        QMessageBox::warning(this,tr("Critical Error"),tr("Failed when updating GRUB configuration, your system may not be able to boot."),QMessageBox::Yes);
         delete this;
         exit(-1);
     }else{
         ui->NextStepButton->setEnabled(true);
-        WorkProcess->SetLabelText(tr("基础部分安装顺利完成"));
+        WorkProcess->SetLabelText(tr("Successfully installed system."));
     }
 }
 
 void AOSC_Installer_MainWindow::SLOT_SetUserNameDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("致命错误"),tr("为您设置新用户失败"));
+        QMessageBox::warning(this,tr("Critical Error"),tr("Failed setting up user."));
         delete this;
         exit(-1);
     }else{
@@ -286,7 +286,7 @@ void AOSC_Installer_MainWindow::SLOT_SetUserNameDone(int Status){
 
 void AOSC_Installer_MainWindow::SLOT_SetUserPassDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("致命错误"),tr("为您设置用户密码"));
+        QMessageBox::warning(this,tr("Critical Error"),tr("Setting password for user failed."));
         delete this;
         exit(-1);
     }else{
@@ -298,7 +298,7 @@ void AOSC_Installer_MainWindow::SLOT_SetUserPassDone(int Status){
 
 void AOSC_Installer_MainWindow::SLOT_SetRootPassDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("致命错误"),tr("为您设置Root密码失败"));
+        QMessageBox::warning(this,tr("Critical Error"),tr("Setting password for root failed."));
         delete this;
         exit(-1);
     }else{
@@ -310,15 +310,15 @@ void AOSC_Installer_MainWindow::SLOT_SetRootPassDone(int Status){
 
 void AOSC_Installer_MainWindow::SLOT_DoPostInstDone(int Status){
     if(Status != 0){
-        QMessageBox::warning(this,tr("致命错误"),tr("执行最后操作失败"));
+        QMessageBox::warning(this,tr("Critical Error"),tr("Finalization error occurred."));
         delete this;
         exit(-1);
     }else{
-        int result = QMessageBox::question(this,tr("询问"),tr("是否使用AnthonUI?"),QMessageBox::Yes|QMessageBox::No);
+        int result = QMessageBox::question(this,tr("Question"),tr("Do you want to use AnthonUI - Desktop Environment customization from AOSC"),QMessageBox::Yes|QMessageBox::No);
         if(result == QMessageBox::Yes){
             // Just Call system()
         }else{
-            QMessageBox::question(this,tr("安装完成"),tr("安装完成，即将退出"),QMessageBox::Yes);
+            QMessageBox::question(this,tr("Installation Complete"),tr("Enjoy!"),QMessageBox::Yes);
             delete this;
             exit(0);
         }
