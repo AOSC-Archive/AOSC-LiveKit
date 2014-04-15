@@ -16,8 +16,7 @@
 #include "ConfigureUserTab/ConfigureUserTab.h"
 #include "WorkDoneTab/WorkDoneTab.h"
 
-#define _INSTALL_FILE_      "/squash"
-//#define _INSTALL_FILE_FROM_ "/mnt/squash/*"
+//define _INSTALL_FILE_      "/squash" //No need to mount squash, it's already there mounted...
 #define _INSTALL_FILE_DEST_ "/target"
 #define _TMP_TOTAL_SIZE_    "/tmp/TotleFile.tmp"
 #define _TMP_NOW_SIZE       "/tmp/NowSize.tmp"

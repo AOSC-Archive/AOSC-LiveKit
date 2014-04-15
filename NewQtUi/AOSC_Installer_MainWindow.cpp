@@ -15,12 +15,11 @@ AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     BuildObject();
     AddToTabWidget();
     system("sudo umount /target");
-    system("sudo umount /mnt/squash");
-    MountSquashfs = new QProcess(this);       // Mount Squashfs....
+/*  MountSquashfs = new QProcess(this);       // Mount Squashfs....
     this->connect(MountSquashfs,SIGNAL(finished(int)),this,SLOT(SLOT_MountSquashfsDone(int)));
     QStringList ArgList;
     ArgList << "mount" << _INSTALL_FILE_ << "/mnt/squash" ;
-    MountSquashfs->start("sudo",ArgList);
+    MountSquashfs->start("sudo",ArgList); */
 //##########链接基本的信号与槽#############
     this->connect(ui->NextStepButton,SIGNAL(clicked()),this,SLOT(SLOT_NextButtonClicked()));
     this->connect(ui->PervStepButton,SIGNAL(clicked()),this,SLOT(SLOT_PervButtonClicked()));
@@ -64,7 +63,6 @@ AOSC_Installer_MainWindow::~AOSC_Installer_MainWindow()
 {
     delete ui;
     system("sudo umount -Rf /target");
-    system("sudo umount -Rf /mnt/squash/");
     printf("Destructor called.\n");
     exit(0);
 }
@@ -206,7 +204,7 @@ void AOSC_Installer_MainWindow::SLOT_TotalFiles(int TotalFile){
     this->connect(CopyFile,SIGNAL(finished(int)),StatisticsFiles,SLOT(CopyDone()));
     this->connect(CopyFile,SIGNAL(finished(int)),WorkProcess,SLOT(SLOT_CopyDone(int)));
     QStringList ArgList;
-    ArgList << "cp" << "-arv" << "/mnt/squash/*" << _INSTALL_FILE_DEST_;
+    ArgList << "cp" << "-arv" << "/lib/live/mount/rootfs/live.squashfs/." << _INSTALL_FILE_DEST_;
     CopyFile->setStandardOutputFile(_TMP_TOTAL_SIZE_);
     CopyFile->start("sudo",ArgList);
     emit SIG_StartCopyFile();
