@@ -6,7 +6,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
- #include <unistd.h>
+#include <unistd.h>
 
 AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
@@ -105,7 +105,7 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
         }else if(result == NO_FORMAT){
             if(QMessageBox::warning(this,tr("Warning"),tr("Are you sure that you want to start the installation without formatting? This can lead to serious problem afterwards..."),QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
                 return;
-            }result = 0;
+           }result = 0;
         }
         if(result != 0)
             return;
@@ -213,13 +213,13 @@ void AOSC_Installer_MainWindow::SLOT_NowCopyed(int NowCopyed){
     WorkProcess->SetNowCopyed(NowCopyed);
 }
 
-void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
-    if(Status != 0){
+void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int status){
+/*    if(Status != 0){
         StatisticsFiles->CopyDone();
         printf("Status = %d\n",Status);
         QMessageBox::warning(this,tr("Error"),tr("Error occurred while copying files! Sad."),QMessageBox::Yes);
         delete this;
-    }else{
+    }else{ */
         WorkProcess->SetLabelText(tr("Installing and configuring GRUB..."));
         SetGrub = new QProcess(this);
         this->connect(SetGrub,SIGNAL(finished(int)),this,SLOT(SLOT_SetGrubDone(int)));
@@ -242,7 +242,7 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
                 exit(0);
             }
             SetGrub->start("sudo",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
-        }
+//        }
     }
 }
 
@@ -251,12 +251,12 @@ void AOSC_Installer_MainWindow::SLOT_SetGrubDone(int Status){
         QMessageBox::warning(this,tr("Critical Error"),tr("Failed installing GRUB!"));
         delete this;
         exit(-1);
-    }else{
+    }else{ 
         UpDateGrub = new QProcess(this);
         this->connect(UpDateGrub,SIGNAL(finished(int)),this,SLOT(SLOT_UpdateGrubDone(int)));
         WorkProcess->SetLabelText(tr("Updating GRUB..."));
         UpDateGrub->start("sudo",QStringList()<<"chroot"<<_INSTALL_FILE_DEST_<<"grub-mkconfig"<<"-o"<<"/target/boot/grub/grub.cfg");
-    }
+//    }
 }
 
 void AOSC_Installer_MainWindow::SLOT_UpdateGrubDone(int Status){
@@ -337,7 +337,7 @@ void StatisticsFileSize::GetReady(int _Size){
 }
 
 void StatisticsFileSize::run(){
-    sprintf(ExecBuff,"find /mnt/squash | wc -l > %s",_TMP_NOW_SIZE);
+    sprintf(ExecBuff,"find /lib/live/mount/rootfs/live.squashfs | wc -l > %s",_TMP_NOW_SIZE);
     system(ExecBuff);
     printf("Execed!\n");
     fp = fopen(_TMP_NOW_SIZE,"r");
@@ -353,7 +353,7 @@ void StatisticsFileSize::run(){
         fp = fopen(_TMP_NOW_SIZE,"r");       //!
         fscanf(fp,"%d",&NowSize);
         emit Copyed(NowSize);
-        printf("Debug >> Now Copyed Files Size ==  %d\n",NowSize);
+        printf("Debug >> Now Copyed Files Count ==  %d\n",NowSize);
         fclose(fp);     //!
         fp = NULL;
     }
@@ -365,9 +365,9 @@ void StatisticsFileSize::CopyDone(){
         fclose(fp);
         fp = NULL;
     }
-    sprintf(ExecBuff,"sudo rm -rf %s",_TMP_NOW_SIZE);
+/*  sprintf(ExecBuff,"sudo rm -rf %s",_TMP_NOW_SIZE);
     system(ExecBuff);
-    this->terminate();
+    this->terminate(); */
 }
 
 

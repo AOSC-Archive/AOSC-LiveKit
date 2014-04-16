@@ -154,9 +154,9 @@
   <widget class="QCheckBox" name="MyDeviceIsEFICheckBox">
    <property name="geometry">
     <rect>
-     <x>418</x>
+     <x>416</x>
      <y>330</y>
-     <width>131</width>
+     <width>141</width>
      <height>20</height>
     </rect>
    </property>
