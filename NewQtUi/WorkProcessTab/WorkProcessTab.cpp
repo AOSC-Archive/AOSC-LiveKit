@@ -13,6 +13,7 @@ WorkProcessTab::WorkProcessTab(QWidget *parent) :
     this->connect(ui->StartButton,SIGNAL(clicked()),this,SLOT(SLOT_StartButtonClicked()));
     ui->MainProcessBar->hide();
     ui->MainProcessBar->setRange(0,0);
+    isFormat = false;
 }
 
 WorkProcessTab::~WorkProcessTab()
@@ -22,6 +23,10 @@ WorkProcessTab::~WorkProcessTab()
 
 void WorkProcessTab::SLOT_StartButtonClicked(){
     ui->StartButton->hide();
+    if(isFormat == true){
+        emit SIG_StartButtonClicked_WithFormat();
+        return;
+    }
     emit SIG_StartButtonClicked();
 }
 

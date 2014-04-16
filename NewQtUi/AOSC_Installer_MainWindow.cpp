@@ -15,11 +15,6 @@ AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     BuildObject();
     AddToTabWidget();
     system("sudo umount /target");
-/*  MountSquashfs = new QProcess(this);       // Mount Squashfs....
-    this->connect(MountSquashfs,SIGNAL(finished(int)),this,SLOT(SLOT_MountSquashfsDone(int)));
-    QStringList ArgList;
-    ArgList << "mount" << _INSTALL_FILE_ << "/mnt/squash" ;
-    MountSquashfs->start("sudo",ArgList); */
 //##########链接基本的信号与槽#############
     this->connect(ui->NextStepButton,SIGNAL(clicked()),this,SLOT(SLOT_NextButtonClicked()));
     this->connect(ui->PervStepButton,SIGNAL(clicked()),this,SLOT(SLOT_PervButtonClicked()));
@@ -109,6 +104,9 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
         }
         if(result != 0)
             return;
+        if(PartedDisk->isFormat() == true){
+
+        }
     }else if(MainTab->currentWidget()==ConfigureUser){
         result = ConfigureUser->CheckInput();
         if(result == NO_ROOT_PASS){
@@ -153,6 +151,24 @@ void AOSC_Installer_MainWindow::SLOT_MountSquashfsDone(int Status){
     }
 }
 
+void AOSC_Installer_MainWindow::SLOT_StartInstall_WithFormat(){
+    Format = new QProcess(this);
+    connect(Format,SIGNAL(finished(int)),this,SLOT(SLOT_FormatDone(int)));
+    char ch[20];
+    sprintf(ch,"mkfs.%s",PartedDisk->GetFormatFileSystem().toUtf8().data());
+    Format->start("sudo",QStringList()<<ch<<PartedDisk->GetTargetPartition());
+}
+
+void AOSC_Installer_MainWindow::SLOT_FormatDone(int Status){
+    if(Status != 0){
+        QMessageBox::warning(this,tr("Error"),tr("Format your disk partition failure."),QMessageBox::Yes);
+        delete this;
+        exit(-1);
+    }else{
+        SLOT_StartInstall();
+    }
+}
+
 void AOSC_Installer_MainWindow::SLOT_StartInstall(){
     MountTarget = new QProcess(this);
     this->connect(MountTarget,SIGNAL(finished(int)),this,SLOT(SLOT_MountTargetDone(int)));
@@ -169,7 +185,7 @@ void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
     if(Status != 0){
         QMessageBox::warning(this,tr("Critical Error"),tr("Failed to mount target partition! Please check if it is corrupted or already mounted."),QMessageBox::Yes);
         exit(0);
-    }else{/*
+    }else{
         if(system("sudo mount --bind /dev /target/dev")!=0){
             QMessageBox::warning(this,tr("严重错误"),tr("挂载dev列表到目标安装位置失败"),QMessageBox::Yes);
             delete this;
@@ -185,7 +201,7 @@ void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
         if(system("sudo mount --bind /dev/pts /target/dev/pts")!=0){
             QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
             delete this;
-        }*/
+        }
         StatisticsFiles = new StatisticsFileSize();
         this->connect(StatisticsFiles,SIGNAL(TotalFile(int)),this,SLOT(SLOT_TotalFiles(int)));
         this->connect(StatisticsFiles,SIGNAL(Copyed(int)),this,SLOT(SLOT_NowCopyed(int)));
@@ -213,13 +229,13 @@ void AOSC_Installer_MainWindow::SLOT_NowCopyed(int NowCopyed){
     WorkProcess->SetNowCopyed(NowCopyed);
 }
 
-void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int status){
-/*    if(Status != 0){
+void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
+    /*if(Status != 0){
         StatisticsFiles->CopyDone();
         printf("Status = %d\n",Status);
         QMessageBox::warning(this,tr("Error"),tr("Error occurred while copying files! Sad."),QMessageBox::Yes);
         delete this;
-    }else{ */
+    }else{*/
         WorkProcess->SetLabelText(tr("Installing and configuring GRUB..."));
         SetGrub = new QProcess(this);
         this->connect(SetGrub,SIGNAL(finished(int)),this,SLOT(SLOT_SetGrubDone(int)));
@@ -241,9 +257,9 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int status){
                 delete this;
                 exit(0);
             }
-            SetGrub->start("sudo",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
-//        }
-    }
+            SetGrub->start("sudoSLOT_StartButtonClicked",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
+        }
+//    }
 }
 
 void AOSC_Installer_MainWindow::SLOT_SetGrubDone(int Status){
@@ -256,7 +272,7 @@ void AOSC_Installer_MainWindow::SLOT_SetGrubDone(int Status){
         this->connect(UpDateGrub,SIGNAL(finished(int)),this,SLOT(SLOT_UpdateGrubDone(int)));
         WorkProcess->SetLabelText(tr("Updating GRUB..."));
         UpDateGrub->start("sudo",QStringList()<<"chroot"<<_INSTALL_FILE_DEST_<<"grub-mkconfig"<<"-o"<<"/target/boot/grub/grub.cfg");
-//    }
+    }
 }
 
 void AOSC_Installer_MainWindow::SLOT_UpdateGrubDone(int Status){
@@ -300,9 +316,20 @@ void AOSC_Installer_MainWindow::SLOT_SetRootPassDone(int Status){
         delete this;
         exit(-1);
     }else{
+        if(QMessageBox::question(this,tr("Question"),tr("Do you want to use AnthonUI as default?"),QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
+            // Use AnthonUI
+        }else{
+            // Do not use
+        }
         DoPostInst = new QProcess(this);
         this->connect(DoPostInst,SIGNAL(finished(int)),this,SLOT(SLOT_DoPostInstDone(int)));
-
+        //  Please Set Fstab here
+        //  To get target disk partiton use
+        //      PartedDisk->GetTargetPartition();
+        //  To get filesystem type use
+        //      PartedDisk->GetFormatFileSystem();
+        //  Translate them to char* use
+        //      PartedDisk->GetFormatFileSystem().toUtf8().data();
     }
 }
 

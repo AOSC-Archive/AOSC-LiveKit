@@ -64,10 +64,12 @@ public slots:
     void SLOT_IAgreeCheckBoxClicked(bool);
     void SLOT_MountSquashfsDone(int);
     void SLOT_StartInstall(void);
+    void SLOT_StartInstall_WithFormat(void);
+    void SLOT_FormatDone(int);
     void SLOT_MountTargetDone(int);
     void SLOT_TotalFiles(int);
     void SLOT_NowCopyed(int);
-    void SLOT_CopyFileDone(int);
+    void SLOT_CopyFileDone(int Status);
     void SLOT_SetGrubDone(int);
     void SLOT_UpdateGrubDone(int);
 
@@ -89,6 +91,7 @@ private:
     ConfigureUserTab    *ConfigureUser;
     WorkDoneTab         *WorkDone;
     StatisticsFileSize  *StatisticsFiles;
+    QProcess            *Format;
     QProcess            *SizeFile;
     QProcess            *MountTarget;
     QProcess            *MountSquashfs;

@@ -32,9 +32,11 @@ public:
     void UpdateEFIPartitionMap(void);
     int CheckInput(void);
     int isEFIDevice(void);
+    int isFormat(void);
     QString GetTargetDisk(void);
     QString GetTargetPartition(void);
     QString GetEFIPartition(void);
+    QString GetFormatFileSystem(void);
 
 
 

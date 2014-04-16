@@ -10,6 +10,15 @@ PartedDiskTab::PartedDiskTab(QWidget *parent) :
     ui->FormatPartitionSelect->hide();
     ui->MyDeviceIsEFILabel->hide();
     ui->FileSystemTypeLabel->hide();
+
+    ui->FormatPartitionSelect->insertItem(0,tr("---"));
+    ui->FormatPartitionSelect->insertItem(1,tr("ext3"));
+    ui->FormatPartitionSelect->insertItem(2,tr("ext4"));
+    ui->FormatPartitionSelect->insertItem(3,tr("xfs"));
+    ui->FormatPartitionSelect->insertItem(4,tr("btrfs"));
+    ui->FormatPartitionSelect->insertItem(5,tr("jfs"));
+    ui->FormatPartitionSelect->insertItem(6,tr("reiserfs"));
+
     this->connect(ui->MyDeviceIsEFICheckBox,SIGNAL(clicked(bool)),this,SLOT(SLOT_MyDeviceIsEFICheckBoxClicked(bool)));
     this->connect(ui->FormatCheckBox,SIGNAL(clicked(bool)),this,SLOT(SLOT_FormatDiskPartitionCheckBoxClicked(bool)));
     this->connect(ui->PartitionDiskButton,SIGNAL(clicked()),this,SLOT(SLOT_PartitionDiskButtonClicked()));
@@ -146,6 +155,10 @@ int PartedDiskTab::isEFIDevice(){
     return ui->MyDeviceIsEFICheckBox->isChecked();
 }
 
+int PartedDiskTab::isFormat(){
+    return ui->FormatCheckBox->isChecked();
+}
+
 QString PartedDiskTab::GetTargetPartition(){
     return ui->DiskPartitionSelect->currentText();
 }
@@ -156,4 +169,8 @@ QString PartedDiskTab::GetTargetDisk(){
 
 QString PartedDiskTab::GetEFIPartition(){
     return ui->MyDeviceIsEFIComboBox->currentText();
+}
+
+QString PartedDiskTab::GetFormatFileSystem(){
+    return ui->FormatPartitionSelect->currentText();
 }
