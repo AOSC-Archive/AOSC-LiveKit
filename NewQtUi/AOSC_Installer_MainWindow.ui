@@ -89,7 +89,7 @@
      </font>
     </property>
     <property name="text">
-     <string>磁盘分区</string>
+     <string>分区磁盘</string>
     </property>
    </widget>
    <widget class="QLabel" name="InstallSystemLabel">

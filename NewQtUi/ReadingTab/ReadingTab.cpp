@@ -17,3 +17,7 @@ ReadingTab::~ReadingTab()
 void ReadingTab::SLOT_IAgreeCheckBoxClicked(bool status){       //  其实就是转发信号【话说我可以用namespace的】
     emit SIGNAL_IAgreeCheckBoxClicked(status);
 }
+
+bool ReadingTab::is_IAgreeCheckBox_Status(){
+    return ui->IAgreeCheckBox->isChecked();
+}

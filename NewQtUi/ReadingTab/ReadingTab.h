@@ -14,6 +14,7 @@ class ReadingTab : public QWidget
 public:
     explicit ReadingTab(QWidget *parent = 0);
     ~ReadingTab();
+    bool is_IAgreeCheckBox_Status(void);
 signals:
     void SIGNAL_IAgreeCheckBoxClicked(bool);
 public slots:
