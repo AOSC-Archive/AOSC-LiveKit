@@ -85,6 +85,8 @@ public slots:
     void SLOT_SetRootPassDone(int);
     void SLOT_DoPostInstDone(int);
 
+    void SLOT_PrintStdOutput();
+
 private:
     int                 AllFiles;
     int                 fh;

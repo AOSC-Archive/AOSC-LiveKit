@@ -245,6 +245,7 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
     }else{*/
         WorkProcess->SetLabelText(tr("Installing and configuring GRUB..."));
         SetGrub = new QProcess(this);
+        UpDateGrub = new QProcess(this);
         this->connect(SetGrub,SIGNAL(finished(int)),this,SLOT(SLOT_SetGrubDone(int)));
         if(PartedDisk->isEFIDevice() == false){
             SetGrub->start("sudo",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=i386-pc" << PartedDisk->GetTargetDisk());
@@ -264,6 +265,8 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
                 delete this;
                 exit(0);
             }
+            this->connect(SetGrub,SIGNAL(readyRead()),this,SLOT(SLOT_PrintStdOutput()));
+            this->connect(UpDateGrub,SIGNAL(readyRead()),this,SLOT(SLOT_PrintStdOutput()));
             SetGrub->start("sudoSLOT_StartButtonClicked",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
         }
 //    }
@@ -357,6 +360,12 @@ void AOSC_Installer_MainWindow::SLOT_DoPostInstDone(int Status){
     }
 }
 
+void AOSC_Installer_MainWindow::SLOT_PrintStdOutput(){
+    if(SetGrub->isReadable() == true)
+        printf("%s\n",SetGrub->readAll().data());
+    if(UpDateGrub->isReadable() == true)
+        printf("%s\n",SetGrub->readAll().data());
+}
 
 //----------------------
 
@@ -403,5 +412,4 @@ void StatisticsFileSize::CopyDone(){
     system(ExecBuff);
     this->terminate(); */
 }
-
 
