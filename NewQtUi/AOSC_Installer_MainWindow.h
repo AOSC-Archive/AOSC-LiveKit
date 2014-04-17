@@ -26,6 +26,13 @@ class AOSC_Installer_MainWindow;
 class StatisticsFileSize;
 }
 
+class MyTabWidget : public QTabWidget{
+    Q_OBJECT
+public:
+    explicit MyTabWidget(QTabWidget *parent = 0);
+    ~MyTabWidget(){}
+};
+
 class StatisticsFileSize : public QThread{
     Q_OBJECT
 public:
@@ -83,7 +90,7 @@ private:
     int                 fh;
     Ui::AOSC_Installer_MainWindow *ui;
     QHBoxLayout         *layout;
-    QTabWidget          *MainTab;
+    MyTabWidget         *MainTab;
     GetStartTab         *GetStart;
     ReadingTab          *Reading;
     PartedDiskTab       *PartedDisk;
@@ -106,5 +113,6 @@ private:
     QProcess            *DoPostInst;
 
 };
+
 
 #endif // AOSC_INSTALLER_MAINWINDOW_H

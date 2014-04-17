@@ -8,6 +8,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+MyTabWidget::MyTabWidget(QTabWidget *parent):
+    QTabWidget(parent){
+    this->tabBar()->hide();
+}
+
 AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     QMainWindow(parent),
     ui(new Ui::AOSC_Installer_MainWindow)
@@ -23,12 +28,12 @@ AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
     this->connect(PartedDisk,SIGNAL(SIG_AskForShow()),this,SLOT(show()));
     this->connect(WorkProcess,SIGNAL(SIG_StartButtonClicked()),this,SLOT(SLOT_StartInstall()));
     ui->PervStepButton->hide();
-    MainTab->tabBar()->setHidden(true);     //  Qt5大法好！
+    MainTab->setDocumentMode(true);
 }
 
 void AOSC_Installer_MainWindow::BuildObject(){
     ui->setupUi(this);                      //  初始化基本UI
-    MainTab     = new QTabWidget;           //  总Tab
+    MainTab     = new MyTabWidget;          //  总Tab
     GetStart    = new GetStartTab;          //  开始分页
     Reading     = new ReadingTab;           //  阅读协议分页
     PartedDisk  = new PartedDiskTab;        //  分区分页
