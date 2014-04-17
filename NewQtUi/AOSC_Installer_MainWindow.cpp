@@ -124,6 +124,8 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
             QMessageBox::warning(this,tr("Warning"),tr("Root password does not match, please double check."),QMessageBox::Yes);
         }else if(result == USER_PASS_NOT_MATCH){
             QMessageBox::warning(this,tr("Warning"),tr("Base user password does not match, please double check."),QMessageBox::Yes);
+        }else if(result == USER_NAME_HAS_SPACE){
+            QMessageBox::warning(this,tr("Warning"),tr("用户名中不允许出现空格！请修改后重试！"),QMessageBox::Yes);
         }
         if(result != 0) return;
         SetUserName = new QProcess(this);

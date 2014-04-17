@@ -23,7 +23,16 @@ int ConfigureUserTab::CheckInput(){
     else if(ui->UserNameEdit->text().isEmpty())                                         return NO_USER_NAME;
     else if(ui->RootPassEdit_1->text()!=ui->RootPassEdit_2->text())                     return ROOT_PASS_NOT_MATCH;
     else if(ui->UserPassEdit_1->text()!=ui->UserPassEdit_2->text())                     return USER_PASS_NOT_MATCH;
-    else                                                                                return 0;
+    else {
+        ui->UserNameEdit->setText(ui->UserNameEdit->text().toLower());      //  转化成小写
+        int i;
+        for(i=0;i<ui->UserNameEdit->text().size();i++){
+            if(ui->UserNameEdit->text().at(i) == ' '){
+                return  USER_NAME_HAS_SPACE;
+            }
+        }
+        return 0;
+    }
 }
 
 QString ConfigureUserTab::GetUserName(){

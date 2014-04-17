@@ -8,6 +8,7 @@
 #define NO_USER_PASS        3
 #define ROOT_PASS_NOT_MATCH 4
 #define USER_PASS_NOT_MATCH 5
+#define USER_NAME_HAS_SPACE 6
 
 namespace Ui {
 class ConfigureUserTab;
