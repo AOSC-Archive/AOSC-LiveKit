@@ -350,13 +350,15 @@ void AOSC_Installer_MainWindow::SLOT_DoPostInstDone(int Status){
         exit(-1);
     }else{
         int result = QMessageBox::question(this,tr("Question"),tr("Do you want to use AnthonUI - Desktop Environment customization from AOSC"),QMessageBox::Yes|QMessageBox::No);
-        if(result == QMessageBox::Yes){
-            // Just Call system()
+        if(result == QMessageBox::No){
+            system("sudo rm -rf /home/*/.kde");
+            system("sudo apt-get purge anthonui-kde");
         }else{
             QMessageBox::question(this,tr("Installation Complete"),tr("Enjoy!"),QMessageBox::Yes);
             delete this;
             exit(0);
         }
+    system("sudo apt-get purge aosc-installer");
     }
 }
 
