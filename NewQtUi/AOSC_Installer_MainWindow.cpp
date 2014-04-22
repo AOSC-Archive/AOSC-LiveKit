@@ -162,7 +162,7 @@ void AOSC_Installer_MainWindow::SLOT_StartInstall_WithFormat(){
     Format = new QProcess(this);
     connect(Format,SIGNAL(finished(int)),this,SLOT(SLOT_FormatDone(int)));
     char ch[20];
-    sprintf(ch,"mkfs.%s",PartedDisk->GetFormatFileSystem().toUtf8().data());
+    sprintf(ch,"mkfs.%s %s",PartedDisk->GetFormatFileSystem().toUtf8().data(),PartedDisk->GetTargetPartition().toUtf8().data());
     Format->start("sudo",QStringList()<<ch<<PartedDisk->GetTargetPartition());
 }
 
@@ -193,7 +193,7 @@ void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
         QMessageBox::warning(this,tr("Critical Error"),tr("Failed to mount target partition! Please check if it is corrupted or already mounted."),QMessageBox::Yes);
         exit(0);
     }else{
-        if(system("sudo mount --bind /dev /target/dev")!=0){
+/*        if(system("sudo mount --bind /dev /target/dev")!=0){
             QMessageBox::warning(this,tr("严重错误"),tr("挂载dev列表到目标安装位置失败"),QMessageBox::Yes);
             delete this;
         }
@@ -208,7 +208,7 @@ void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
         if(system("sudo mount --bind /dev/pts /target/dev/pts")!=0){
             QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
             delete this;
-        }
+        } */
         StatisticsFiles = new StatisticsFileSize();
         this->connect(StatisticsFiles,SIGNAL(TotalFile(int)),this,SLOT(SLOT_TotalFiles(int)));
         this->connect(StatisticsFiles,SIGNAL(Copyed(int)),this,SLOT(SLOT_NowCopyed(int)));
@@ -237,6 +237,22 @@ void AOSC_Installer_MainWindow::SLOT_NowCopyed(int NowCopyed){
 }
 
 void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
+        if(system("sudo mount --bind /dev /target/dev")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载dev列表到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
+        if(system("sudo mount --bind /proc /target/proc")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载proc到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
+        if(system("sudo mount --bind /sys /target/sys")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
+        if(system("sudo mount --bind /dev/pts /target/dev/pts")!=0){
+            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
+            delete this;
+        }
     /*if(Status != 0){
         StatisticsFiles->CopyDone();
         printf("Status = %d\n",Status);
