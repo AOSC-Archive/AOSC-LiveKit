@@ -148,7 +148,7 @@ int PartedDiskTab::CheckInput(){
     }else{
         return NO_FORMAT;
     }
-    return -1;
+    return 0;
 }
 
 int PartedDiskTab::isEFIDevice(){

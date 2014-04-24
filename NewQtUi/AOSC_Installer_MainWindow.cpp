@@ -228,6 +228,7 @@ void AOSC_Installer_MainWindow::SLOT_TotalFiles(int TotalFile){
     this->connect(CopyFile,SIGNAL(finished(int)),WorkProcess,SLOT(SLOT_CopyDone(int)));
     QStringList ArgList;
     ArgList << "cp" << "-arv" << "/lib/live/mount/rootfs/live.squashfs/." << _INSTALL_FILE_DEST_;
+//    ArgList << "cp" << "-arv" << "/squash" << _INSTALL_FILE_DEST_;
     CopyFile->setStandardOutputFile(_TMP_TOTAL_SIZE_);
     CopyFile->start("sudo",ArgList);
     emit SIG_StartCopyFile();
@@ -259,6 +260,7 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
         QMessageBox::warning(this,tr("Error"),tr("Error occurred while copying files! Sad."),QMessageBox::Yes);
         delete this;
     }else{*/
+        StatisticsFiles->CopyDone();
         WorkProcess->SetLabelText(tr("Installing and configuring GRUB..."));
         SetGrub = new QProcess(this);
         UpDateGrub = new QProcess(this);
@@ -284,6 +286,7 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
             this->connect(SetGrub,SIGNAL(readyRead()),this,SLOT(SLOT_PrintStdOutput()));
             this->connect(UpDateGrub,SIGNAL(readyRead()),this,SLOT(SLOT_PrintStdOutput()));
             SetGrub->start("sudoSLOT_StartButtonClicked",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
+            SetGrub->setStandardOutputFile("/tmp/GRUB_OUTPUT");
         }
 //    }
 }
@@ -399,6 +402,7 @@ void StatisticsFileSize::GetReady(int _Size){
 
 void StatisticsFileSize::run(){
     sprintf(ExecBuff,"find /lib/live/mount/rootfs/live.squashfs | wc -l > %s",_TMP_NOW_SIZE);
+//    sprintf(ExecBuff,"find /squash | wc -l > %s",_TMP_NOW_SIZE);
     system(ExecBuff);
     printf("Execed!\n");
     fp = fopen(_TMP_NOW_SIZE,"r");
