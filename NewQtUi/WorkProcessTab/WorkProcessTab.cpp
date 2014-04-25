@@ -21,12 +21,18 @@ WorkProcessTab::~WorkProcessTab()
     delete ui;
 }
 
+void WorkProcessTab::SetIsFormat(bool k){
+    isFormat = k;
+}
+
 void WorkProcessTab::SLOT_StartButtonClicked(){
     ui->StartButton->hide();
     if(isFormat == true){
+        printf("Emited\n");
         emit SIG_StartButtonClicked_WithFormat();
         return;
     }
+    printf("NotEmited!\n");
     emit SIG_StartButtonClicked();
 }
 

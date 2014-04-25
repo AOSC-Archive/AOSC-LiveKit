@@ -19,6 +19,7 @@ public:
     void SetNowCopyed(int);
     void SetProcessBarShow(bool);
     void SetLabelText(QString);
+    void SetIsFormat(bool);
 public slots:
     void SLOT_StartButtonClicked(void);
     void SLOT_CopyDone(int);
