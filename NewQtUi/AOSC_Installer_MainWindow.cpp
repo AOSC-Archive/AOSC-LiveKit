@@ -19,7 +19,7 @@ AOSC_Installer_MainWindow::AOSC_Installer_MainWindow(QMainWindow *parent) :
 {
     BuildObject();
     AddToTabWidget();
-    system("sudo umount /target");
+    system("sudo umount -Rf /target");
 //##########链接基本的信号与槽#############
     this->connect(ui->NextStepButton,SIGNAL(clicked()),this,SLOT(SLOT_NextButtonClicked()));
     this->connect(ui->PervStepButton,SIGNAL(clicked()),this,SLOT(SLOT_PervButtonClicked()));
