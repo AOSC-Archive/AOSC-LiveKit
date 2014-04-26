@@ -132,8 +132,9 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
         SetUserName = new QProcess(this);
         this->connect(SetUserName,SIGNAL(finished(int)),this,SLOT(SLOT_SetUserNameDone(int)));
         char NewHome[64];
-        sprintf(NewHome,"/home/%s",ConfigureUser->GetUserName().toUtf8().data());
-        SetUserName->start("sudo",QStringList()<<"chroot"<<"/target" << "usermod" << "-l" << ConfigureUser->GetUserName() << "-md" << NewHome << "live");
+//        sprintf(NewHome,"/home/%s",ConfigureUser->GetUserName().toUtf8().data());
+//        Homerun causes problem when home directory changed, holding up for May to be resolved.
+        SetUserName->start("sudo",QStringList()<<"chroot"<<"/target" << "usermod" << "-l" << ConfigureUser->GetUserName() "live");
     }
     MainTab->setCurrentIndex(MainTab->currentIndex()+1);        //  跳转到下一步
     SetAllButtonEnable();                                       //  将按钮全部激活
@@ -346,20 +347,7 @@ void AOSC_Installer_MainWindow::SLOT_SetRootPassDone(int Status){
         delete this;
         exit(-1);
     }else{
-        if(QMessageBox::question(this,tr("Question"),tr("Do you want to use AnthonUI as default?"),QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
-            // Use AnthonUI
-        }else{
-            // Do not use
-        }
-        DoPostInst = new QProcess(this);
-        this->connect(DoPostInst,SIGNAL(finished(int)),this,SLOT(SLOT_DoPostInstDone(int)));
-        //  Please Set Fstab here
-        //  To get target disk partiton use
-        //      PartedDisk->GetTargetPartition();
-        //  To get filesystem type use
-        //      PartedDisk->GetFormatFileSystem();
-        //  Translate them to char* use
-        //      PartedDisk->GetFormatFileSystem().toUtf8().data();
+// No need for fstab any more.
     }
 }
 
