@@ -131,10 +131,10 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
         if(result != 0) return;
         SetUserName = new QProcess(this);
         this->connect(SetUserName,SIGNAL(finished(int)),this,SLOT(SLOT_SetUserNameDone(int)));
-        char NewHome[64];
+//        char NewHome[64];
 //        sprintf(NewHome,"/home/%s",ConfigureUser->GetUserName().toUtf8().data());
 //        Homerun causes problem when home directory changed, holding up for May to be resolved.
-        SetUserName->start("sudo",QStringList()<<"chroot"<<"/target" << "usermod" << "-l" << ConfigureUser->GetUserName() "live");
+        SetUserName->start("sudo",QStringList()<<"chroot"<<"/target" << "usermod" << "-l" << ConfigureUser->GetUserName() << "live");
     }
     MainTab->setCurrentIndex(MainTab->currentIndex()+1);        //  跳转到下一步
     SetAllButtonEnable();                                       //  将按钮全部激活
