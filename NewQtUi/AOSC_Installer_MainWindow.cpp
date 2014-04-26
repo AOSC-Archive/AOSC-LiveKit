@@ -301,7 +301,7 @@ void AOSC_Installer_MainWindow::SLOT_SetGrubDone(int Status){
         UpDateGrub = new QProcess(this);
         this->connect(UpDateGrub,SIGNAL(finished(int)),this,SLOT(SLOT_UpdateGrubDone(int)));
         WorkProcess->SetLabelText(tr("Updating GRUB..."));
-        UpDateGrub->start("sudo",QStringList()<<"chroot"<<_INSTALL_FILE_DEST_<<"grub-mkconfig"<<"-o"<<"/target/boot/grub/grub.cfg");
+        UpDateGrub->start("sudo",QStringList()<<"chroot"<<_INSTALL_FILE_DEST_<<"grub-mkconfig"<<"-o"<<"/boot/grub/grub.cfg");
     }
 }
 
