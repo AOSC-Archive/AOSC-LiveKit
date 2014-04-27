@@ -89,7 +89,7 @@ void AOSC_Installer_MainWindow::CheckButtonDisable(){
     else if(MainTab->currentWidget()==ConfigureUser)ui->PervStepButton->setDisabled(true);
     else if(MainTab->currentWidget()==WorkDone){
         ui->NextStepButton->hide();
-        ui->PervStepButton->setDisabled();
+        ui->PervStepButton->setDisabled(true);
     }
 }
 
@@ -347,8 +347,8 @@ void AOSC_Installer_MainWindow::SLOT_DoPostInstDone(int Status){
     }else{
         int result = QMessageBox::question(this,tr("Question"),tr("Do you want to use AnthonUI - Desktop Environment customization from AOSC"),QMessageBox::Yes|QMessageBox::No);
         if(result == QMessageBox::No){
-            system("sudo rm -rf /home/*/.kde");
-            system("sudo apt-get purge anthonui-kde");
+            system("sudo chroot /target rm -rf /home/*/.kde");
+            system("sudo chroot /target apt-get purge anthonui-kde --yes");
         }
         system("sudo apt-get purge aosc-installer");
         QMessageBox::question(this,tr("Installation Complete"),tr("Enjoy!"),QMessageBox::Yes);
