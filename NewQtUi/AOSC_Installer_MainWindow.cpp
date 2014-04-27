@@ -325,7 +325,7 @@ void AOSC_Installer_MainWindow::SLOT_SetUserPassDone(int Status){
     }else{
         SetRootPass = new QProcess(this);
         this->connect(SetRootPass,SIGNAL(finished(int)),this,SLOT(SLOT_SetRootPassDone(int)));
-        SetRootPass->start("chroot",QStringList()<<"chroot"<<"/target"<<"/usr/bin/cpw.sh"<<"root"<<ConfigureUser->GetRootPass());
+        SetRootPass->start("sudo",QStringList()<<"chroot"<<"/target"<<"/usr/bin/cpw.sh"<<"root"<<ConfigureUser->GetRootPass());
     }
 }
 
