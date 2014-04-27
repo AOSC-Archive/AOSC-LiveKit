@@ -30,4 +30,5 @@ SOURCES += AOSC_Installer_MainWindow.cpp main.cpp \
     ConfigureUserTab/ConfigureUserTab.cpp \
     WorkDoneTab/WorkDoneTab.cpp \
     WorkProcessTab/WorkProcessTab.cpp
-
+TRANSLATIONS += l10n/AOSC_Installer_zh-CN.ts \
+    l10n/AOSC_Installer_zh-TW.ts

@@ -1,6 +1,7 @@
 #include "AOSC_Installer_MainWindow.h"
 #include "ui_AOSC_Installer_MainWindow.h"
 #include <QTabBar>
+#include <QTabWidget>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -86,7 +87,10 @@ void AOSC_Installer_MainWindow::CheckButtonDisable(){
         ui->PervStepButton->setDisabled(true);
     }
     else if(MainTab->currentWidget()==ConfigureUser)ui->PervStepButton->setDisabled(true);
-    else if(MainTab->currentWidget()==WorkDone)ui->NextStepButton->hide();
+    else if(MainTab->currentWidget()==WorkDone){
+        ui->NextStepButton->hide();
+        ui->PervStepButton->setDisabled();
+    }
 }
 
 void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
@@ -131,14 +135,14 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
         if(result != 0) return;
         SetUserName = new QProcess(this);
         this->connect(SetUserName,SIGNAL(finished(int)),this,SLOT(SLOT_SetUserNameDone(int)));
-//        char NewHome[64];
-//        sprintf(NewHome,"/home/%s",ConfigureUser->GetUserName().toUtf8().data());
-//        Homerun causes problem when home directory changed, holding up for May to be resolved.
         SetUserName->start("sudo",QStringList()<<"chroot"<<"/target" << "usermod" << "-l" << ConfigureUser->GetUserName() << "live");
     }
     MainTab->setCurrentIndex(MainTab->currentIndex()+1);        //  跳转到下一步
     SetAllButtonEnable();                                       //  将按钮全部激活
     CheckButtonDisable();                                       //  检查同时disable某些按钮
+    if(MainTab->currentWidget()==WorkDone){
+        SLOT_DoPostInstDone(0);
+    }
 }
 
 void AOSC_Installer_MainWindow::SLOT_PervButtonClicked(){
@@ -195,22 +199,6 @@ void AOSC_Installer_MainWindow::SLOT_MountTargetDone(int Status){
         QMessageBox::warning(this,tr("Critical Error"),tr("Failed to mount target partition! Please check if it is corrupted or already mounted."),QMessageBox::Yes);
         exit(0);
     }else{
-/*        if(system("sudo mount --bind /dev /target/dev")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载dev列表到目标安装位置失败"),QMessageBox::Yes);
-            delete this;
-        }
-        if(system("sudo mount --bind /proc /target/proc")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载proc到目标安装位置失败"),QMessageBox::Yes);
-            delete this;
-        }
-        if(system("sudo mount --bind /sys /target/sys")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
-            delete this;
-        }
-        if(system("sudo mount --bind /dev/pts /target/dev/pts")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
-            delete this;
-        } */
         StatisticsFiles = new StatisticsFileSize();
         this->connect(StatisticsFiles,SIGNAL(TotalFile(int)),this,SLOT(SLOT_TotalFiles(int)));
         this->connect(StatisticsFiles,SIGNAL(Copyed(int)),this,SLOT(SLOT_NowCopyed(int)));
@@ -361,12 +349,11 @@ void AOSC_Installer_MainWindow::SLOT_DoPostInstDone(int Status){
         if(result == QMessageBox::No){
             system("sudo rm -rf /home/*/.kde");
             system("sudo apt-get purge anthonui-kde");
-        }else{
-            QMessageBox::question(this,tr("Installation Complete"),tr("Enjoy!"),QMessageBox::Yes);
-            delete this;
-            exit(0);
         }
-    system("sudo apt-get purge aosc-installer");
+        system("sudo apt-get purge aosc-installer");
+        QMessageBox::question(this,tr("Installation Complete"),tr("Enjoy!"),QMessageBox::Yes);
+        delete this;
+        exit(0);
     }
 }
 
