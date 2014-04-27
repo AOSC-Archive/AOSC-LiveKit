@@ -8,7 +8,7 @@ INCLUDEPATH += .
 QT += widgets
 
 # Input
-HEADERS += AOSC_Installer_MainWindow.h \
+HEADERS += AOSC_Installer_MainWindow.h i18n.h\
     GetStartTab/GetStartTab.h \
     ReadingTab/ReadingTab.h \
     PartedDiskTab/PartedDiskTab.h \
@@ -23,12 +23,14 @@ FORMS += AOSC_Installer_MainWindow.ui \
     ConfigureUserTab/ConfigureUserTab.ui \
     WorkDoneTab/WorkDoneTab.ui \
     WorkProcessTab/WorkProcessTab.ui
-SOURCES += AOSC_Installer_MainWindow.cpp main.cpp \
+SOURCES += AOSC_Installer_MainWindow.cpp main.cpp i18n.cpp\
     GetStartTab/GetStartTab.cpp \
     ReadingTab/ReadingTab.cpp \
     PartedDiskTab/PartedDiskTab.cpp \
     ConfigureUserTab/ConfigureUserTab.cpp \
     WorkDoneTab/WorkDoneTab.cpp \
     WorkProcessTab/WorkProcessTab.cpp
-TRANSLATIONS += l10n/AOSC_Installer_zh-CN.ts \
-    l10n/AOSC_Installer_zh-TW.ts
+TRANSLATIONS += l10n/AOSC_Installer_zh_CN.ts \
+    l10n/AOSC_Installer_zh_TW.ts 
+
+RESOURCES += resources.qrc

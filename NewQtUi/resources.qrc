@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+  <file>l10n/AOSC_Installer_zh_CN.qm</file>
+  <file>l10n/AOSC_Installer_zh_TW.qm</file>
+</qresource>
+</RCC>
