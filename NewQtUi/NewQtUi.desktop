@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Install System
+Name[zh_CN]=安装系统
+Exec=NewQtUi
+Icon=checkbox
+Terminal=false
+Categories=System;
+StartupNotify=true

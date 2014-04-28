@@ -130,7 +130,7 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
         }else if(result == USER_PASS_NOT_MATCH){
             QMessageBox::warning(this,tr("Warning"),tr("Base user password does not match, please double check."),QMessageBox::Yes);
         }else if(result == USER_NAME_HAS_SPACE){
-            QMessageBox::warning(this,tr("Warning"),tr("用户名中不允许出现空格！请修改后重试！"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Warning"),tr("Space is not allowed in username! Please double check and try again."),QMessageBox::Yes);
         }
         if(result != 0) return;
         SetUserName = new QProcess(this);
@@ -229,19 +229,19 @@ void AOSC_Installer_MainWindow::SLOT_NowCopyed(int NowCopyed){
 
 void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
         if(system("sudo mount --bind /dev /target/dev")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载dev列表到目标安装位置失败"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Critical Error"),tr("Mounting dev to target failed."),QMessageBox::Yes);
             delete this;
         }
         if(system("sudo mount --bind /proc /target/proc")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载proc到目标安装位置失败"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Critical Error"),tr("Mounting proc to target failed."),QMessageBox::Yes);
             delete this;
         }
         if(system("sudo mount --bind /sys /target/sys")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Critical Error"),tr("Mounting sys to target failed."),QMessageBox::Yes);
             delete this;
         }
         if(system("sudo mount --bind /dev/pts /target/dev/pts")!=0){
-            QMessageBox::warning(this,tr("严重错误"),tr("挂载sys到目标安装位置失败"),QMessageBox::Yes);
+            QMessageBox::warning(this,tr("Critical Error"),tr("Mounting pts to target failed."),QMessageBox::Yes);
             delete this;
         }
     /*if(Status != 0){
@@ -351,7 +351,7 @@ void AOSC_Installer_MainWindow::SLOT_DoPostInstDone(int Status){
             system("sudo chroot /target apt-get purge anthonui-kde --yes");
         }
         system("sudo apt-get purge aosc-installer");
-        QMessageBox::question(this,tr("Installation Complete"),tr("Enjoy!"),QMessageBox::Yes);
+        QMessageBox::question(this,tr("Installation Complete"),tr("Please enjoy yourself in this distribution, if you got questions or troubles, DO NOT hesitate to report or ask for help."),QMessageBox::Yes);
         delete this;
         exit(0);
     }

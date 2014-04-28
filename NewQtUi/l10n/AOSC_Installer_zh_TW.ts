@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_TW">
+<TS version="2.0" language="zh_TW">
 <context>
     <name>AOSC_Installer_MainWindow</name>
     <message>
@@ -19,9 +19,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="74"/>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="57"/>
         <source>License Agreement</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../AOSC_Installer_MainWindow.ui" line="74"/>
+        <source>License Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -135,11 +139,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="133"/>
-        <source>用户名中不允许出现空格！请修改后重试！</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="161"/>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="178"/>
         <source>Error</source>
@@ -157,6 +156,10 @@
     </message>
     <message>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="199"/>
+        <location filename="../AOSC_Installer_MainWindow.cpp" line="232"/>
+        <location filename="../AOSC_Installer_MainWindow.cpp" line="236"/>
+        <location filename="../AOSC_Installer_MainWindow.cpp" line="240"/>
+        <location filename="../AOSC_Installer_MainWindow.cpp" line="244"/>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="267"/>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="274"/>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="286"/>
@@ -184,27 +187,28 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="232"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="236"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="240"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="244"/>
-        <source>严重错误</source>
+        <location filename="../AOSC_Installer_MainWindow.cpp" line="133"/>
+        <source>Space is not allowed in username! Please double check and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="232"/>
-        <source>挂载dev列表到目标安装位置失败</source>
+        <source>Mounting dev to target failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="236"/>
-        <source>挂载proc到目标安装位置失败</source>
+        <source>Mounting proc to target failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="240"/>
+        <source>Mounting sys to target failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="244"/>
-        <source>挂载sys到目标安装位置失败</source>
+        <source>Mounting pts to target failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -279,7 +283,7 @@
     </message>
     <message>
         <location filename="../AOSC_Installer_MainWindow.cpp" line="354"/>
-        <source>Enjoy!</source>
+        <source>Please enjoy yourself in this distribution, if you got questions or troubles, DO NOT hesitate to report or ask for help.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -444,7 +448,7 @@
         <source>License Agreement</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
+    <message utf8="true">
         <location filename="../ReadingTab/ReadingTab.ui" line="46"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
