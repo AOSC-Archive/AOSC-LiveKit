@@ -4,3 +4,4 @@ mkdir -p abdist/usr/{bin,share/applications}
 cp -av NewQtUi abdist/usr/bin/
 cp -av NewQtUi.desktop abdist/usr/share/applications/
 cp -av cpw.sh abdist/usr/bin/
+chmod 755 abdist/usr/bin/*
