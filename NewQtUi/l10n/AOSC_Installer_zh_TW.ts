@@ -4,285 +4,206 @@
 <context>
     <name>AOSC_Installer_MainWindow</name>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="32"/>
         <source>AOSC_Installer_MainWindow</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="56"/>
-        <source>Prepare for Installation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="56"/>
         <source>Preparing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="57"/>
-        <source>License Agreement</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="74"/>
         <source>License Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="92"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="58"/>
         <source>Partitioning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="110"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="59"/>
         <source>Building System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="128"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="60"/>
         <source>Set-up User</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="146"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="61"/>
         <source>Finalizing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="172"/>
         <source>Steps</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="190"/>
         <source>Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.ui" line="208"/>
         <source>Forward</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="101"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="103"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="105"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="107"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="109"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="111"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="123"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="125"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="127"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="129"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="131"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="133"/>
+        <source>Prepare for Installation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>License Agreement</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="101"/>
         <source>Critial Error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="103"/>
         <source>Please select your target Disk before proceeding.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="105"/>
         <source>Please select your EFI System Partition befor proceeding.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="107"/>
         <source>Please select your target partition before proceeding.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="109"/>
         <source>Please select File System to format the parition!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="111"/>
         <source>Are you sure that you want to start the installation without formatting? This can lead to serious problem afterwards...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="123"/>
         <source>Please input a new password for root.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="125"/>
         <source>Please input a username for the base user.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="127"/>
         <source>Please input a new password for the base user.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="129"/>
         <source>Root password does not match, please double check.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="131"/>
         <source>Base user password does not match, please double check.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="161"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="178"/>
-        <source>Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="161"/>
-        <source>Installation has encountered a critical error and must exit now.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="178"/>
-        <source>Format your disk partition failure.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="199"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="232"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="236"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="240"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="244"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="267"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="274"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="286"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="299"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="310"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="322"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="334"/>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="344"/>
-        <source>Critical Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="199"/>
-        <source>Failed to mount target partition! Please check if it is corrupted or already mounted.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="207"/>
-        <source>Preparing for Installation...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="214"/>
-        <source>Copying system files...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="133"/>
         <source>Space is not allowed in username! Please double check and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="232"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Installation has encountered a critical error and must exit now.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Format your disk partition failure.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Critical Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to mount target partition! Please check if it is corrupted or already mounted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Preparing for Installation...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copying system files...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Mounting dev to target failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="236"/>
         <source>Mounting proc to target failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="240"/>
         <source>Mounting sys to target failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="244"/>
         <source>Mounting pts to target failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="254"/>
         <source>Installing and configuring GRUB...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="267"/>
         <source>Failed while trying to create directory for ESP to mount.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="274"/>
         <source>Failed mounting ESP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="286"/>
         <source>Failed installing GRUB!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="292"/>
         <source>Updating GRUB...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="299"/>
         <source>Failed when updating GRUB configuration, your system may not be able to boot.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="304"/>
         <source>Successfully installed system.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="310"/>
         <source>Failed setting up user.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="322"/>
         <source>Setting password for user failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="334"/>
         <source>Setting password for root failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="344"/>
         <source>Finalization error occurred.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="348"/>
         <source>Question</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="348"/>
         <source>Do you want to use AnthonUI - Desktop Environment customization from AOSC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="354"/>
         <source>Installation Complete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../AOSC_Installer_MainWindow.cpp" line="354"/>
         <source>Please enjoy yourself in this distribution, if you got questions or troubles, DO NOT hesitate to report or ask for help.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -290,39 +211,30 @@
 <context>
     <name>ConfigureUserTab</name>
     <message>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="31"/>
         <source>Set-Up User</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="50"/>
         <source>Configure root Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="69"/>
         <source>Configure Base Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="102"/>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="151"/>
         <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="115"/>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="164"/>
         <source>Confirm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ConfigureUserTab/ConfigureUserTab.ui" line="138"/>
         <source>Username</source>
         <translation type="unfinished"></translation>
     </message>
@@ -330,22 +242,18 @@
 <context>
     <name>GetStartTab</name>
     <message>
-        <location filename="../GetStartTab/GetStartTab.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GetStartTab/GetStartTab.ui" line="33"/>
         <source>Hi There!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GetStartTab/GetStartTab.ui" line="51"/>
         <source>Thanks for checking out our newest distribution!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../GetStartTab/GetStartTab.ui" line="69"/>
         <source>Are you ready to install it to your dear computer?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -353,85 +261,66 @@
 <context>
     <name>PartedDiskTab</name>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="19"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="36"/>
         <source>Partitioning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="54"/>
         <source>Start GParted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="103"/>
         <source>Format Parition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="122"/>
         <source>Select Disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="141"/>
         <source>Select Parititon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="170"/>
         <source> It&apos;s a EFI system</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="199"/>
         <source>EFI System Parition</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.ui" line="218"/>
         <source>File System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="14"/>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="76"/>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="97"/>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="120"/>
         <source>---</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="15"/>
         <source>ext3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="16"/>
         <source>ext4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="17"/>
         <source>xfs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="18"/>
         <source>btrfs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="19"/>
         <source>jfs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../PartedDiskTab/PartedDiskTab.cpp" line="20"/>
         <source>reiserfs</source>
         <translation type="unfinished"></translation>
     </message>
@@ -439,17 +328,14 @@
 <context>
     <name>ReadingTab</name>
     <message>
-        <location filename="../ReadingTab/ReadingTab.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ReadingTab/ReadingTab.ui" line="33"/>
         <source>License Agreement</source>
         <translation type="unfinished"></translation>
     </message>
     <message utf8="true">
-        <location filename="../ReadingTab/ReadingTab.ui" line="46"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -496,7 +382,6 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ReadingTab/ReadingTab.ui" line="107"/>
         <source>I Agree</source>
         <translation type="unfinished"></translation>
     </message>
@@ -504,17 +389,14 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>WorkDoneTab</name>
     <message>
-        <location filename="../WorkDoneTab/WorkDoneTab.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WorkDoneTab/WorkDoneTab.ui" line="31"/>
         <source>Finalizing...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WorkDoneTab/WorkDoneTab.ui" line="50"/>
         <source>We are working on the last few stages of installation...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -522,17 +404,14 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>WorkProcessTab</name>
     <message>
-        <location filename="../WorkProcessTab/WorkProcessTab.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WorkProcessTab/WorkProcessTab.ui" line="31"/>
         <source>Building System</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../WorkProcessTab/WorkProcessTab.ui" line="75"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
