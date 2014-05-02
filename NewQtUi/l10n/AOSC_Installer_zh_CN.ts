@@ -17,7 +17,7 @@
     </message>
     <message>
         <source>Building System</source>
-        <translation>构建系统</translation>
+        <translation>正在安装</translation>
     </message>
     <message>
         <source>Set-up User</source>
