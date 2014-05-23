@@ -1,5 +1,6 @@
 #include "PartedDiskTab.h"
 #include "ui_PartedDiskTab.h"
+#include <QMessageBox>
 
 PartedDiskTab::PartedDiskTab(QWidget *parent) :
     QWidget(parent),
@@ -18,6 +19,8 @@ PartedDiskTab::PartedDiskTab(QWidget *parent) :
     ui->FormatPartitionSelect->insertItem(4,tr("btrfs"));
     ui->FormatPartitionSelect->insertItem(5,tr("jfs"));
     ui->FormatPartitionSelect->insertItem(6,tr("reiserfs"));
+    ui->UseSwapLabel->hide();
+    ui->SwapSelect->hide();
 
     this->connect(ui->MyDeviceIsEFICheckBox,SIGNAL(clicked(bool)),this,SLOT(SLOT_MyDeviceIsEFICheckBoxClicked(bool)));
     this->connect(ui->FormatCheckBox,SIGNAL(clicked(bool)),this,SLOT(SLOT_FormatDiskPartitionCheckBoxClicked(bool)));
@@ -83,6 +86,35 @@ void PartedDiskTab::UpdatePartitionMap(){
     }
     sprintf(ExecBuff,"rm -rf %s",_TMP_PARTITION_FILE_);
     system(ExecBuff);
+
+    ui->SwapSelect->clear();
+    sprintf(ExecBuff,"ls /dev/sd?? > %s",_TMP_PARTITION_FILE_);
+    system(ExecBuff);
+    sprintf(ExecBuff,"ls /dev/sd??? >> %s",_TMP_PARTITION_FILE_);
+    system(ExecBuff);
+    fp = fopen(_TMP_PARTITION_FILE_,"r");
+    ui->SwapSelect->insertItem(-1,tr("---"));
+    bzero(TmpString,64);
+    TmpInt = 0;
+    while(fscanf(fp,"%s",TmpString) != EOF){
+        ui->SwapSelect->insertItem(TmpInt,tr(TmpString));
+        bzero(TmpString,64);
+        TmpInt ++;
+    }
+    sprintf(ExecBuff,"rm -rf %s",_TMP_PARTITION_FILE_);
+    system(ExecBuff);
+    return;
+}
+
+int PartedDiskTab::isSwap(){
+    if(ui->UseSwapCheckBox->isChecked()==true){
+        if(ui->SwapSelect->currentText() == ui->DiskPartitionSelect->currentText()){
+            QMessageBox("Warning","分区重复！",QMessageBox::Yes);
+            return -1;
+        }else
+            return true;
+    }
+    return 0;
 }
 
 void PartedDiskTab::UpdateDiskMap(){
@@ -173,4 +205,8 @@ QString PartedDiskTab::GetEFIPartition(){
 
 QString PartedDiskTab::GetFormatFileSystem(){
     return ui->FormatPartitionSelect->currentText();
+}
+
+QString PartedDiskTab::GetSwapPartition(){
+    return ui->SwapSelect->currentText();
 }

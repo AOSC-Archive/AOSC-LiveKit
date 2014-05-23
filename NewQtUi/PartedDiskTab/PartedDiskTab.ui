@@ -218,7 +218,93 @@
     <string>File System</string>
    </property>
   </widget>
+  <widget class="QLabel" name="UseSwapLabel">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>370</y>
+     <width>91</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Swap Parition</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="UseSwapCheckBox">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>330</y>
+     <width>101</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Sans Serif</family>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Use Swap</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="SwapSelect">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>360</y>
+     <width>111</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+  </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>UseSwapCheckBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>SwapSelect</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>220</x>
+     <y>339</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>225</x>
+     <y>375</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>UseSwapCheckBox</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>UseSwapLabel</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>220</x>
+     <y>339</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>125</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
