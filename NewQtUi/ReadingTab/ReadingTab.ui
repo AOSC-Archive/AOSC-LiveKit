@@ -18,7 +18,7 @@
     <rect>
      <x>40</x>
      <y>30</y>
-     <width>371</width>
+     <width>521</width>
      <height>40</height>
     </rect>
    </property>
@@ -91,9 +91,9 @@ p, li { white-space: pre-wrap; }
   <widget class="QCheckBox" name="IAgreeCheckBox">
    <property name="geometry">
     <rect>
-     <x>490</x>
+     <x>470</x>
      <y>455</y>
-     <width>71</width>
+     <width>101</width>
      <height>20</height>
     </rect>
    </property>
