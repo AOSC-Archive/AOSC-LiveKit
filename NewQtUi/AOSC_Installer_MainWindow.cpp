@@ -168,6 +168,7 @@ void AOSC_Installer_MainWindow::SLOT_StartInstall_WithFormat(){
     Format = new QProcess(this);
     connect(Format,SIGNAL(finished(int)),this,SLOT(SLOT_FormatDone(int)));
     char ch[64];
+    WorkProcess->SetLabelText("建立分区中");
     sprintf(ch,"mkfs.%s",PartedDisk->GetFormatFileSystem().toUtf8().data());
     Format->start("sudo",QStringList()<<ch<<PartedDisk->GetTargetPartition().toUtf8().data());
 }
