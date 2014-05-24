@@ -335,7 +335,7 @@ void AOSC_Installer_MainWindow::SLOT_SetRootPassDone(int Status){
         delete this;
         exit(-1);
     }else{
-// No need for fstab any more.
+	system("genfstab -p /target >> /target/etc/fstab");
     }
 }
 
