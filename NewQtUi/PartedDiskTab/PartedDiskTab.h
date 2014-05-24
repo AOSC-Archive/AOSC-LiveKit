@@ -33,12 +33,10 @@ public:
     int CheckInput(void);
     int isEFIDevice(void);
     int isFormat(void);
-    int isSwap(void);
     QString GetTargetDisk(void);
     QString GetTargetPartition(void);
     QString GetEFIPartition(void);
     QString GetFormatFileSystem(void);
-    QString GetSwapPartition(void);
 
 
 

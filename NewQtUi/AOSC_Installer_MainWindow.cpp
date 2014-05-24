@@ -117,13 +117,6 @@ void AOSC_Installer_MainWindow::SLOT_NextButtonClicked(){
         if(PartedDisk->isFormat() == true){
             WorkProcess->SetIsFormat(true);
         }
-        if(PartedDisk->isSwap() == true){
-            char ExecBuff[265];
-            sprintf(ExecBuff,"sudo mkfs.?? %s",PartedDisk->GetSwapPartition().toUtf8().data());
-            system("ExecBuff");
-        }else{
-            return;
-        }
     }else if(MainTab->currentWidget()==ConfigureUser){
         result = ConfigureUser->CheckInput();
         if(result == NO_ROOT_PASS){
