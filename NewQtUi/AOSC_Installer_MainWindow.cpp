@@ -336,7 +336,7 @@ void AOSC_Installer_MainWindow::SLOT_SetRootPassDone(int Status){
         delete this;
         exit(-1);
     }else{
-	system("genfstab -p /target >> /target/etc/fstab");
+	system("genfstab -p /target | sudo tee /target/etc/fstab");
     }
 }
 
