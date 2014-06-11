@@ -6,6 +6,7 @@ PartedDiskTab::PartedDiskTab(QWidget *parent) :
     ui(new Ui::PartedDiskTab)
 {
     ui->setupUi(this);
+    ui->SetGrub->setChecked(true);
     ui->MyDeviceIsEFIComboBox->hide();
     ui->FormatPartitionSelect->hide();
     ui->MyDeviceIsEFILabel->hide();
@@ -173,4 +174,8 @@ QString PartedDiskTab::GetEFIPartition(){
 
 QString PartedDiskTab::GetFormatFileSystem(){
     return ui->FormatPartitionSelect->currentText();
+}
+
+bool PartedDiskTab::WhetherSetGrub(){
+    return ui->SetGrub->isChecked();
 }

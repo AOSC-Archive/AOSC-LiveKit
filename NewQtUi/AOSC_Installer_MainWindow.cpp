@@ -85,6 +85,7 @@ void AOSC_Installer_MainWindow::CheckButtonDisable(){
     else if(MainTab->currentWidget()==WorkProcess){
         ui->NextStepButton->setDisabled(true);
         ui->PervStepButton->setDisabled(true);
+        WorkProcess->SLOT_StartButtonClicked();
     }
     else if(MainTab->currentWidget()==ConfigureUser)ui->PervStepButton->setDisabled(true);
     else if(MainTab->currentWidget()==WorkDone){
@@ -276,6 +277,10 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
                 delete this;
                 exit(0);
             }
+            if(PartedDisk->WhetherSetGrub() == false){
+                   SLOT_UpdateGrubDone(0);
+                   return;
+            }
             SetGrub->start("sudo",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
 
         }
@@ -303,6 +308,7 @@ void AOSC_Installer_MainWindow::SLOT_UpdateGrubDone(int Status){
     }else{
         ui->NextStepButton->setEnabled(true);
         WorkProcess->SetLabelText(tr("Successfully installed system."));
+        WorkProcess->SetProcessBarShow(false);
     }
 }
 

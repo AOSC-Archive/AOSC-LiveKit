@@ -37,6 +37,7 @@ public:
     QString GetTargetPartition(void);
     QString GetEFIPartition(void);
     QString GetFormatFileSystem(void);
+    bool    WhetherSetGrub(void);
 
 
 
