@@ -324,6 +324,10 @@
         <source>reiserfs</source>
         <translation>reiserfs</translation>
     </message>
+    <message>
+        <source>Do you want to install Grub?</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ReadingTab</name>
