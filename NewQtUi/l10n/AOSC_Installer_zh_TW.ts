@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="zh-TW" sourcelanguage="en">
+<TS version="2.0" language="zh" sourcelanguage="en">
 <context>
     <name>AOSC_Installer_MainWindow</name>
     <message>
@@ -21,7 +21,7 @@
     </message>
     <message>
         <source>Set-up User</source>
-        <translation>設置使用者</translation>
+        <translation>設定使用者</translation>
     </message>
     <message>
         <source>Finalizing</source>
@@ -177,11 +177,11 @@
     </message>
     <message>
         <source>Failed setting up user.</source>
-        <translation>設置使用者失敗</translation>
+        <translation>設定使用者失敗</translation>
     </message>
     <message>
         <source>Setting password for user failed.</source>
-        <translation>爲新使用者設置密碼時失敗</translation>
+        <translation>為新使用者設定密碼時失敗</translation>
     </message>
     <message>
         <source>Setting password for root failed.</source>
@@ -294,7 +294,7 @@
     </message>
     <message>
         <source>File System</source>
-        <translation>檔案繫統</translation>
+        <translation>檔案系統</translation>
     </message>
     <message>
         <source>---</source>
@@ -326,7 +326,7 @@
     </message>
     <message>
         <source>Do you want to install Grub?</source>
-        <translation type="unfinished"></translation>
+        <translation>您希望安裝Grub嗎?</translation>
     </message>
 </context>
 <context>

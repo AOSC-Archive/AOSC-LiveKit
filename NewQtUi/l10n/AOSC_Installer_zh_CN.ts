@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="zh_CN">
+<TS version="2.0" language="zh" sourcelanguage="en">
 <context>
     <name>AOSC_Installer_MainWindow</name>
     <message>
@@ -326,7 +326,7 @@
     </message>
     <message>
         <source>Do you want to install Grub?</source>
-        <translation type="unfinished"></translation>
+        <translation>你想要安装 GRUB 吗？</translation>
     </message>
 </context>
 <context>
