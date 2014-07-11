@@ -171,6 +171,10 @@ void AOSC_Installer_MainWindow::SLOT_StartInstall_WithFormat(){
     char ch[64];
     WorkProcess->SetLabelText("Formatting target partition...");
     sprintf(ch,"mkfs.%s",PartedDisk->GetFormatFileSystem().toUtf8().data());
+    if(PartedDisk->GetFormatFileSystem() == "xfs" | PartedDisk->GetFormatFileSystem()=="btrfs"|PartedDisk->GetFormatFileSystem() == "jfs"){
+        Format->start("sudo",QStringList()<<ch<<"-f"<<PartedDisk->GetTargetPartition().toUtf8().data());
+        return;
+    }
     Format->start("sudo",QStringList()<<ch<<PartedDisk->GetTargetPartition().toUtf8().data());
 }
 
