@@ -284,10 +284,10 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
                 delete this;
                 exit(0);
             }
-            if(PartedDisk->WhetherSetGrub() == false){
+/*            if(PartedDisk->WhetherSetGrub() == false){
                    SLOT_UpdateGrubDone(0);
                    return;
-            }
+            } */
             SetGrub->start("sudo",QStringList() << "chroot" << _INSTALL_FILE_DEST_ << "grub-install" << "--target=x86_64-efi" << "--efi-directory=/efi" << "--bootloader-id=AOSC-GRUB" << "--recheck");
 
         }
