@@ -253,6 +253,9 @@ void AOSC_Installer_MainWindow::SLOT_CopyFileDone(int Status){
         delete this;
     }else{*/
         StatisticsFiles->CopyDone();
+        if(PartedDisk->WhetherSetGrub() == false){
+            this->SLOT_UpdateGrubDone(0);
+        }
         WorkProcess->SetLabelText(tr("Installing and configuring GRUB..."));
         SetGrub = new QProcess(this);
         UpDateGrub = new QProcess(this);
