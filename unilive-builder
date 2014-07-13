@@ -1,0 +1,165 @@
+#!/bin/bash
+
+# The following is a native implementation of RemasterSys... simplified actually, for AOSC OS2 Distros.
+# Also it's intended for further *Spin Editions* to be built easily and legitimately.
+
+# What's Implemented Now?
+# 1. A simple interface and routine for mounting build drive and do some clean up.
+# 2. Tells the user what to do with configuration files.
+
+# Prolog...
+echo -e "\033[31mHere is something important before you proceed\033[0m"
+echo " - Never hack this program unless YOU KNOW WHAT YOU ARE DOING"
+echo " - You need about 50% or more space left in your target partition"
+echo " - You need about 2-4 GiB of RAM available, the more, the better"
+echo " - This can take you all day if you don't have a beefy computer"
+echo " - There are things that are not allowed to be preinstalled, like Google Chrome, Adobe Flash Plugin and Firefox"
+echo ""
+echo ""
+read -p "Press any key to get started, whenever you feel comfortable"
+
+# Make sure network is working
+echo -e "Please tell me if the network is working \033[36m[INFO]\033[0m"
+echo -e "\033[31mIf it's working, press any key to procceed, if not, press Ctrl-C right away to quit\033[0m"
+echo ""
+read -p "Press any key to procceed or use Ctrl-C to quit..."
+
+# Check if the user is running the script with root priviledges.
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+#Get partition
+echo "Please tell me the partition you've put your distro in: " 
+read partition
+
+# Create mount directory
+mkdir /target 1> /dev/null
+echo -e "Create mount directory... \033[32m[OK]\033[0m"
+
+# Check if partiton is mounted
+umount -Rf $partition
+echo -e "umount-ing partition... \033[32m[OK]\033[0m"
+
+# Check filesystem type
+df -T | grep $partition | awk '{print $2}' 1> /tmp/fs
+echo -e "Detecting FS type of specified partition... \033[32m[OK]\033[0m"
+
+# Not sure why it doesn't work in anyway
+#
+# fsck.`cat /tmp/fs` $partition 
+# if [ "$?" != "0" ] 
+# then 
+#    echo -e "Checking specified partition for FS error or corruption... \033[31m[FAILED]\033[0m"
+# else
+#    echo -e "Checking specified partition for FS error or corruption... \033[32m[OK]\033[0m"
+# fi
+#
+
+# Mount partition to /target
+mount $partition /target &> /dev/null
+if [ "$?" != "0" ]
+then
+    echo -e "Mounting partition... \033[31m[FAILED]\033[0m"
+else
+    echo -e "Mounting partition... \033[32m[OK]\033[0m"
+fi
+
+# LSB Information Fill-in
+echo -e "Now we need to make sure that you have your /etc/lsb-release file filled in... \033[36m[INFO]\033[0m"
+cp /example/lsb-release /examples/lsb-release.change
+vim /example/lsb-release.change
+mv /example/lsb-release.change /target/etc/lsb-release
+echo -e "/etc/lsb-release filled in... \033[36m[IFNO]\033[0m"
+
+# Choose installer to use
+PS3='Please tell me which kind of installer you want to use for your distro: '
+options=("Qt-UI, recommended for Desktop Distros, but requires Qt to be installed" "Non-GUI, designed for CLI or lightweight distro dispite the ease of use" "I don't need one")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Qt-UI, recommended for Desktop Distros, but requires Qt to be installed")
+            echo -e "Now installing packages for the installer to work..."
+            apt-get update -qq
+            echo -e "Updating Package list... \033[32m[OK]\033[0m"
+            chroot /target apt-get install qt-4 expect --force-yes
+            apt-get install git
+            echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
+            echo -e "aquiring and compiling Qt-UI installer... \033[36m[INFO]\033[0m"
+            git clone https://github.com/AOSC-Dev/AOSC-Installer 
+            cp -r AOSC-Installer/Qt-ui /target/
+            cp /examples/build-qt.sh /target/usr/bin/
+            chroot /target build-qt.sh
+            echo -e "aquiring and compiling Qt-UI installer... \033[32m[OK]\033[0m"
+            ;;
+        "Non-GUI, designed for CLI or lightweight distro dispite the ease of use")
+            echo -e "Now installing packages for the installer to work..."
+            apt-get update -qq
+            echo -e "Updating Package list... \033[32m[OK]\033[0m"
+            apt-get install dialog newt expect --force-yes
+            apt-get install git
+            echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
+            echo -e "aquiring and compiling Non-GUI installer... \033[36m[INFO]\033[0m"
+            git clone https://github.com/AOSC-Dev/AOSC-Installer 
+            cp -r AOSC-Installer/Non-GUI /target/
+            cp /examples/build-bash.sh /target/usr/bin/
+            chroot /target build-bash.sh
+            echo -e "aquiring and compiling Non-GUI installer... \033[32m[OK]\033[0m"
+            ;;
+        "I don't need one")
+            echo -e "You won't be able to install the system (a.k.a. Live Only)"
+            read -p "Press any key to continue..."
+            ;;
+        *) echo invalid option;;
+    esac
+done
+
+# Auditing...
+echo -e "As the system will be released as a free distro, we are now going to remove illegal software included... \033[31m[IMPORTANT]\033[0m"
+chroot /target apt-get purge google-chrome flashplugin-nonfree firefox xulrunner
+# A bug of Google Chrome package...
+rm -rf /opt/google-chrome
+echo -e "Cleaning up software... \033[36m[OK]\033[0m"
+
+# Clean up distro...
+echo -e "We are now going to clean up, but meanwhile, you will procceed into a temporary shell to pack up the configuration files for your user... \033[36m[INFO]\033[0m"
+echo -e "\033[31mCopy all the necessary configuration file into /etc/skel !!! Not including your browsing data!!!\033[0m"
+echo -e "\033[31mPlease use exit to quit when you are done.\033[0m"
+chroot /target
+echo -e "Cleaning up target system... \033[36m[INFO]\033[0m"
+rm -rf /target/home/*
+chroot /target useradd -g users live -m 
+rm -f /target/boot/grub/grub.cfg
+rm -f /target/tmp/*
+rm -f /target/var/tmp/*
+rm -f /target/var/log/*
+rm -f /target/var/spool/*
+rm -f /target/var/cache/fontconfig/*
+chroot /target apt-get clean
+echo -e "Now, set the password of the user... \033[36m[INFO]\033[0m"
+chroot /target passwd live
+echo -e "Setting live user... \033[36m[OK]\033[0m"
+rm -rf /target/root/.* 
+rm -rf /target/root/*
+cp -r /target/etc/skel/. /target/root
+chroot /target chown -R root /root
+echo -e "Setting up root... \033[36m[OK\033[0m"
+
+# Packing...
+echo -e "Building squashfs file for the distro... This may take some time!!!\033[36m[INFO]\033[0m"
+umount -Rf /target/{dev,proc,sys}
+mksquashfs /target/* /target/squash -b 524288 -comp xz -Xdict-size 100% -always-use-fragments # safe to hack. adjust according to the actual performance of your computer
+echo -e "Building squashfs file for the distro... \033[32m[OK]\033[0m"
+
+# Build ISO
+echo -e "You are now required to edit the grub.cfg file for the release... \033[36m[INFO]\033[0m"
+vim /target/iso/boot/grub/grub.cfg
+echo -e "Updating GRUB configuration... \033[32m[OK]\033[0m"
+cp -r /example/iso /target/
+mv /target/squash /target/iso/
+grub-mkrescue -o /target/aosc_os2-custom.iso /target/iso
+echo -e "Now building iso for the distro... \033[32m[OK]\033[0m"
+
+# Final phase
+echo -e "Now the iso is ready, be ready to share! \033[36m[HURRAY!!!]\033[0m"
