@@ -68,9 +68,9 @@ fi
 
 # LSB Information Fill-in
 echo -e "Now we need to make sure that you have your /etc/lsb-release file filled in... \033[36m[INFO]\033[0m"
-cp /example/lsb-release /examples/lsb-release.change
-vim /example/lsb-release.change
-mv /example/lsb-release.change /target/etc/lsb-release
+cp lsb-release lsb-release.change
+vim lsb-release.change
+mv lsb-release.change /target/etc/lsb-release
 echo -e "/etc/lsb-release filled in... \033[36m[IFNO]\033[0m"
 
 # Choose installer to use
@@ -156,7 +156,7 @@ echo -e "Building squashfs file for the distro... \033[32m[OK]\033[0m"
 echo -e "You are now required to edit the grub.cfg file for the release... \033[36m[INFO]\033[0m"
 vim /target/iso/boot/grub/grub.cfg
 echo -e "Updating GRUB configuration... \033[32m[OK]\033[0m"
-cp -r /example/iso /target/
+cp -r /example-iso-root /target/
 mv /target/squash /target/iso/
 grub-mkrescue -o /target/aosc_os2-custom.iso /target/iso
 echo -e "Now building iso for the distro... \033[32m[OK]\033[0m"
