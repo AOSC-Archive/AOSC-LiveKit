@@ -2,4 +2,4 @@
 cd "$1"
 strip bin/busybox
 strip --strip-debug lib/*.so*
-find . -depth | cpio -o -H newc | ${3-xz -z --check=crc32 --x86 --lzma2=preset=8e,nice=273} > "${2-initrd}"
+find . -depth | cpio -o -H newc | ${3-xz -z --check=crc32 --x86 --lzma2=preset=8e,nice=273} > "${2-../initrd}"
