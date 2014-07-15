@@ -27,7 +27,7 @@
 # TODOs
 # Re-write Installer selection, consider co-operating with autobuild or even the package manager
 # do_ok() defect: unable to get variables' values after $2 is done.
-utils=${1:-$(readlink -m $0)}
+utils=${1:-$(dirname $(readlink -m $0))}
 scriptname=unilive-builder
 
 # ISO Boot Check
