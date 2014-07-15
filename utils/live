@@ -13,7 +13,6 @@ _find_decompressor() {
 
 exinitramfs() {
   _find_decompressor $1
-  mkdir ${2:-$1}; cd ${2:-$1}
+  mkdir ${2:-$1.unpacked}; cd ${2:-$1.unpacked}
   $_decomp $1 | cpio -i
 }
-
