@@ -1,4 +1,19 @@
-cd "$1"
-strip bin/busybox
-strip --strip-debug lib/*.so*
-find . -depth | cpio -o -H newc | ${3-xz -z --check=crc32 --x86 --lzma2=preset=8e,nice=273} > "${2-../initrd}"
+alias XZ='xz'
+mkinitramfs() {
+  cd "$1"
+  strip bin/busybox
+  strip --strip-debug lib/*.so*
+  find . -depth | cpio -o -H newc | ${3-xz -z --check=crc32 --x86 --lzma2=preset=8e,nice=273} > "${2-../initrd}"
+}
+
+_find_decompressor() {
+  _decomp=$(file $1| grep compressed | cut -f 2 -d ":" | cut -f 2 -d " ")
+  if [ $_decomp ]; then _decomp+="-cd"; else _decomp=cat; fi
+}
+
+exinitramfs() {
+  _find_decompressor $1
+  mkdir ${2:-$1}; cd ${2:-$1}
+  $_decomp $1 | cpio -i
+}
+

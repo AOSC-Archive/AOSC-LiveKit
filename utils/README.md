@@ -8,7 +8,7 @@ Usage:`source live`.
 
 Functions:
 ###mkinitramfs
-`mkinitramfa source [target] ["somezip -someflag"]
+`mkinitramfs source [target] ["somezip -someflag"]`
 
 ###exinitramfs
-``exinitramfs source [dest]``
+`exinitramfs source [dest]`
