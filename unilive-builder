@@ -6,16 +6,20 @@
 # 1. A simple interface and routine for mounting build drive and do some clean up.
 # 2. Tells the user what to do with configuration files.
 
-utils=${1:-$(dirname $0)}
+# TODOs
+# Re-write Installer selection, consider co-operating with autobuild or even the package manager
+# do_ok() defect: unable to get variables' values after $2 is done.
+utils=${1:-$(readlink -m $0)}
+scriptname=unilive-builder
 
-# ISO Root Check
+# ISO Boot Check
 if ! [ -d ${utils}/example-iso-boot ]; then
   echo -e "example iso root not found.\nGo to github.com/AOSC-Dev/AOSC-InstallKit to get it."
   exit 1
 fi
 
 # Prolog...
-echo -e "\033[31mHere is something important before you proceed\033[0m"
+echo -e "\e[31mHere is something important before you proceed\e[0m"
 echo " - Never hack this program unless YOU KNOW WHAT YOU ARE DOING"
 echo " - You need about 50% or more space left in your target partition"
 echo " - You need about 2-4 GiB of RAM available, the more, the better"
@@ -26,60 +30,48 @@ echo ""
 read -p "Press any key to get started, whenever you feel comfortable"
 
 # Make sure network is working
-echo -e "Please tell me if the network is working \033[36m[INFO]\033[0m"
-echo -e "\033[31mIf it's working, press any key to procceed, if not, press Ctrl-C right away to quit\033[0m"
-echo ""
+echo -e "Please tell me if the network is working \e[36m[INFO]\e[0m"
+echo -e "\e[31mIf it's working, press any key to procceed, if not, press Ctrl-C right away to quit\e[0m"
+echo 
 read -p "Press any key to procceed or use Ctrl-C to quit..."
 
 # Check if the user is running the script with root priviledges.
-if [ "$(id -u)" != "0" ]; then
+if [ "$EUID" != "0" ]; then
    echo "This script must be run as root" 1>&2
    exit 1
 fi
 
 # Get partition
 echo "Please tell me the partition you've put your distro in: " 
-read partition
+read -e -i "/dev/" -p "partition>" partition
 
-# Create mount directory
-mkdir /target 1> /dev/null
-echo -e "Create mount directory... \033[32m[OK]\033[0m"
+do_ok "Create mount directory..." "mkdir /target > /dev/null"
 
-# Check if partiton is mounted
-umount -Rf $partition
-echo -e "umount-ing partition... \033[32m[OK]\033[0m"
+do_ok "umount-ing $partition" "umount -Rf $partition || true"
 
 # Check filesystem type
-df -T | grep $partition | awk '{print $2}' 1> /tmp/fs
-echo -e "Detecting FS type of specified partition... \033[32m[OK]\033[0m"
+# Follow-up printf used as workaround.
+do_ok "Detect FS type of specified partition=" "fs=$(df -T | grep $partition | awk '{print $2}' 2>/dev/null; printf "$fs")"
 
-# Not sure why it doesn't work in anyway
-#
-# fsck.`cat /tmp/fs` $partition 
-# if [ "$?" != "0" ] 
-# then 
-#   echo -e "Checking specified partition for FS error or corruption... \033[31m[FAILED]\033[0m"
-# else
-#   echo -e "Checking specified partition for FS error or corruption... \033[32m[OK]\033[0m"
-# fi
-#
-
-# Mount partition to /target
-mount $partition /target &> /dev/null
-if [ "$?" != "0" ]
-then
-  echo -e "Mounting partition... \033[31m[FAILED]\033[0m"
-else
-  echo -e "Mounting partition... \033[32m[OK]\033[0m"
+if [ "fs" == "fuseblk" ]; then
+  echo -e "fuseblk fs detected. [\e[31mWARN\e[0m]\nPlease enter your real fs name as used in mount and fsck:"
+  echo -e "Please also make sure you are using a POSIX-compatible fs\nso anything don't get messed up."
+  read -e -p "fs=" -i "$fs" fs
 fi
 
+# Not sure why it doesn't work in anyway
+# do_ok "Checking specified partition for FS error or corruption..." "fsck.$fs $partition || ignore_command_not_found" || exit 1
+
+# Mount partition to /target
+do_ok "mounting partition.." "mount -t fs $partition /target &> /dev/null"
+
 # LSB Information Fill-in
-echo -e "Now we need to make sure that you have your /etc/lsb-release file filled in... \033[36m[INFO]\033[0m"
+echo -e "Now we need to make sure that you have your /etc/lsb-release file filled in... \e[36m[INFO]\e[0m"
 lsbinput
 lsbgen > lsb-release.change
 vim lsb-release.change
 mv lsb-release.change /target/etc/lsb-release
-echo -e "/etc/lsb-release filled in... \033[36m[IFNO]\033[0m"
+echo -e "/etc/lsb-release filled in... \e[36m[INFO]\e[0m"
 
 # Choose installer to use
 # Modernize!
@@ -91,30 +83,30 @@ do
     "Qt-UI, recommended for Desktop Distros, but requires Qt to be installed")
     echo -e "Now installing packages for the installer to work..."
     apt-get update -qq
-    echo -e "Updating Package list... \033[32m[OK]\033[0m"
+    echo -e "Updating Package list... \e[32m[OK]\e[0m"
     chroot /target apt-get install qt-4 expect --force-yes
     apt-get install git
-    echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
-    echo -e "aquiring and compiling Qt-UI installer... \033[36m[INFO]\033[0m"
+    echo -e "Installing necessary packages... \e[32m[OK]\e[0m"
+    echo -e "aquiring and compiling Qt-UI installer... \e[36m[INFO]\e[0m"
     git clone https://github.com/AOSC-Dev/AOSC-Installer 
     cp -r AOSC-Installer/Qt-ui /target/
     cp /examples/build-qt.sh /target/usr/bin/
     chroot /target build-qt.sh
-    echo -e "aquiring and compiling Qt-UI installer... \033[32m[OK]\033[0m"
+    echo -e "aquiring and compiling Qt-UI installer... \e[32m[OK]\e[0m"
     ;;
     "Non-GUI, designed for CLI or lightweight distro dispite the ease of use")
     echo -e "Now installing packages for the installer to work..."
     apt-get update -qq
-    echo -e "Updating Package list... \033[32m[OK]\033[0m"
+    echo -e "Updating Package list... \e[32m[OK]\e[0m"
     apt-get install dialog newt expect --force-yes
     apt-get install git
-    echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
-    echo -e "aquiring and compiling Non-GUI installer... \033[36m[INFO]\033[0m"
+    echo -e "Installing necessary packages... \e[32m[OK]\e[0m"
+    echo -e "aquiring and compiling Non-GUI installer... \e[36m[INFO]\e[0m"
     git clone https://github.com/AOSC-Dev/AOSC-Installer 
     cp -r AOSC-Installer/Non-GUI /target/
     cp /examples/build-bash.sh /target/usr/bin/
     chroot /target build-bash.sh
-    echo -e "aquiring and compiling Non-GUI installer... \033[32m[OK]\033[0m"
+    echo -e "aquiring and compiling Non-GUI installer... \e[32m[OK]\e[0m"
     ;;
     "I don't need one")
     echo -e "You won't be able to install the system (a.k.a. Live Only)"
@@ -125,18 +117,18 @@ do
 done
 
 # Auditing...
-echo -e "As the system will be released as a free distro, we are now going to remove illegal software included... \033[31m[IMPORTANT]\033[0m"
+echo -e "As the system will be released as a free distro, we are now going to remove illegal software included... \e[31m[IMPORTANT]\e[0m"
 chroot /target apt-get purge google-chrome flashplugin-nonfree firefox xulrunner
 # A bug of Google Chrome package...
 rm -rf /opt/google-chrome
-echo -e "Cleaning up software... \033[36m[OK]\033[0m"
+echo -e "Cleaning up software... \e[36m[OK]\e[0m"
 
 # Clean up distro...
-echo -e "We are now going to clean up, but meanwhile, you will procceed into a temporary shell to pack up the configuration files for your user... \033[36m[INFO]\033[0m"
-echo -e "\033[31mCopy all the necessary configuration file into /etc/skel !!! Not including your browsing data!!!\033[0m"
-echo -e "\033[31mPlease use exit to quit when you are done.\033[0m"
+echo -e "We are now going to clean up, but meanwhile, you will procceed into a temporary shell to pack up the configuration files for your user... \e[36m[INFO]\e[0m"
+echo -e "\e[31mCopy all the necessary configuration file into /etc/skel !!! Not including your browsing data!!!\e[0m"
+echo -e "\e[31mPlease use exit to quit when you are done.\e[0m"
 chroot /target
-echo -e "Cleaning up target system... \033[36m[INFO]\033[0m"
+echo -e "Cleaning up target system... \e[36m[INFO]\e[0m"
 rm -rf /target/home/*
 chroot /target useradd -g users live -m 
 rm -f /target/boot/grub/grub.cfg
@@ -146,17 +138,17 @@ rm -f /target/var/log/*
 rm -f /target/var/spool/*
 rm -f /target/var/cache/fontconfig/*
 chroot /target apt-get clean
-echo -e "Now, set the password of the user... \033[36m[INFO]\033[0m"
+echo -e "Now, set the password of the user... \e[36m[INFO]\e[0m"
 chroot /target passwd live
-echo -e "Setting live user... \033[36m[OK]\033[0m"
+echo -e "Setting live user... \e[36m[OK]\e[0m"
 rm -rf /target/root/.* 
 rm -rf /target/root/*
 cp -r /target/etc/skel/. /target/root
 chroot /target chown -R root /root
-echo -e "Setting up root... \033[36m[OK\033[0m"
+echo -e "Setting up root... \e[36m[OK\e[0m"
 
 # Packing...
-echo -e "Building squashfs file for the distro... This may take some time!!!\033[36m[INFO]\033[0m"
+echo -e "Building squashfs file for the distro... This may take some time!!!\e[36m[INFO]\e[0m"
 umount -Rf /target/{dev,proc,sys}
 echo "Enter the Squashfs flags you want to use: "
 echo "You may want to use: 
@@ -167,27 +159,27 @@ on slow Medias) at the costs of mush longer compression time."
 $SQUASHFLAGS="-b 1048576 -comp xz -Xdict-size 100% -Xbcj x86"
 read -e -p "mksquashfs target squash" -i "$SQUASHFLAGS" -t 20 || true
 mksquashfs /target/* /target/squash $SQUASHFLAGS
-echo -e "Building squashfs file for the distro... \033[32m[OK]\033[0m"
+echo -e "Building squashfs file for the distro... \e[32m[OK]\e[0m"
 
 # Build ISO
-echo -e "You are now required to edit the grub.cfg file for the release... \033[36m[INFO]\033[0m"
+echo -e "You are now required to edit the grub.cfg file for the release... \e[36m[INFO]\e[0m"
 mkgrubcfg > /target/iso/boot/grub/grub.cfg
-echo -e "Updating GRUB configuration... \033[32m[OK]\033[0m"
+echo -e "Updating GRUB configuration... \e[32m[OK]\e[0m"
 cp -r /example-iso-boot /target/iso/boot
 mv /target/squash /target/iso/
 grub-mkrescue -o /target/aosc_os2-custom.iso /target/iso
-echo -e "Now building iso for the distro... \033[32m[OK]\033[0m"
+echo -e "Now building iso for the distro... \e[32m[OK]\e[0m"
 
 # Final phase
-echo -e "Now the iso is ready, be ready to share! \033[36m[HURRAY!!!]\033[0m"
+echo -e "Now the iso is ready, be ready to share! \e[36m[HURRAY!!!]\e[0m"
 
 
 # Function Includes Start
-lsbinput(){
+lsbinput() {
   . /etc/lsb-releaae || true
   . /etc/os-release || true
-  echo "Input the following system infos"
-  read -e -p "Distribution Name/ID of your Distro:" -i ${DISTRIB_ID-AOSC_AnthonOS} DISTRIB_ID
+  echo "Input the following system infos:"
+  read -e -p "Distribution Name/ID of your Distro:" -i ${DISTRIB_ID-$ID} DISTRIB_ID
   read -e -p "Version/Release:" -i ${DISTRIB_RELEASE-$VERSION} DISTRIB_RELEASE
   read -e -p "Codename:" -i ${DISTRIB_CODENAME-Misaka} DISTRIB_CODENAME
   read -e -p "Description:" -i ${DISTRIB_DESCRIPTION-$PRETTY_NAME} DISTRIB_DESCRIPTION 
@@ -195,16 +187,18 @@ lsbinput(){
 }
 
 # lsbgen > lsb-release.change
-lsbgen(){
+lsbgen() {
   echo "# LSB Release information generated by AOSC unilive-builder"
   echo "# Source system $NAME, distro timestamp `date -u +%s`($(LANG=C date -u))."
+  # Comment the line if LSB not enabled
+  ! [ $LSB_VERSION ] && printf "# "
   for i in LSB_VERSION DISTRIB_{ID,RELEASE,CODENAME,DESCRIPTION}; do
-    echo "$i=\"${$i}\""
+    echo "$i=\"$(eval echo \$$i)\""
   done
 }
 
 # mkgrubcfg > grub.cfg at iso
-mkgrubcfg(){
+mkgrubcfg() {
   echo -e "# grub.cfg for Live Medias generated by unilive-builder\n# generate-time: $(LANG=C date -u)/$(date -u +%s)"
   # Skeleton
   cat ${utils}/grub.cfg | tail -n +2| sed "s/\(LANG\)/$LANG/g" | sed "s/\(INITRD\)/$(basename $(ls example-iso-boot/initrd*))/g"
@@ -212,11 +206,31 @@ mkgrubcfg(){
   menuentry "$DISTRIB_ID, $DISTRIB_RELEASE \"$DISTRIB_CODENAME\" with safe mode graphics" loadlive quiet nomodeset rw rootdelay=5
 }
 
-menuentry(){
+menuentry() {
   echo "memuentry \"$1\" {"
   shift
   echo -e "  $*"
   echo "}"
 }
 
+do_ok() {
+  printf "$1"
+  (eval "$2" 2>>/tmp/$scriptname) && echo -e "$3[\e[32mOK\e[0m]" || (
+    echo -e "$3[\e[31mFAILED\e[0m]"
+    read -p "Error occoured. Press any key to continue." -n 1 -t 5 
+    echo "Error information available in /tmp/$scriptname" && return 1
+  )
+}
+
+ignore_command_not_found() { 
+  local _ret=$?
+  case _ret in
+    127|0)
+      return 0
+      ;;
+    *)
+      return $_ret
+      ;;
+   esac
+  }
 # -*- vim:fenc=utf-8:shiftwidth=2:softtabstop=2
