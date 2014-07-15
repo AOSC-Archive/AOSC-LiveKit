@@ -6,10 +6,10 @@
 # 1. A simple interface and routine for mounting build drive and do some clean up.
 # 2. Tells the user what to do with configuration files.
 
-utils-path=${1:-$(dirname $0)}
+utils=${1:-$(dirname $0)}
 
 # ISO Root Check
-if ! [ -d ${utils-path}/example-iso-boot ]; then
+if ! [ -d ${utils}/example-iso-boot ]; then
   echo -e "example iso root not found.\nGo to github.com/AOSC-Dev/AOSC-InstallKit to get it."
   exit 1
 fi
@@ -58,9 +58,9 @@ echo -e "Detecting FS type of specified partition... \033[32m[OK]\033[0m"
 # fsck.`cat /tmp/fs` $partition 
 # if [ "$?" != "0" ] 
 # then 
-#    echo -e "Checking specified partition for FS error or corruption... \033[31m[FAILED]\033[0m"
+#   echo -e "Checking specified partition for FS error or corruption... \033[31m[FAILED]\033[0m"
 # else
-#    echo -e "Checking specified partition for FS error or corruption... \033[32m[OK]\033[0m"
+#   echo -e "Checking specified partition for FS error or corruption... \033[32m[OK]\033[0m"
 # fi
 #
 
@@ -68,9 +68,9 @@ echo -e "Detecting FS type of specified partition... \033[32m[OK]\033[0m"
 mount $partition /target &> /dev/null
 if [ "$?" != "0" ]
 then
-    echo -e "Mounting partition... \033[31m[FAILED]\033[0m"
+  echo -e "Mounting partition... \033[31m[FAILED]\033[0m"
 else
-    echo -e "Mounting partition... \033[32m[OK]\033[0m"
+  echo -e "Mounting partition... \033[32m[OK]\033[0m"
 fi
 
 # LSB Information Fill-in
@@ -82,44 +82,45 @@ mv lsb-release.change /target/etc/lsb-release
 echo -e "/etc/lsb-release filled in... \033[36m[IFNO]\033[0m"
 
 # Choose installer to use
+# Modernize!
 PS3='Please tell me which kind of installer you want to use for your distro: '
 options=("Qt-UI, recommended for Desktop Distros, but requires Qt to be installed" "Non-GUI, designed for CLI or lightweight distro dispite the ease of use" "I don't need one")
 select opt in "${options[@]}"
 do
     case $opt in
-        "Qt-UI, recommended for Desktop Distros, but requires Qt to be installed")
-            echo -e "Now installing packages for the installer to work..."
-            apt-get update -qq
-            echo -e "Updating Package list... \033[32m[OK]\033[0m"
-            chroot /target apt-get install qt-4 expect --force-yes
-            apt-get install git
-            echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
-            echo -e "aquiring and compiling Qt-UI installer... \033[36m[INFO]\033[0m"
-            git clone https://github.com/AOSC-Dev/AOSC-Installer 
-            cp -r AOSC-Installer/Qt-ui /target/
-            cp /examples/build-qt.sh /target/usr/bin/
-            chroot /target build-qt.sh
-            echo -e "aquiring and compiling Qt-UI installer... \033[32m[OK]\033[0m"
-            ;;
-        "Non-GUI, designed for CLI or lightweight distro dispite the ease of use")
-            echo -e "Now installing packages for the installer to work..."
-            apt-get update -qq
-            echo -e "Updating Package list... \033[32m[OK]\033[0m"
-            apt-get install dialog newt expect --force-yes
-            apt-get install git
-            echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
-            echo -e "aquiring and compiling Non-GUI installer... \033[36m[INFO]\033[0m"
-            git clone https://github.com/AOSC-Dev/AOSC-Installer 
-            cp -r AOSC-Installer/Non-GUI /target/
-            cp /examples/build-bash.sh /target/usr/bin/
-            chroot /target build-bash.sh
-            echo -e "aquiring and compiling Non-GUI installer... \033[32m[OK]\033[0m"
-            ;;
-        "I don't need one")
-            echo -e "You won't be able to install the system (a.k.a. Live Only)"
-            read -p "Press any key to continue..."
-            ;;
-        *) echo invalid option;;
+    "Qt-UI, recommended for Desktop Distros, but requires Qt to be installed")
+    echo -e "Now installing packages for the installer to work..."
+    apt-get update -qq
+    echo -e "Updating Package list... \033[32m[OK]\033[0m"
+    chroot /target apt-get install qt-4 expect --force-yes
+    apt-get install git
+    echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
+    echo -e "aquiring and compiling Qt-UI installer... \033[36m[INFO]\033[0m"
+    git clone https://github.com/AOSC-Dev/AOSC-Installer 
+    cp -r AOSC-Installer/Qt-ui /target/
+    cp /examples/build-qt.sh /target/usr/bin/
+    chroot /target build-qt.sh
+    echo -e "aquiring and compiling Qt-UI installer... \033[32m[OK]\033[0m"
+    ;;
+    "Non-GUI, designed for CLI or lightweight distro dispite the ease of use")
+    echo -e "Now installing packages for the installer to work..."
+    apt-get update -qq
+    echo -e "Updating Package list... \033[32m[OK]\033[0m"
+    apt-get install dialog newt expect --force-yes
+    apt-get install git
+    echo -e "Installing necessary packages... \033[32m[OK]\033[0m"
+    echo -e "aquiring and compiling Non-GUI installer... \033[36m[INFO]\033[0m"
+    git clone https://github.com/AOSC-Dev/AOSC-Installer 
+    cp -r AOSC-Installer/Non-GUI /target/
+    cp /examples/build-bash.sh /target/usr/bin/
+    chroot /target build-bash.sh
+    echo -e "aquiring and compiling Non-GUI installer... \033[32m[OK]\033[0m"
+    ;;
+    "I don't need one")
+    echo -e "You won't be able to install the system (a.k.a. Live Only)"
+    read -p "Press any key to continue..."
+    ;;
+    *) echo invalid option;;
     esac
 done
 
@@ -157,7 +158,15 @@ echo -e "Setting up root... \033[36m[OK\033[0m"
 # Packing...
 echo -e "Building squashfs file for the distro... This may take some time!!!\033[36m[INFO]\033[0m"
 umount -Rf /target/{dev,proc,sys}
-mksquashfs /target/* /target/squash -b 524288 -comp xz -Xdict-size 100% -always-use-fragments # safe to hack. adjust according to the actual performance of your computer
+echo "Enter the Squashfs flags you want to use: "
+echo "You may want to use: 
+-always-use-fragments to sacrifice mechanic medias'performance
+for better compression rates.
+-Xbcj x86 to make the image smaller(and faster to read
+on slow Medias) at the costs of mush longer compression time."
+$SQUASHFLAGS="-b 1048576 -comp xz -Xdict-size 100% -Xbcj x86"
+read -e -p "mksquashfs target squash" -i "$SQUASHFLAGS" -t 20 || true
+mksquashfs /target/* /target/squash $SQUASHFLAGS
 echo -e "Building squashfs file for the distro... \033[32m[OK]\033[0m"
 
 # Build ISO
@@ -178,25 +187,27 @@ lsbinput(){
   . /etc/lsb-releaae || true
   . /etc/os-release || true
   echo "Input the following system infos"
-  read -p "Distribution Name/ID of your Distro:" -i ${DISTRIB_ID-AOSC_AnthonOS} DISTRIB_ID
-  read -p "Version/Release:" -i ${DISTRIB_RELEASE-$VERSION} DISTRIB_RELEASE
-  read -p "Codename:" -i ${DISTRIB_CODENAME-Misaka} DISTRIB_CODENAME
-  read -p "Descriptive Dtstription:" -i ${DISTRIB_DISTRIPTION-$PRETTY_NAME} DISTRIB_DISTRIPTION 
+  read -e -p "Distribution Name/ID of your Distro:" -i ${DISTRIB_ID-AOSC_AnthonOS} DISTRIB_ID
+  read -e -p "Version/Release:" -i ${DISTRIB_RELEASE-$VERSION} DISTRIB_RELEASE
+  read -e -p "Codename:" -i ${DISTRIB_CODENAME-Misaka} DISTRIB_CODENAME
+  read -e -p "Description:" -i ${DISTRIB_DESCRIPTION-$PRETTY_NAME} DISTRIB_DESCRIPTION 
   lsb_release &> /dev/null && read -p "LSB Version:" -i ${LSB_VERSION-4.1} LSB_VERSION
 }
 
 # lsbgen > lsb-release.change
 lsbgen(){
   echo "# LSB Release information generated by AOSC unilive-builder"
-  echo "# Source system was $NAME, distro timestamp `date -u +%s`."
+  echo "# Source system $NAME, distro timestamp `date -u +%s`($(LANG=C date -u))."
   for i in LSB_VERSION DISTRIB_{ID,RELEASE,CODENAME,DESCRIPTION}; do
     echo "$i=\"${$i}\""
   done
 }
+
 # mkgrubcfg > grub.cfg at iso
 mkgrubcfg(){
+  echo -e "# grub.cfg for Live Medias generated by unilive-builder\n# generate-time: $(LANG=C date -u)/$(date -u +%s)"
   # Skeleton
-  cat grub.cfg | sed "s/\(LANG\)/$LANG/g" | sed "s/\(INITRD\)/$(basename $(ls example-iso-boot/initrd*))/g"
+  cat ${utils}/grub.cfg | tail -n +2| sed "s/\(LANG\)/$LANG/g" | sed "s/\(INITRD\)/$(basename $(ls example-iso-boot/initrd*))/g"
   menuentry "$DISTRIB_ID, $DISTRIB_RELEASE \"$DISTRIB_CODENAME\"" loadlive quiet rw rootdelay=5
   menuentry "$DISTRIB_ID, $DISTRIB_RELEASE \"$DISTRIB_CODENAME\" with safe mode graphics" loadlive quiet nomodeset rw rootdelay=5
 }
@@ -207,3 +218,5 @@ menuentry(){
   echo -e "  $*"
   echo "}"
 }
+
+# -*- vim:fenc=utf-8:shiftwidth=2:softtabstop=2
