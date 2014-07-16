@@ -75,7 +75,7 @@ do_ok "umount-ing $partition" "umount -Rf $partition || true"
 do_ok "Detect FS type of specified partition=" "fs=$(df -T | grep $partition | awk '{print $2}' 2>/dev/null; printf "$fs")"
 
 if [ "fs" == "fuseblk" ]; then
-  echo -e "fuseblk fs detected. [\e[31mWARN\e[0m]\nPlease enter your real fs name as used in mount and fsck:"
+  echo -e "fuseblk fs detected.              [\e[31mWARN\e[0m]\nPlease enter your real fs name as used in mount and fsck:"
   echo -e "Please also make sure you are using a POSIX-compatible fs\nso anything don't get messed up."
   read -e -p "fs=" -i "$fs" fs
 fi
@@ -126,28 +126,26 @@ esac
 
 
 # Auditing...
-echo -e "As the system will be released as a free distro, we are now going to remove illegal software included... \e[31m[IMPORTANT]\e[0m"
-chroot /target apt-get purge google-chrome flashplugin-nonfree firefox xulrunner
+echo -e "As the system will be released as a free/libre distro, 
+we are now going to remove proprietary software... \e[31m[IMPORTANT]\e[0m"
+chroot /target "apt-get purge google-chrome flashplugin-nonfree firefox xulrunner"
 # A bug of Google Chrome package...
-do_ok "Cleaning up software..." "rm -rf /opt/google-chrome"
+do_ok "Performing Google Chrome Cleanup..." "rm -rf /opt/google-chrome"
 
 # Clean up distro...
-echo -e "We are now going to clean up, but meanwhile, you will procceed into a temporary shell to pack up the configuration files for your user... \e[36m[INFO]\e[0m"
-echo -e "\e[31mCopy all the necessary configuration file into /etc/skel !!! Not including your browsing data!!!\e[0m"
-echo -e "\e[31mPlease use exit to quit when you are done.\e[0m"
+echo -e "We are now going to clean up, but meanwhile,
+you will procceed into a temporary shell to pack up the
+configuration files for your user... \e[36m[INFO]\e[0m"
+echo -e "\e[31mRemember to copy all the necessary files into /etc/skel !!!\n\e[1mNot including your browsing data!!!\e[0m"
+echo -e "\e[31mPlease use 'exit' to quit when you are done.\e[0m"
 chroot /target
-echo -e "Cleaning up target system... \e[36m[INFO]\e[0m"
-rm -rf /target/home/*
+do_ok "Cleaning up target system... \" "(rm -rf /target/home/*
 chroot /target useradd -g users live -m 
-rm -f /target/boot/grub/grub.cfg
-rm -f /target/tmp/*
-rm -f /target/var/tmp/*
-rm -f /target/var/log/*
-rm -f /target/var/spool/*
-rm -f /target/var/cache/fontconfig/*
-chroot /target apt-get clean
-echo -e "Now, set the password of the user... \e[36m[INFO]\e[0m"
-do_ok "Setting up live user..." ""
+rm -rf /target/boot/grub/grub.cfg /target/tmp/* /target/var/{tmp,log,spool,cache/fontconfig/*}
+chroot /target apt-get clean) >> /tmp/$scriptname.out"
+echo -e "Now, set the password of the user... \e[36m[INFO]\e[1m\nNote: Using 'live' as password is recommended.\e[0m"
+read -e -p "Password for live:" -i live livepass
+do_ok "Setting up live user..." "change_passwd live $livepass"
 rm -rf /target/root/.* 
 rm -rf /target/root/*
 cp -r /target/etc/skel/. /target/root
@@ -161,7 +159,7 @@ echo "You may want to use:
 -always-use-fragments to sacrifice mechanic medias'performance
 for better compression rates.
 -Xbcj x86 to make the image smaller(and faster to read
-on slow Medias) at the costs of mush longer compression time."
+on slow Medias) at the cost of mush longer compression time."
 $SQUASHFLAGS="-b 1048576 -comp xz -Xdict-size 100% -Xbcj x86"
 read -e -p "mksquashfs target squash" -i "$SQUASHFLAGS" -t 20 || true
 # do_ok exception since there is a progress bar
@@ -173,7 +171,7 @@ echo -e "\r\rBuilding squashfs file for the distro... \e[32m[OK]\e[0m"
 
 # Build ISO
 echo -e "You are now required to edit the grub.cfg file for the release... \e[36m[INFO]\e[0m"
-do_ok "Updating GRUB configuration..." "mkgrubcfg > /target/iso/boot/grub/grub.cfg && (vi grub.cfg&>/dev/null; true) || false"
+do_ok "Updating GRUB configuration..." "mkgrubcfg > /target/iso/boot/grub/grub.cfg && (vi grub.cfg; true) || false"
 do_ok "Now building iso for the distro..." "
 cp -r /example-iso-boot /target/iso/boot
 mv /target/squash /target/iso/
