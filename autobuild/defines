@@ -1,4 +1,5 @@
 PKGNAME="aosc-installers"
 PKGVER=0-$(date -u +%s)
 PKGDES="helper scripts for aosc installers."
-PKGDEP="aosc-installer-qt aosc-installer-sh"
+PKGDEP="aosc-installer-sh"
+PKGRECOM="aosc-installer-qt"

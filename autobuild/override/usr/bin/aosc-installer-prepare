@@ -2,9 +2,10 @@
 # aosc-installer-prepare: helps generate aosc-installer-related information.
 # Run this only once.
 
-echo "aosc-installer-sh-interface aosc-installer-sh" >> /etc/bashrc
-add_favorite $1
+echo "sudo su aosc-installer-sh-interface" >> /etc/bashrc
+add_favorite aosc-installer-qt
 
 add_favourite() {
+  # First test it if it exists
   # Adds the specified installer to various DEs' favourite list.
 }

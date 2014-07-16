@@ -92,54 +92,41 @@ mv lsb-release.change /target/etc/lsb-release
 echo -e "/etc/lsb-release filled in... \e[36m[INFO]\e[0m"
 
 # Choose installer to use
-# Modernize!
-PS3='Please tell me which kind of installer you want to use for your distro: '
-options=("Qt-UI, recommended for Desktop Distros, but requires Qt to be installed" "Non-GUI, designed for CLI or lightweight distro dispite the ease of use" "I don't need one")
-select opt in "${options[@]}"
-do
-    case $opt in
-    "Qt-UI, recommended for Desktop Distros, but requires Qt to be installed")
-    echo -e "Now installing packages for the installer to work..."
-    apt-get update -qq
-    echo -e "Updating Package list... \e[32m[OK]\e[0m"
-    chroot /target apt-get install qt-4 expect --force-yes
-    apt-get install git
-    echo -e "Installing necessary packages... \e[32m[OK]\e[0m"
-    echo -e "aquiring and compiling Qt-UI installer... \e[36m[INFO]\e[0m"
-    git clone https://github.com/AOSC-Dev/AOSC-Installer 
-    cp -r AOSC-Installer/Qt-ui /target/
-    cp /examples/build-qt.sh /target/usr/bin/
-    chroot /target build-qt.sh
-    echo -e "aquiring and compiling Qt-UI installer... \e[32m[OK]\e[0m"
-    ;;
-    "Non-GUI, designed for CLI or lightweight distro dispite the ease of use")
-    echo -e "Now installing packages for the installer to work..."
-    apt-get update -qq
-    echo -e "Updating Package list... \e[32m[OK]\e[0m"
-    apt-get install dialog newt expect --force-yes
-    apt-get install git
-    echo -e "Installing necessary packages... \e[32m[OK]\e[0m"
-    echo -e "aquiring and compiling Non-GUI installer... \e[36m[INFO]\e[0m"
-    git clone https://github.com/AOSC-Dev/AOSC-Installer 
-    cp -r AOSC-Installer/Non-GUI /target/
-    cp /examples/build-bash.sh /target/usr/bin/
-    chroot /target build-bash.sh
-    echo -e "aquiring and compiling Non-GUI installer... \e[32m[OK]\e[0m"
-    ;;
-    "I don't need one")
-    echo -e "You won't be able to install the system (a.k.a. Live Only)"
-    read -p "Press any key to continue..."
-    ;;
-    *) echo invalid option;;
-    esac
-done
+# Dnfize!(try to wrap the install)
+while (read -e -n 1 -p "Would you like to include an installer in your system(Y/n)" -i "Y" installer); do
+echo
+case $installer in
+  y|Y)
+    while (read -e -n 1 -p "Would you like to have a Qt GUI installer?(Y/n)" -i "Y" qt-installer); do
+    echo
+    installers="aosc-installers"
+    case $qt-installer in
+      y|Y|yes)
+        installers+="aosc-installer-qt"
+        break
+        ;;
+      n|N|no)
+        break
+        ;;
+      *)
+        echo "Invalid selection!"
+     esac
+     ;;
+     chroot /target "apt-get install $installers"
+     chroot /target "aosc-installer-prepare"
+ n|N)
+    read -n 1 -e -i "n" -p "Wow, are you sure you want to make a live-only spin?(y/Y)" noinst
+    if ([ "$noinst" == "y" ] || [ "$noinst" == "Y"]); then break; fi
+ *)
+    echo "Invalid selection!"
+esac
+
 
 # Auditing...
 echo -e "As the system will be released as a free distro, we are now going to remove illegal software included... \e[31m[IMPORTANT]\e[0m"
 chroot /target apt-get purge google-chrome flashplugin-nonfree firefox xulrunner
 # A bug of Google Chrome package...
-rm -rf /opt/google-chrome
-echo -e "Cleaning up software... \e[36m[OK]\e[0m"
+do_ok "Cleaning up software..." "rm -rf /opt/google-chrome"
 
 # Clean up distro...
 echo -e "We are now going to clean up, but meanwhile, you will procceed into a temporary shell to pack up the configuration files for your user... \e[36m[INFO]\e[0m"
