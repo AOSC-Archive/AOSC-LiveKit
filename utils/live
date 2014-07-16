@@ -3,7 +3,7 @@ cinitramfs() {
   cd "$1"
   strip bin/busybox
   strip --strip-debug lib/*.so*
-  find . -depth | cpio -o -H newc | ${3-xz -z --check=crc32 --x86 --lzma2=preset=8e,nice=273} > "${2-../initrd}"
+  find . -d | cpio -o -H newc | ${3-xz -z --check=crc32 --x86 --lzma2=preset=8e,nice=273} > "${2-../initrd}"
 }
 
 _find_decompressor() {
@@ -25,7 +25,7 @@ _readlink() {
   [ "$1" == "--help" ] && _rl_help; return 0 
   [ "$1" == "-e" ] && shift 
   if ! [ $1 ]; then _rl_help >&2; return 1; fi
-  echo "$( cd "$( dirname "$1" )" && pwd )"
+  echo "$(cd "$(dirname "$1")" && pwd)"
 }
 (which readlink &>/dev/null) || alias readlink='_readlink'
 
