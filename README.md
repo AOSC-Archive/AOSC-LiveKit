@@ -1,6 +1,6 @@
-AOSC-Installer
+AOSC-LiveKit
 ==============
-Installer for AOSC OS2/3 Distributions.
+Installer and live media builder for AOSC OS2/3 Distributions.
 
 packing
 ----

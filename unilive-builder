@@ -180,6 +180,7 @@ echo -e "Now building iso for the distro... \e[32m[OK]\e[0m"
 
 # Final phase
 echo -e "Now the iso is ready, be ready to share! \e[36m[HURRAY!!!]\e[0m"
+# echo -e "LIVE CLEAR [\e[36mNICONICONI\e[0m]"
 
 
 # Function Includes Start
