@@ -1,8 +1,0 @@
-# Missing rpm
-cd installer-sh
-PKGVER=$PKGVER autobuild
-mv aosc-installer-sh{.deb,_$PKGVER.tar.xz} ..
-cd ../installer-qt
-PKGVER=$PKGVER autobuild
-mv aosc-installer-qt{.deb,_$PKGVER.tar.xz} ..
-cd ..

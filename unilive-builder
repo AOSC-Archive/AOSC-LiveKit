@@ -99,10 +99,9 @@ case $installer in
   y|Y)
     while (read -e -n 1 -p "Would you like to have a Qt GUI installer?(Y/n)" -i "Y" qt-installer); do
     echo
-    installers="aosc-installers"
     case $qt-installer in
       y|Y|yes)
-        installers+="aosc-installer-qt"
+        chroot /target "apt-get install aosc-installer-qt"
         break
         ;;
       n|N|no)
@@ -112,8 +111,7 @@ case $installer in
         echo "Invalid selection!"
      esac
      ;;
-     chroot /target "apt-get install $installers"
-     chroot /target "aosc-installer-prepare"
+     chroot /target "apt-get install aosc-installer-sh"
  n|N)
     read -n 1 -e -i "n" -p "Wow, are you sure you want to make a live-only spin?(y/Y)" noinst
     if ([ "$noinst" == "y" ] || [ "$noinst" == "Y"]); then break; fi
