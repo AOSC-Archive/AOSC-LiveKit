@@ -1,7 +1,4 @@
 #!/bin/bash
-USERNAME=/tmp/username
-PASSWD=/tmp/passwd
-
 expect << EOF
 spawn passwd `cat $USERNAME`
 expect "Enter new UNIX password:"

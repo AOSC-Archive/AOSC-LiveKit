@@ -1,3 +1,0 @@
-isunderx(){
-	[ "$DISPLAY" != "" ]
-}

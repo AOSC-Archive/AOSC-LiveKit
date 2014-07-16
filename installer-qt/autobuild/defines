@@ -1,5 +1,6 @@
+ABTYPE=qtproj
 PKGNAME=aosc-installer
-PKGVER=0-os2-5
+PKGVER=${PKGVER-0-os2-5}
 PKGSEC=utils
 PKGDEP="qt-4 expect gparted sudo apt e2fsprogs reiserfsprogs xfsprogs jfsutils genfstab"
 PKGDES="Installer possibly to be universal, by AOSC."

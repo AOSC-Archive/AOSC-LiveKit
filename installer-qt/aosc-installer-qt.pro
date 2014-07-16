@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = NewQtUi
+TARGET = aosc-installer-qt
 INCLUDEPATH += .
 QT += widgets
 

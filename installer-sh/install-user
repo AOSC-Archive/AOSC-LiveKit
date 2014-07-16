@@ -7,4 +7,4 @@ whiptail --title "User Configuration" --inputbox "And your password please" 15 6
 whiptail --title "User Configuration" --inputbox "Please repeat the password" 15 65 2>$PASSWD
 whiptail --title "User Configuration" --infobox "Now configuring the user and its password..." 10 65
 usermod -l `cat $USERNAME` -md /home/`cat $USERNAME` misaka
-/usr/sbin/cpw.sh 
+LANG=C cpw

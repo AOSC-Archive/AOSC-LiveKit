@@ -1,0 +1,9 @@
+#!/bin/bash
+install-prepare
+
+# -*- vim:fenc=utf-8:shiftwidth=2:softtabstop=2
+
+# add to vimrc if you want indent.
+# filetype indent on
+# set smartindent
+# autocmd BufRead,BufWritePre *.sh normal gg=G

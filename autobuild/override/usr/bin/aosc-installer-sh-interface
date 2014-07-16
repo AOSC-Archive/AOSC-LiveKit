@@ -1,0 +1,11 @@
+#! /bin/bash
+# aosc-installer-sh-interface: Partly-friendly interface for Live Medias' shells.
+
+. /etc/os-release
+whiptail --title "Welcome to $NAME\x21"\
+--yesno "Select what you are going to do:"\
+--yes-button "Install" --no-button "Try it out" 12 60 && aosc-installer-sh || (
+  clear
+  echo -e "Just run \e[1maosc-installer-sh\e[0m if you want to install."
+  exit 0
+)
