@@ -1,0 +1,158 @@
+#!/bin/bash
+install-prepare
+
+# -*- vim:fenc=utf-8:shiftwidth=2:softtabstop=2
+
+# add to vimrc if you want indent.
+# filetype indent on
+# set smartindent
+# autocmd BufRead,BufWritePre *.sh normal gg=G# Automatically merged. For better reading,
+try running gg=G in vim for autoindent after you've set up autoindent.
+install-complete() {
+cat /target/etc/bashrc | head -n -1 > /target/etc/bashrc
+whiptail --title "System Installation Complete!" --infobox "Installation has successfully completed,\n your computer will be now restarted" 15 75
+sleep 5
+sync
+reboot}
+install-configure() {
+BOOT=/tmp/boot_dev
+ESP=/tmp/esp
+mount --bind /dev /target/dev
+mount --bind /proc /target/proc
+mount --bind /sys /target/sys
+mount -vt devpts devpts /target/dev/pts -o gid=5,mode=620
+
+whiptail --title "Post-Copy Configuration" --inputbox "Plese tell me the device name of the boot disk" 12 65 2> $BOOT
+whiptail --title "Post-Copy Configuration" --msgbox "We are now going to install GRUB on your system" 12 65 
+whiptail --title "EFI Users!!!" --yesno "Are you running on EFI?" 12 65 
+if [ $exitstatus = 0 ]; then
+	whiptail --title "EFI Uers!!!" --inputbox "Please tell me the partition where your ESP (EFI System\nPartition) is located." 12 70 2> $ESP
+	mkdir -v /target/efi
+	mount `cat $ESP` /target/efi
+	chroot /target grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=CentralPoint --recheck
+	chroot /target grub-mkconfig -o /boot/grub/grub.cfg
+else
+	whiptail --title "Post-Copy Configuration" --infobox "Installing GRUB to `cat $BOOT`" 12 65
+	chroot /target grub-install --target=i386-pc `cat $BOOT` --recheck
+	chroot /target grub-mkconfig -o /boot/grub/grub.cfg
+fi
+whiptail --title "Post-Copy Configuration" --infobox "Configuring /etc/fstab file..." 12 65
+echo "$TARGET / $FS defaults 1 1" > /target/etc/fstab
+chroot /target install-user
+install-complete
+}
+install-copy() {
+DIRS=(/mnt/squash/*)
+DEST="/target"
+ 
+dialog --title "Copying System Files..." --gauge "Copying directory" 10 75 < <(
+   n=${#DIRS[*]}; 
+ 
+   i=0
+ 
+   for f in "${DIRS[@]}"
+   do
+      PCT=$(( 100*(++i)/n ))
+ 
+cat <<EOF
+XXX
+$PCT
+Copying directory "$f" ...
+XXX
+EOF
+
+   cp -arv $f $DEST &>/dev/null
+   done
+)
+install-configure
+rm $DEST/install-started
+}
+install-install() {
+whiptail --title "Installation Stage" --msgbox "We are now ready to install `lsb_release -i` to `cat $TARGET`, press OK to start." 8 65
+mkdir /target
+mount `cat $TARGET` /target
+install-copy
+
+}
+install-partition() {
+export TARGET=/tmp/target_disk
+export FS=/tmp/target_fs
+
+whiptail --title "Partition Your Hard Drive" --msgbox "Here's your partition table so far:\n\n`fdisk -l`" 24 80
+whiptail --title "Partition Your Hard Drive" --yesno "Now we will pop you into GNU Parted to do some partitioning...\n\nDo you need to change anything?" 15 65
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+	parted
+else
+	true
+fi
+whiptail --title "Partition Your Hard Drive" --inputbox "Please tell me the device name of your target partition: " 10 40 \
+2> "$TARGET"
+whiptail --title "Partition Your Hard Drive" --menu "Please choose a preferred filesystem from below" 15 80 6 \
+"ext3" "Third Extended File System" \
+"ext4" "Fourth Extended File System" \
+"jfs" "Journaled File System" \
+"btrfs" "B-tree File System" \
+"xfs" "XFS" 2> $FS
+whiptail --title "ATTENTION" --yesno "Formatting a partition will cause data lost,\nand _USUALLY_ hard to recover!\n\nAre you sure that you want to format `cat $TARGET` with `cat $FS`?" 15 65 
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+        mkfs.`cat $FS` `cat $TARGET`
+	bash install-install
+else
+        whiptail --title "Error..." --msgbox "In early stage development, we don't support\ninstalling without formating the target partition.\n\nWe apologize for the inconvenience."  12 65
+	exit 1
+fi
+}
+install-prepare() {
+whiptail --title "CentralPoint/Non-GUI Distribution Installer" --yesno "This installer is designed for CentralPoint or other Community Distribution \nusing bash or virtual terminal as default interface. \n\n\nDo you want to continue?" 15 80
+exitstatus=$?
+if [ $exitstatus = 0 ]
+then
+	install-staging
+else
+	whiptail --title "Huh?" --yesno "Are you sure that you want to quit?" 8 40
+	exitstatus=$?
+	if [ $exitstatus = 0 ]
+	then
+		exit 0
+		echo "(Exit status was $exitstatus)"
+	else
+		install-prepare
+		echo "(Exit status was $exitstatus)"
+	fi
+fi 
+echo "(Exit status was $exitstatus)"
+
+}
+install-staging() {
+whiptail --title "CentralPoint/Non-GUI Distribution Installer" --msgbox "Here's what we are going to do:\n\n* License Agreement\n* Partition Your Hard Drive\n* Install System\n* Configure and Personalize\n* Voila!" 20 80
+whiptail --title "License Agreement" --yesno "CentralPoint and other distribution from AOSC license under LGPL,\nfor further reading go to:\n\nhttp://www.gnu.org/copyleft/lesser.html\n\nSystem Info:\n\n`lsb_release -a`\n\nDo you agree and still want to continue?" 20 80
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+	install-partition
+else
+	whiptail --title "Sorry" --msgbox "We cannot continue the installation unless you agree with the the License Agreement :-(" 8 50
+	exit 0
+fi
+}
+install-user() {
+USERNAME=/tmp/username
+PASSWD=/tmp/passwd
+
+whiptail --title "User Configuration" --inputbox "Please tell me your username (lower-case letter and numbers only please,\nand no space are allowed." 15 70 2>$USERNAME
+whiptail --title "User Configuration" --inputbox "And your password please" 15 65 2>$PASSWD
+whiptail --title "User Configuration" --inputbox "Please repeat the password" 15 65 2>$PASSWD
+whiptail --title "User Configuration" --infobox "Now configuring the user and its password..." 10 65
+usermod -l `cat $USERNAME` -md /home/`cat $USERNAME` misaka
+LANG=C cpw}
+cpw() {
+expect << EOF
+spawn passwd `cat $USERNAME`
+expect "Enter new UNIX password:"
+send "`cat $PASSWD`\r"
+expect "Retype new UNIX password:"
+send "`cat $PASSWD`\r"
+expect eof;
+EOF
+rm -rf /tmp/*}
