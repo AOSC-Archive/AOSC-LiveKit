@@ -6,6 +6,6 @@ cp installer $TARGET
 echo -e "# Automatically merged. For better reading,\ntry running gg=G in vim for autoindent after you've set up autoindent." >> $TARGET
 for i in install-* cpw; do
 echo "$i() {"
-cat $i >> $TARGET
+cat $i | tail -n +2 >> $TARGET
 echo "}"
 done
