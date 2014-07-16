@@ -2,6 +2,10 @@ utils
 ====
 Small utils made up from scripts.
 
+autobuild/
+----
+Packs unilive-builder.
+
 live
 ----
 Usage:`source live`.
