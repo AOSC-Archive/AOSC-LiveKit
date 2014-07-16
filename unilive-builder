@@ -30,7 +30,7 @@
 # do_ok() defect: unable to get variables' values after $2 is done.
   # Try using eval.
 
-lib=${1:-$(dirname $(readlink -m $0))}
+lib=${1:-$(dirname $(readlink -e $0))}
 scriptname=unilive-builder
 
 # ISO Boot Check
