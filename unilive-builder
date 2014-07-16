@@ -25,9 +25,12 @@
 # 2. Tells the user what to do with configuration files.
 
 # TODOs
-# Re-write Installer selection, consider co-operating with autobuild or even the package manager
+# Wrap package manager operations
+# Switch operation logging to do_ok "Information" "Process"
 # do_ok() defect: unable to get variables' values after $2 is done.
-lib=${1:-$(dirname $(readlink -e $0))}
+  # Try using eval.
+
+lib=${1:-$(dirname $(readlink -m $0))}
 scriptname=unilive-builder
 
 # ISO Boot Check
