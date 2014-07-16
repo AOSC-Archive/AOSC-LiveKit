@@ -147,8 +147,7 @@ rm -f /target/var/spool/*
 rm -f /target/var/cache/fontconfig/*
 chroot /target apt-get clean
 echo -e "Now, set the password of the user... \e[36m[INFO]\e[0m"
-chroot /target passwd live
-echo -e "Setting live user... \e[36m[OK]\e[0m"
+do_ok "Setting up live user..." ""
 rm -rf /target/root/.* 
 rm -rf /target/root/*
 cp -r /target/etc/skel/. /target/root
@@ -156,7 +155,6 @@ chroot /target chown -R root /root
 echo -e "Setting up root... \e[36m[OK\e[0m"
 
 # Packing...
-echo -e "Building squashfs file for the distro... This may take some time!!!\e[36m[INFO]\e[0m"
 umount -Rf /target/{dev,proc,sys}
 echo "Enter the Squashfs flags you want to use: "
 echo "You may want to use: 
@@ -166,17 +164,20 @@ for better compression rates.
 on slow Medias) at the costs of mush longer compression time."
 $SQUASHFLAGS="-b 1048576 -comp xz -Xdict-size 100% -Xbcj x86"
 read -e -p "mksquashfs target squash" -i "$SQUASHFLAGS" -t 20 || true
+# do_ok exception since there is a progress bar
+echo -e "Building squashfs file for the distro... This may take some time!!!\e[36m[INFO]\e[0m"
 mksquashfs /target/* /target/squash $SQUASHFLAGS
-echo -e "Building squashfs file for the distro... \e[32m[OK]\e[0m"
+# \r (return) deletes the line above, well actually I am not sure
+# how many lines are used by mksquashfs to display the progress bar
+echo -e "\r\rBuilding squashfs file for the distro... \e[32m[OK]\e[0m"
 
 # Build ISO
 echo -e "You are now required to edit the grub.cfg file for the release... \e[36m[INFO]\e[0m"
-mkgrubcfg > /target/iso/boot/grub/grub.cfg
-echo -e "Updating GRUB configuration... \e[32m[OK]\e[0m"
+do_ok "Updating GRUB configuration..." "mkgrubcfg > /target/iso/boot/grub/grub.cfg && (vi grub.cfg&>/dev/null; true) || false"
+do_ok "Now building iso for the distro..." "
 cp -r /example-iso-boot /target/iso/boot
 mv /target/squash /target/iso/
-grub-mkrescue -o /target/aosc_os2-custom.iso /target/iso
-echo -e "Now building iso for the distro... \e[32m[OK]\e[0m"
+grub-mkrescue -o /target/aosc_os2-custom.iso /target/iso"
 
 # Final phase
 echo -e "Now the iso is ready, be ready to share! \e[36m[HURRAY!!!]\e[0m"
@@ -223,10 +224,10 @@ menuentry() {
 
 do_ok() {
   printf "$1"
-  (eval "$2" 2>>/tmp/$scriptname) && echo -e "$3[\e[32mOK\e[0m]" || (
+  (eval "$2" 2>>/tmp/${scriptname-$0}) && echo -e "$3[\e[32mOK\e[0m]" || (
     echo -e "$3[\e[31mFAILED\e[0m]"
     read -p "Error occoured. Press any key to continue." -n 1 -t 5 
-    echo "Error information available in /tmp/$scriptname" && return 1
+    echo "Error information available in /tmp/${scriptname-$0}" && return 1
   )
 }
 
@@ -240,5 +241,17 @@ ignore_command_not_found() {
       return $_ret
       ;;
    esac
+}
+
+change_password() {
+  LANG=C expect << EOF
+  spawn chroot /target "passwd $1"
+  expect "Enter new UNIX password:"
+  send "$2\r"
+  expect "Retype new UNIX password:"
+  send "$2\r"
+  expect eof;
+  EOF
   }
+  
 # -*- vim:fenc=utf-8:shiftwidth=2:softtabstop=2
