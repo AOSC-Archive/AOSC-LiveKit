@@ -1,0 +1,6 @@
+mkdir -p $PKGDIR/usr/{lib/unilive-builder,bin}
+cd $SRCDIR
+cp -a ../example-iso-boot $PKGDIR/usr/ljb/unilive-builder || (echo "iso boot images not found! Aborted."; return 1)
+cp ../unilive-builder $PKGDIR/usr/bin || return 1
+# change the whole line where "utils=${1" exists to utils=(the lib)
+sed -i $PKGDIR/usr/bin/unilive-builder "$(cat ../unilive-builder | sed -n -e '/utils=\$\{1/,$p')s/.*/utils=\/usr\/lib\/unilive-builder/g"

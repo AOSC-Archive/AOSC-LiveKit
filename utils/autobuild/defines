@@ -1,0 +1,3 @@
+PKGNAME=unilive-builder
+PKGVER=0-git-$(date -u +%s)
+PKGDES="Guided Live Media Spin building."
