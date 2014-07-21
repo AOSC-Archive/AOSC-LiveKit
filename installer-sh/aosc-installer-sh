@@ -1,6 +1,12 @@
 #!/bin/bash
 # Enjoy the semi-modular design, use your text editor's find.
-scriptname=$0
+# Comments should work with ROBODoc. 
+# -------
+# CONSIDER SWITCHING TO http://atterer.org/jigdo **COMPLETELY**.
+# Work in progress, Jeff your code is absolutely a huge mess.
+# Suzuka Suzuka ...SEGFAULT! Core dumped.
+scriptname=$(basename $0)
+LINE=${LINE:-n}
 # Prepare
 . /etc/lsb-release
 if !(whiptail --title "$DISTRIB_ID Distribution Installer" --yesno "This installer is designed for CentralPoint and other Community Distributions \nusing bash or virtual terminal as default interface. \n\n\nDo you want to continue?" 15 80)
@@ -8,38 +14,98 @@ then
   user_abort
 fi 
 
-
 # Staging
 whiptail --title "CentralPoint/Non-GUI Distribution Installer" --msgbox "Here's what we are going to do:\n\n* License Agreement\n* Partition Your Hard Drive\n* Install System\n* Configure and Personalize" --ok-button "Voila!" 20 80
 # While don't agree, ask user to exit or continue.
 while ! (whiptail --title "License Agreement" --yesno "CentralPoint and other distribution from AOSC license under LGPL,\nfor further reading go to:\n\nhttp://www.gnu.org/copyleft/lesser.html\n\nSystem Info:\n\n`lsb_release -a`" --yes-button "Agree" --no-button "No..." 18 80); do
-	if (whiptail --yesno --title "Sorry" --msgbox "We cannot continue the installation unless you agree with the the License Agreement :-(" --yes-button "Quit" --no-button "Continue" 9 50); then user_abort; fi
+  if (whiptail --yesno --title "Sorry" --msgbox "We cannot continue the installation unless you agree with the the License Agreement :-(" --yes-button "Quit" --no-button "Continue" 9 50); then user_abort; fi
 done
 
 # Partitioning
 whiptail --title "Partition Your Hard Drive" --msgbox "Here's your partition table so far:\n\n`fdisk -l`" 24 80
 whiptail --title "Partition Your Hard Drive" --yesno "Now we will pop you into GNU Parted...\n\nDo you need to change anything?" 15 65 && parted'
 TARGET=$(whiptail --title "Partition Your Hard Drive" --inputbox "Please tell me the device name of your target partition: " 10 40 3>&1 1>&2 2>&3)
-FS=$(whiptail --title "Partition Your Hard Drive" --menu "Please choose a preferred filesystem from below\n(Currently (df -T | grep $partition | awk '{print $2}' 2>/dev/null; printf "$fs"))" 15 80 6 \
+(Currently (df -T | grep $partition | awk '{print $2}
+
+if (whiptail --title "ATTENTION" --yesno "Formatting a partition will cause data lost,\nand _USUALLY_ hard to recover!\n\nAre you =sure that you want to format `cat $TARGET` with `cat $FS`?" 15 65); then
+FS=$(whiptail --title "Partition Your Hard Drive" --menu "Please choose a preferred filesystem from below\n')" 15 80 6 \
 "ext3" "Third Extended File System" \
 "ext4" "Fourth Extended File System" \
 "jfs" "Journaled File System" \
 "btrfs" "B-tree File System" \
 "xfs" "XFS" 3>&1 1>&2 2>&3)
-whiptail --title "ATTENTION" --yesno "Formatting a partition will cause data lost,\nand _USUALLY_ hard to recover!\n\nAre you =sure that you want to format `cat $TARGET` with `cat $FS`?" 15 65 
-exitstatus=$?
-if [ $exitstatus = 0 ]; then
-        mkfs.$FS $TARGET
-	bash install-install
-else
-        whiptail --title "Error..." --msg
+mkfs.$FS $TARGET
+install-install
+fi
 
 # Libraries
+
+#****f* aosc-installer-sh-libs/user_abort
+# NAME
+#   user_abort
+# RESULT
+#   exits with status 2 with a notify message
+# SOURCE
 user_abort(){
   echo "User aborted install."
   echo "Run '$scriptname' if you want to start the installer again."
-  exit 0
+  exit 2
 }
+#*****
+
+#****f* aosc-installer-sh-libs/yes_or_no
+# NAME
+#   yes_or_no, calls either bash-read or whiptail to do a yes-or-no selection
+# USAGE
+#   yes_or_no "title" "text" height width ["yes text"] ["no text"]
+# INPUTS
+#   $LINE = (y/n)          - If we should use line-based input style(read)
+#   $_DEFAULT = (optional) - The default value for read
+# RESULT
+#   returns 0 or 1 for true or false respectively.
+# NOTES
+#   read without readline may cause crashes.
+# SOURCE
+yes_or_no() {
+  if [ "$LINE" == "y" ]; then
+    echo -e "\e[1m$1\e[0m"
+    echo '$2' | fold -w $4 -s
+    while (read -e -i "$_DEFAULT" -p "Y for ${5:-Yes}, N for ${6:-No}[Y/N]" _yesno); do
+      case $_yesno in
+        y|Y|1|yes|true)
+          return 0
+          ;;
+        n|N|0|no|false)
+          retuen 1
+          ;;
+        *)
+          echo -e "\e[1;31mINVALID INPUT\x21\e[0m"
+       esac
+  else whiptail --title "$1" --yesno "$2" $3 $4 --yes-button "${5:-Yes}" --no-button "$6{:-No}"; return $?
+  fi
+}
+#*****
+
+#****f* aosc-installer-sh-libs/choice
+# NAME
+#   choice, calls either bash-read or whiptail to do a single selection
+# USAGE
+#   choice "title" "menu" height width var-name "Selection 1" "Description 1" ...
+# INPUTS
+#   $LINE = (y/n)          - If we should use line-based input style(read)
+#   $_DEFAULT = (optional) - The default value for read
+# NOTES
+#   read without readline may cause crashes.
+# SOURCE
+choice() {
+  if [ "$LINE" == "y" ]; then
+    
+  else
+  fi
+}
+#*****
+
+
 # -*- vim:fenc=utf-8:shiftwidth=2:softtabstop=2
 
 # add to vimrc if you want indent.
@@ -48,7 +114,7 @@ user_abort(){
 # autocmd BufRead,BufWritePre *.sh normal gg=G
 
 # Automatically merged. For better reading,
-try running gg=G in vim for autoindent after you've set up autoindent.
+# try running gg=G in vim for autoindent after you've set up autoindent.
 
 install-complete() {
 cat /target/etc/bashrc | head -n -1 > /target/etc/bashrc
@@ -67,17 +133,17 @@ mount -vt devpts devpts /target/dev/pts -o gid=5,mode=620
 
 whiptail --title "Post-Copy Configuration" --inputbox "Plese tell me the device name of the boot disk" 12 65 2> $BOOT
 whiptail --title "Post-Copy Configuration" --msgbox "We are now going to install GRUB on your system" 12 65 
-whiptail --title "EFI Users!!!" --yesno "Are you running on EFI?" 12 65 
+whiptail --title "EFI Users!!!" --yesno "Are you running on a EFI device?" 12 65 
 if [ $exitstatus = 0 ]; then
-	whiptail --title "EFI Uers!!!" --inputbox "Please tell me the partition where your ESP (EFI System\nPartition) is located." 12 70 2> $ESP
-	mkdir -v /target/efi
-	mount `cat $ESP` /target/efi
-	chroot /target grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=CentralPoint --recheck
-	chroot /target grub-mkconfig -o /boot/grub/grub.cfg
+whiptail --title "EFI Uers!!!" --inputbox "Please tell me the partition where your ESP (EFI System\nPartition) is located." 12 70 2> $ESP
+mkdir -v /target/efi
+mount `cat $ESP` /target/efi
+chroot /target grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=CentralPoint --recheck
+chroot /target grub-mkconfig -o /boot/grub/grub.cfg
 else
-	whiptail --title "Post-Copy Configuration" --infobox "Installing GRUB to `cat $BOOT`" 12 65
-	chroot /target grub-install --target=i386-pc `cat $BOOT` --recheck
-	chroot /target grub-mkconfig -o /boot/grub/grub.cfg
+whiptail --title "Post-Copy Configuration" --infobox "Installing GRUB to `cat $BOOT`" 12 65
+chroot /target grub-install --target=i386-pc `cat $BOOT` --recheck
+chroot /target grub-mkconfig -o /boot/grub/grub.cfg
 fi
 whiptail --title "Post-Copy Configuration" --infobox "Configuring /etc/fstab file..." 12 65
 echo "$TARGET / $FS defaults 1 1" > /target/etc/fstab
@@ -87,25 +153,17 @@ install-complete
 install-copy() {
 DIRS=(/mnt/squash/*)
 DEST="/target"
- 
-dialog --title "Copying System Files..." --gauge "Copying directory" 10 75 < <(
-   n=${#DIRS[*]}; 
- 
-   i=0
- 
-   for f in "${DIRS[@]}"
-   do
-      PCT=$(( 100*(++i)/n ))
- 
-cat <<EOF
-XXX
-$PCT
-Copying directory "$f" ...
-XXX
-EOF
 
-   cp -arv $f $DEST &>/dev/null
-   done
+dialog --title "Copying System Files..." --gauge "Copying directory" 10 75 < <(
+n=${#DIRS[*]}; 
+
+i=0
+
+for f in "${DIRS[@]}"; do
+PCT=$(( 100*(++i)/n ))
+echo -e "Copying directory \"$f\" ... ${PCT}%"
+cp -arv $f $DEST &>/dev/null
+done
 )
 install-configure
 rm $DEST/install-started
@@ -128,7 +186,8 @@ whiptail --title "User Configuration" --inputbox "And your password please" 15 6
 whiptail --title "User Configuration" --inputbox "Please repeat the password" 15 65 2>$PASSWD
 whiptail --title "User Configuration" --infobox "Now configuring the user and its password..." 10 65
 usermod -l `cat $USERNAME` -md /home/`cat $USERNAME` misaka
-LANG=C cpw}
+LANG=C cpw
+}
 cpw() {
 expect << EOF
 spawn passwd `cat $USERNAME`
@@ -138,4 +197,5 @@ expect "Retype new UNIX password:"
 send "`cat $PASSWD`\r"
 expect eof;
 EOF
-rm -rf /tmp/*}
+rm -rf /tmp/*
+}
