@@ -74,7 +74,7 @@ do_ok "umount-ing $partition" "umount -Rf $partition || true"
 # Follow-up printf used as workaround.
 do_ok "Detect FS type of specified partition=" "fs=$(df -T | grep $partition | awk '{print $2}' 2>/dev/null; printf "$fs")"
 
-if [ "fs" == "fuseblk" ]; then
+if [ "$fs" == "fuseblk" ]; then
   echo -e "fuseblk fs detected.              [\e[31mWARN\e[0m]\nPlease enter your real fs name as used in mount and fsck:"
   echo -e "Please also make sure you are using a POSIX-compatible fs\nso anything don't get messed up."
   read -e -p "fs=" -i "$fs" fs
