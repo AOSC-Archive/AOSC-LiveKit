@@ -6,7 +6,7 @@
 ---
 ####    函数
 
->>   AddPage(QWidget *)
+>>      AddPage(QWidget *)
 
 > 添加一个页面[按照顺序]，也就是说AddPage函数执行的先后顺序决定了Pages呈现的顺序
 
