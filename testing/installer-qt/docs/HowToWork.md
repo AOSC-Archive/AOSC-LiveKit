@@ -8,13 +8,13 @@
 ---
 ####    函数
 
->>   AddPage(QWidget *)
+>>   AddPage(InstallerPage *)
 
 >      添加一个页面[按照顺序]，也就是说AddPage函数执行的先后顺序决定了Pages呈现的顺序
 
->>   DelPage(QWidget *)
+>>   DelPage(InstallerPage *)
 
->      删除指定页面
+>      删除指定页面(可能会被删除)
 
 ####    接口信号
 
@@ -35,14 +35,6 @@
 >>   SLOT_SLOT_TurnToSpecifyPage(QWidget*)
 
 >      跳转向指定页面(怎样用还没想好)
-
->>   SLOT_SetNextButtonDisabled(bool)
-
->      设置InstallerMain::NextButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetNextButtonDisabled(void)链接，true时禁用按钮，flase时启用按钮)
-
->>   SLOT_SetPervButtonDisabled(bool)
-
->      设置InstallerMain::PervButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetPervButtonDisabled(void)链接，true时禁用按钮，flase时启用按钮)
 
 ###   InstallerPage   每个页面[也就是比如分区页面等]
 ---
