@@ -36,13 +36,13 @@
 
 >      跳转向指定页面(怎样用还没想好)
 
->>   SLOT_SetNextButtonDisabel(bool)
+>>   SLOT_SetNextButtonDisabled(bool)
 
->      设置InstallerMain::NextButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetNextButtonDisable(void)链接，true时禁用按钮，flase时启用按钮)
+>      设置InstallerMain::NextButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetNextButtonDisabled(void)链接，true时禁用按钮，flase时启用按钮)
 
->>   SLOT_SetPervButtonDisabel(bool)
+>>   SLOT_SetPervButtonDisabled(bool)
 
->      设置InstallerMain::PervButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetPervButtonDisable(void)链接，true时禁用按钮，flase时启用按钮)
+>      设置InstallerMain::PervButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetPervButtonDisabled(void)链接，true时禁用按钮，flase时启用按钮)
 
 ###   InstallerPage   每个页面[也就是比如分区页面等]
 ---
@@ -54,13 +54,13 @@
 
 ####    接口信号
 
->>   void    SIGN_SetNextButtonDisable(bool);
+>>   void    SIGN_SetNextButtonDisabled(bool);
 
->      设置InstallerMain::NextButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetNextButtonDisable(void)链接，true时禁用按钮，flase时启用按钮)
+>      设置InstallerMain::NextButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetNextButtonDisabled(void)链接，true时禁用按钮，flase时启用按钮)
 
->>   void    SIGN_SetPervButtonDisable(bool);
+>>   void    SIGN_SetPervButtonDisabled(bool);
 
->      设置InstallerMain::PervButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetPervButtonDisable(void)链接，true时禁用按钮，flase时启用按钮)
+>      设置InstallerMain::PervButton的不可点击状态(在InstallerMain::AddPage(QWidget *)中默认与InstallerPage::SIGN_SetPervButtonDisabled(void)链接，true时禁用按钮，flase时启用按钮)
 
 ####    接口槽
 
