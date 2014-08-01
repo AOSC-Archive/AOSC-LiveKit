@@ -12,9 +12,10 @@ public:
     virtual void PervShow();                    //  在跳转到这个页面时要做的操作【例如将按钮disable之类的】
                                                 //  每跳转到这个页面就会执行一次
 
+
 signals:
-    void    SIGN_SetNextButtonDisable(bool);
-    void    SIGN_SetPervButtonDisable(bool);
+    void    SIGN_SetNextButtonDisabled(bool);
+    void    SIGN_SetPervButtonDisabled(bool);
     void    SIGN_TurnToSpecialPage(QWidget *);
 
 public slots:
