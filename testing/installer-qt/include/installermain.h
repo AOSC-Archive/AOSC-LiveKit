@@ -5,6 +5,8 @@
 #include <QTabWidget>
 #include <QPushButton>
 #include <QMap>
+#include <QResizeEvent>
+#include <QLabel>
 #include "installerpage.h"
 
 typedef QMap<int,InstallerPage*> InstallerPagesMap_t;
@@ -16,6 +18,7 @@ public:
     ~InstallerMain();
     void    AddPage(InstallerPage *);
     void    DelPage(InstallerPage *);
+    void    resizeEvent(QResizeEvent *);
 
 signals:
     void    SIGN_PageChanged(QWidget*);
@@ -32,6 +35,7 @@ private:
     InstallerPagesMap_t              InstallerMap;
     InstallerPagesMap_t::Iterator    InstallerMapIterator;
     int                              TotalPages;
+    QLabel                          *Introduce;
 
 };
 

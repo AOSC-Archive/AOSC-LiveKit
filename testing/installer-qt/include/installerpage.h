@@ -2,6 +2,8 @@
 #define INSTALLERPAGE_H
 
 #include <QWidget>
+#include <QLabel>
+#include <QResizeEvent>
 
 class InstallerPage : public QWidget{
     Q_OBJECT
@@ -11,6 +13,8 @@ public:
 
     virtual void PervShow();                    //  在跳转到这个页面时要做的操作【例如将按钮disable之类的】
                                                 //  每跳转到这个页面就会执行一次
+    void    SetContantTitle(const QString &);
+    void    resizeEvent(QResizeEvent* );
 
 
 signals:
@@ -21,6 +25,16 @@ signals:
 public slots:
     virtual void SLOT_NextButtonClicked(void);  //  下一步按钮被按下时所执行的操作
     virtual void SLOT_PageChanged(QWidget *);
+private:
+    QLabel *cTitle;
+};
+
+class WelcomePage : public InstallerPage{
+    Q_OBJECT
+public:
+    explicit WelcomePage(InstallerPage *parent = 0);
+    ~WelcomePage();
+private:
 };
 
 #endif // INSTALLERPAGE_H
