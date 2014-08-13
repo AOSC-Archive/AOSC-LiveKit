@@ -9,7 +9,7 @@ InstallerMain::InstallerMain(QWidget *parent) :
     NextButton  = new QPushButton(this);
     PervButton  = new QPushButton(this);
     Introduce   = new QLabel(this);
-    Introduce->setText(tr("AOSC CopyLeft 256~65536,Designed By 张峻锋"));
+    Introduce->setText("AOSC CopyLeft 2014~65536,Power By 张峻锋 from Mars");
     TotalPages  = 0;
     //  Set Icon
     QIcon Icon(":/Icon/OSIcon");
@@ -32,6 +32,7 @@ InstallerMain::InstallerMain(QWidget *parent) :
     this->connect(PervButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToPervPage()));
     this->connect(NextButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToNextPage()));
     PageTab->setDocumentMode(true);
+    NextButton->setStyleSheet("background-color: rgb(255, 255, 255);");
 }
 
 InstallerMain::~InstallerMain(){
@@ -54,7 +55,7 @@ void InstallerMain::resizeEvent(QResizeEvent *){
     NextButton->setGeometry(this->width()-60,25,45,this->height()-60);
     PervButton->setGeometry(15,25,45,this->height()-60);
     PageTab->setGeometry(59,25,this->width()-118,this->height()-59);
-    Introduce->setGeometry(25,this->height()-35,300,25);
+    Introduce->setGeometry(25,this->height()-35,400,25);
 }
 
 void InstallerMain::SLOT_TurnToNextPage(){

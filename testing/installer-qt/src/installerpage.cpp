@@ -54,7 +54,7 @@ WelcomePage::WelcomePage(InstallerPage *parent):
     InstallerPage(parent){
     Contant = new QLabel(this);
     this->SetContantTitle(tr("欢迎"));
-    Contant->setText(tr("欢迎使用本AOSC系统部署器\n您将在本部署器的指导下部署完成整个系统\n祝您使用愉快"));
+    Contant->setText(tr("欢迎使用本AOSC系统半自动部署器\n您将在本部署器的指导下部署完成整个系统\n祝您使用愉快"));
     Contant->setGeometry(35,115,500,95);
     Contant->setFont(cContantFont);
 }
@@ -78,23 +78,34 @@ void WelcomePage::resizeEvent(QResizeEvent *){
 
 ReadingPage::ReadingPage(InstallerPage *parent):
     InstallerPage(parent){
-    ReadingBrowser = new QTextBrowser(this);
+    ReadingBrowser  = new QTextBrowser(this);
+    isAgreed        = new QCheckBox(this);
     QFile file(":/Argeement/License");
     if(!file.open(QFile::ReadOnly | QFile::Text))
         qDebug() << "Can not open";
     QTextStream in(&file);
     ReadingBrowser->setHtml(in.readAll());
+    isAgreed->setText(tr("I Agree"));
+    this->connect(isAgreed,SIGNAL(clicked(bool)),this,SLOT(AgreementChanged(bool)));
 }
 
 ReadingPage::~ReadingPage(){
 
 }
 
+void ReadingPage::AgreementChanged(bool Status){
+    if(Status == true){
+        emit SIGN_SetNextButtonDisabled(false);
+    }else{
+        emit SIGN_SetNextButtonDisabled(true);
+    }
+}
+
 void ReadingPage::PervShow(){
     emit SIGN_SetNextButtonDisabled(true);
-    printf("Pervshow \n");
 }
 
 void ReadingPage::resizeEvent(QResizeEvent *){
     ReadingBrowser->setGeometry(0,0,this->width(),this->height()-25);
+    isAgreed->setGeometry(this->width()-90,this->height()-25,100,20);
 }

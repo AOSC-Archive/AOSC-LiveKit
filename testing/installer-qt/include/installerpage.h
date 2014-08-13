@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QTextBrowser>
 #include <QResizeEvent>
+#include <QCheckBox>
 
 class InstallerPage : public QWidget{
     Q_OBJECT
@@ -56,8 +57,11 @@ public:
     ~ReadingPage();
     void    resizeEvent(QResizeEvent *);
     void    PervShow();
+public slots:
+    void    AgreementChanged(bool);
 private:
-    QTextBrowser*   ReadingBrowser;
+    QTextBrowser    *ReadingBrowser;
+    QCheckBox       *isAgreed;
 };
 
 #endif // INSTALLERPAGE_H
