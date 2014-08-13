@@ -11,3 +11,6 @@ INCLUDEPATH += . include
 # Input
 HEADERS += include/installermain.h include/installerpage.h
 SOURCES += src/installermain.cpp src/installerpage.cpp src/main.cpp
+
+RESOURCES += \
+    data/resources.qrc

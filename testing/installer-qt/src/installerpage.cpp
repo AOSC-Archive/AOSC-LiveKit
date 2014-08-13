@@ -1,10 +1,21 @@
 #include "installerpage.h"
+#include <stdio.h>
 #include <QLabel>
+#include <QTextBrowser>
+#include <QFont>
+#include <QFile>
+#include <QDebug>
 
 InstallerPage::InstallerPage(QWidget *parent):
     QWidget(parent){
+    QFont cTitleFont;
+    cTitleFont.setBold(true);
+    cTitleFont.setPointSize(30);
     cTitle = new QLabel(this);
-    cTitle->setGeometry(30,15,500,35);
+    cTitle->setFont(cTitleFont);
+    cTitle->setGeometry(30,45,600,75);
+    cContantFont.setBold(false);
+    cContantFont.setPointSize(14);
 }
 
 InstallerPage::~InstallerPage(){
@@ -41,9 +52,49 @@ void InstallerPage::SetContantTitle(const QString &str){
 
 WelcomePage::WelcomePage(InstallerPage *parent):
     InstallerPage(parent){
-    this->SetContantTitle(tr("Welcome"));
+    Contant = new QLabel(this);
+    this->SetContantTitle(tr("欢迎"));
+    Contant->setText(tr("欢迎使用本AOSC系统部署器\n您将在本部署器的指导下部署完成整个系统\n祝您使用愉快"));
+    Contant->setGeometry(35,115,500,95);
+    Contant->setFont(cContantFont);
 }
 
 WelcomePage::~WelcomePage(){
+    delete Contant;
+}
 
+void WelcomePage::PervShow(){
+    emit SIGN_SetPervButtonDisabled(true);
+}
+
+void WelcomePage::resizeEvent(QResizeEvent *){
+}
+
+
+
+
+
+
+
+ReadingPage::ReadingPage(InstallerPage *parent):
+    InstallerPage(parent){
+    ReadingBrowser = new QTextBrowser(this);
+    QFile file(":/Argeement/License");
+    if(!file.open(QFile::ReadOnly | QFile::Text))
+        qDebug() << "Can not open";
+    QTextStream in(&file);
+    ReadingBrowser->setHtml(in.readAll());
+}
+
+ReadingPage::~ReadingPage(){
+
+}
+
+void ReadingPage::PervShow(){
+    emit SIGN_SetNextButtonDisabled(true);
+    printf("Pervshow \n");
+}
+
+void ReadingPage::resizeEvent(QResizeEvent *){
+    ReadingBrowser->setGeometry(0,0,this->width(),this->height()-25);
 }

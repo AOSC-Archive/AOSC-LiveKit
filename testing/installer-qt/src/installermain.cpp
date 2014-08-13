@@ -1,5 +1,7 @@
 #include "installermain.h"
 #include <QTabBar>
+#include <QIcon>
+#include <stdio.h>
 
 InstallerMain::InstallerMain(QWidget *parent) :
     QWidget(parent){
@@ -7,8 +9,16 @@ InstallerMain::InstallerMain(QWidget *parent) :
     NextButton  = new QPushButton(this);
     PervButton  = new QPushButton(this);
     Introduce   = new QLabel(this);
-    Introduce->setText(tr("AOSC CopyLeft 2014~2048"));
+    Introduce->setText(tr("AOSC CopyLeft 256~65536,Designed By 张峻锋"));
     TotalPages  = 0;
+    //  Set Icon
+    QIcon Icon(":/Icon/OSIcon");
+    this->setWindowIcon(Icon);
+    QIcon NextImage(":/Image/NextStepImage");
+    NextButton->setIcon(NextImage);
+    QIcon PervImage(":/Image/PervStepImage");
+    PervButton->setIcon(PervImage);
+    //  Show Button
     NextButton->show();
     PervButton->show();
     PageTab->show();
@@ -17,6 +27,11 @@ InstallerMain::InstallerMain(QWidget *parent) :
     this->setMinimumSize(600,500);
     PageTab->tabBar()->hide();
     this->AddPage(new WelcomePage);
+    this->AddPage(new ReadingPage);
+    PervButton->setDisabled(true);
+    this->connect(PervButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToPervPage()));
+    this->connect(NextButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToNextPage()));
+    PageTab->setDocumentMode(true);
 }
 
 InstallerMain::~InstallerMain(){
@@ -26,7 +41,7 @@ InstallerMain::~InstallerMain(){
 void InstallerMain::AddPage(InstallerPage* Page){
     PageTab->addTab(Page,tr("Tab"));
     TotalPages++;
-    InstallerMap.insert(TotalPages,Page);
+    InstallerMap.insert(TotalPages-1,Page);
     this->connect(Page,SIGNAL(SIGN_SetNextButtonDisabled(bool)),this->NextButton,SLOT(setDisabled(bool)));
     this->connect(Page,SIGNAL(SIGN_SetPervButtonDisabled(bool)),this->PervButton,SLOT(setDisabled(bool)));
 }
@@ -36,21 +51,24 @@ void InstallerMain::DelPage(InstallerPage *){
 }
 
 void InstallerMain::resizeEvent(QResizeEvent *){
-    NextButton->setGeometry(this->width()-60,50,45,this->height()-100);
-    PervButton->setGeometry(25,50,45,this->height()-100);
-    PageTab->setGeometry(70,100,this->width()-130,this->height()-150);
-    Introduce->setGeometry(25,this->height()-45,300,25);
+    NextButton->setGeometry(this->width()-60,25,45,this->height()-60);
+    PervButton->setGeometry(15,25,45,this->height()-60);
+    PageTab->setGeometry(59,25,this->width()-118,this->height()-59);
+    Introduce->setGeometry(25,this->height()-35,300,25);
 }
 
 void InstallerMain::SLOT_TurnToNextPage(){
+    NextButton->setDisabled(false);
+    PervButton->setDisabled(false);
+    InstallerMapIterator = InstallerMap.find(PageTab->currentIndex()+1);
     PageTab->setCurrentIndex(PageTab->currentIndex()+1);
-    InstallerMapIterator = InstallerMap.find(PageTab->currentIndex());
     InstallerPage *Page = InstallerMapIterator.value();
     Page->PervShow();
-
 }
 
 void InstallerMain::SLOT_TurnToPervPage(){
+    NextButton->setDisabled(false);
+    PervButton->setDisabled(false);
     PageTab->setCurrentIndex(PageTab->currentIndex()-1);
     InstallerMapIterator = InstallerMap.find(PageTab->currentIndex());
     InstallerPage *Page = InstallerMapIterator.value();

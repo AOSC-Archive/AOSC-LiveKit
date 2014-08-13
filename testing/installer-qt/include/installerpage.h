@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QLabel>
+#include <QTextBrowser>
 #include <QResizeEvent>
 
 class InstallerPage : public QWidget{
@@ -15,6 +16,7 @@ public:
                                                 //  每跳转到这个页面就会执行一次
     void    SetContantTitle(const QString &);
     void    resizeEvent(QResizeEvent* );
+    QFont   cContantFont;
 
 
 signals:
@@ -29,12 +31,33 @@ private:
     QLabel *cTitle;
 };
 
+//----------------------------------//
+//--------众神与愚民的分界线-----------//
+//--------此刻正是昼夜交替时-----------//
+//--------耀日将寝，皓月当空-----------//
+//--------鬼哭狼嚎，铁骑千军-----------//
+//----------------------------------//
+
 class WelcomePage : public InstallerPage{
     Q_OBJECT
 public:
     explicit WelcomePage(InstallerPage *parent = 0);
     ~WelcomePage();
+    void    resizeEvent(QResizeEvent *);
+    void    PervShow();
 private:
+    QLabel  *Contant;
+};
+
+class ReadingPage : public InstallerPage{
+    Q_OBJECT
+public:
+    explicit ReadingPage(InstallerPage *parent = 0);
+    ~ReadingPage();
+    void    resizeEvent(QResizeEvent *);
+    void    PervShow();
+private:
+    QTextBrowser*   ReadingBrowser;
 };
 
 #endif // INSTALLERPAGE_H
