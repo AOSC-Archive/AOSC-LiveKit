@@ -2,6 +2,8 @@
 #include <QTabBar>
 #include <QIcon>
 #include <stdio.h>
+#include <QPalette>
+#include <QFont>
 
 InstallerMain::InstallerMain(QWidget *parent) :
     QWidget(parent){
@@ -24,7 +26,6 @@ InstallerMain::InstallerMain(QWidget *parent) :
     PageTab->show();
     Introduce->show();
     this->setWindowTitle(tr("AOSC 系统部署器"));
-    this->setMinimumSize(600,500);
     PageTab->tabBar()->hide();
     this->AddPage(new WelcomePage);
     this->AddPage(new ReadingPage);
@@ -32,7 +33,14 @@ InstallerMain::InstallerMain(QWidget *parent) :
     this->connect(PervButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToPervPage()));
     this->connect(NextButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToNextPage()));
     PageTab->setDocumentMode(true);
-    NextButton->setStyleSheet("background-color: rgb(255, 255, 255);");
+    NextButton->setFlat(true);
+    PervButton->setFlat(true);
+    this->setAutoFillBackground(true);
+    QPalette palette;
+    palette.setBrush(QPalette::Background, QBrush(QPixmap(":/Image/BackgroundImage")));
+    this->setPalette(palette);
+    this->setMinimumSize(600,500);
+    this->setMaximumSize(600,500);
 }
 
 InstallerMain::~InstallerMain(){
@@ -52,9 +60,9 @@ void InstallerMain::DelPage(InstallerPage *){
 }
 
 void InstallerMain::resizeEvent(QResizeEvent *){
-    NextButton->setGeometry(this->width()-60,25,45,this->height()-60);
-    PervButton->setGeometry(15,25,45,this->height()-60);
-    PageTab->setGeometry(59,25,this->width()-118,this->height()-59);
+    NextButton->setGeometry(this->width()-60,60,45,this->height()-90);
+    PervButton->setGeometry(15,60,45,this->height()-90);
+    PageTab->setGeometry(59,60,this->width()-118,this->height()-89);
     Introduce->setGeometry(25,this->height()-35,400,25);
 }
 

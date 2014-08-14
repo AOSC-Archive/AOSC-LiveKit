@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/Image">
-        <file alias="NextStepImage">NextStep.png</file>
-        <file alias="PervStepImage">PervStep.png</file>
+        <file alias="NextStepImage">NextStep.gif</file>
+        <file alias="PervStepImage">PervStep.gif</file>
         <file alias="BackgroundImage">BackgroundTest.png</file>
     </qresource>
     <qresource prefix="/Icon">

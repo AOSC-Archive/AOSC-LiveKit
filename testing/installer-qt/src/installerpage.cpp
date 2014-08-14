@@ -55,7 +55,7 @@ WelcomePage::WelcomePage(InstallerPage *parent):
     Contant = new QLabel(this);
     this->SetContantTitle(tr("欢迎"));
     Contant->setText(tr("欢迎使用本AOSC系统半自动部署器\n您将在本部署器的指导下部署完成整个系统\n祝您使用愉快"));
-    Contant->setGeometry(35,115,500,95);
+    Contant->setGeometry(30,115,500,95);
     Contant->setFont(cContantFont);
 }
 

@@ -36,7 +36,6 @@ private:
     InstallerPagesMap_t::Iterator    InstallerMapIterator;
     int                              TotalPages;
     QLabel                          *Introduce;
-
 };
 
 #endif // INSTALLERMAIN_H
