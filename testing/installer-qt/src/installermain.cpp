@@ -29,7 +29,8 @@ InstallerMain::InstallerMain(QWidget *parent) :
     PageTab->tabBar()->hide();
     this->AddPage(new WelcomePage);
     this->AddPage(new ReadingPage);
-    PervButton->setDisabled(true);
+    this->AddPage(new PartedPage);
+    PervButton->setHidden(true);
     this->connect(PervButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToPervPage()));
     this->connect(NextButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToNextPage()));
     PageTab->setDocumentMode(true);
@@ -51,8 +52,8 @@ void InstallerMain::AddPage(InstallerPage* Page){
     PageTab->addTab(Page,tr("Tab"));
     TotalPages++;
     InstallerMap.insert(TotalPages-1,Page);
-    this->connect(Page,SIGNAL(SIGN_SetNextButtonDisabled(bool)),this->NextButton,SLOT(setDisabled(bool)));
-    this->connect(Page,SIGNAL(SIGN_SetPervButtonDisabled(bool)),this->PervButton,SLOT(setDisabled(bool)));
+    this->connect(Page,SIGNAL(SIGN_SetNextButtonDisabled(bool)),this->NextButton,SLOT(setHidden(bool)));
+    this->connect(Page,SIGNAL(SIGN_SetPervButtonDisabled(bool)),this->PervButton,SLOT(setHidden(bool)));
 }
 
 void InstallerMain::DelPage(InstallerPage *){
@@ -60,15 +61,15 @@ void InstallerMain::DelPage(InstallerPage *){
 }
 
 void InstallerMain::resizeEvent(QResizeEvent *){
-    NextButton->setGeometry(this->width()-60,60,45,this->height()-90);
-    PervButton->setGeometry(15,60,45,this->height()-90);
-    PageTab->setGeometry(59,60,this->width()-118,this->height()-89);
+    NextButton->setGeometry(this->width()-60,40,45,this->height()-70);
+    PervButton->setGeometry(15,40,45,this->height()-70);
+    PageTab->setGeometry(59,40,this->width()-118,this->height()-69);
     Introduce->setGeometry(25,this->height()-35,400,25);
 }
 
 void InstallerMain::SLOT_TurnToNextPage(){
-    NextButton->setDisabled(false);
-    PervButton->setDisabled(false);
+    NextButton->setHidden(false);
+    PervButton->setHidden(false);
     InstallerMapIterator = InstallerMap.find(PageTab->currentIndex()+1);
     PageTab->setCurrentIndex(PageTab->currentIndex()+1);
     InstallerPage *Page = InstallerMapIterator.value();
@@ -76,8 +77,8 @@ void InstallerMain::SLOT_TurnToNextPage(){
 }
 
 void InstallerMain::SLOT_TurnToPervPage(){
-    NextButton->setDisabled(false);
-    PervButton->setDisabled(false);
+    NextButton->setHidden(false);
+    PervButton->setHidden(false);
     PageTab->setCurrentIndex(PageTab->currentIndex()-1);
     InstallerMapIterator = InstallerMap.find(PageTab->currentIndex());
     InstallerPage *Page = InstallerMapIterator.value();

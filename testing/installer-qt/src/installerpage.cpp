@@ -1,19 +1,21 @@
 #include "installerpage.h"
+#include <parted/parted.h>
 #include <stdio.h>
 #include <QLabel>
 #include <QTextBrowser>
 #include <QFont>
 #include <QFile>
+#include <QPushButton>
 #include <QDebug>
 
 InstallerPage::InstallerPage(QWidget *parent):
     QWidget(parent){
     QFont cTitleFont;
     cTitleFont.setBold(true);
-    cTitleFont.setPointSize(30);
+    cTitleFont.setPointSize(27);
     cTitle = new QLabel(this);
     cTitle->setFont(cTitleFont);
-    cTitle->setGeometry(30,45,600,75);
+    cTitle->setGeometry(0,0,600,50);
     cContantFont.setBold(false);
     cContantFont.setPointSize(14);
 }
@@ -55,7 +57,7 @@ WelcomePage::WelcomePage(InstallerPage *parent):
     Contant = new QLabel(this);
     this->SetContantTitle(tr("欢迎"));
     Contant->setText(tr("欢迎使用本AOSC系统半自动部署器\n您将在本部署器的指导下部署完成整个系统\n祝您使用愉快"));
-    Contant->setGeometry(30,115,500,95);
+    Contant->setGeometry(30,100,500,95);
     Contant->setFont(cContantFont);
 }
 
@@ -102,10 +104,76 @@ void ReadingPage::AgreementChanged(bool Status){
 }
 
 void ReadingPage::PervShow(){
-    emit SIGN_SetNextButtonDisabled(true);
+    if(isAgreed->isChecked() == false)
+        emit SIGN_SetNextButtonDisabled(true);
 }
 
 void ReadingPage::resizeEvent(QResizeEvent *){
     ReadingBrowser->setGeometry(0,0,this->width(),this->height()-25);
     isAgreed->setGeometry(this->width()-90,this->height()-25,100,20);
+}
+
+
+
+
+
+
+PartedPage::PartedPage(InstallerPage *parent)
+    :InstallerPage(parent){
+    DeviceSelect = new QTabWidget(this);
+    ChangeButton = new QPushButton(this);
+    AddButton    = new QPushButton(this);
+    DelButton    = new QPushButton(this);
+    List         = new PartitionList();
+    DeviceSelect->setGeometry(0,50,this->width(),this->height()-180);
+    DeviceSelect->insertTab(0,List,"Main");
+    ChangeButton->setText("Change");
+    AddButton->setText("+");
+    DelButton->setText("-");
+    AddButton->setGeometry(0,this->height()-120,20,20);
+    ChangeButton->setGeometry(20,this->height()-120,50,20);
+    DelButton->setGeometry(70,this->height()-120,20,20);
+    SetContantTitle(tr("Parted!"));
+    ped_device_probe_all();
+}
+
+PartedPage::~PartedPage(){
+
+}
+
+void PartedPage::RefreshDiskPartition(){
+    PedPartition Part;
+    PedDevice *dev = 0;
+    while((dev = ped_device_get_next(dev))){
+        printf("\n ==============================================\n");
+        printf("device model: %s\n", dev->model);
+        printf("path: %s\n",dev->path);
+        long long size = (dev->sector_size * dev->length)/(1024*1024*1024);
+        printf("size: %lld G\n", size);
+        PedDisk* disk = ped_disk_new(dev);
+        PedPartition* part = 0;
+        while((part = ped_disk_next_partition(disk, part))){
+            //略过不是分区的空间
+            if ((part->type & PED_PARTITION_METADATA) ||
+                (part->type & PED_PARTITION_FREESPACE) ||
+                (part->type & PED_PARTITION_EXTENDED))
+                    continue;
+            printf("++++++++++++++++++++++++++++++++++++\n");
+            printf("partition: %s\n", ped_partition_get_path(part));
+            if(part->fs_type)
+                printf("fs_type: %s\n", part->fs_type->name);
+            else
+                printf("fs_type: (null)\n");
+            //printf("partition start:%lld/n", part->geom.start);
+            //printf("partition end: %lld/n", part->geom.end);
+            printf("partition length:%lld M\n", (part->geom.length * dev->sector_size)/(1024*1024));
+            memcpy((void*)&Part,(void*)part,sizeof(Part));
+            List->AddPartition(Part);
+        }
+    }
+}
+
+void PartedPage::PervShow(){
+    emit SIGN_SetNextButtonDisabled(true);
+    RefreshDiskPartition();
 }

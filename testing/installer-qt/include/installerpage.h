@@ -6,6 +6,9 @@
 #include <QTextBrowser>
 #include <QResizeEvent>
 #include <QCheckBox>
+#include <QTabWidget>
+#include <QPushButton>
+#include "partitionselect.h"
 
 class InstallerPage : public QWidget{
     Q_OBJECT
@@ -62,6 +65,24 @@ public slots:
 private:
     QTextBrowser    *ReadingBrowser;
     QCheckBox       *isAgreed;
+};
+
+
+class PartedPage : public InstallerPage{
+    Q_OBJECT
+public:
+    explicit PartedPage(InstallerPage *parent = 0);
+    ~PartedPage();
+    void PervShow();
+    void RefreshDiskPartition(void);
+public slots:
+private:
+    QTabWidget      *DeviceSelect;
+    QPushButton     *ChangeButton;
+    QPushButton     *AddButton;
+    QPushButton     *DelButton;
+    PartitionList   *List;
+
 };
 
 #endif // INSTALLERPAGE_H
