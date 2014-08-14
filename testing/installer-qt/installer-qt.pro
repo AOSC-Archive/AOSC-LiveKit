@@ -11,7 +11,9 @@ QMAKE_CXXFLAGS  += -g -ggdb
 
 # Input
 HEADERS += include/installermain.h include/installerpage.h \
-    include/partitionselect.h
+    include/partitionselect.h \
+    include/dialogbox.h
 SOURCES += src/installermain.cpp src/installerpage.cpp src/main.cpp \
-    src/partitionselect.cpp
+    src/partitionselect.cpp \
+    src/dialogbox.cpp
 RESOURCES += data/resources.qrc

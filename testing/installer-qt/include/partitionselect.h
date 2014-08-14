@@ -11,20 +11,23 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#define _FRIEND_LABEL_HEIGTH    30
+#define _FRIEND_LABEL_HEIGTH    40
 
 class PartitionItem : public QWidget{
     Q_OBJECT
 public:
     explicit        PartitionItem(QWidget *parent = 0);
-    void            SetPartiton(const PedPartition _Partiton);
+    void            SetPartiton(PedPartition *_Partiton, PedDevice *Device);
     PedPartition    GetPartition(void);
+    void            SetUnselected(bool);
 signals:
     void clicked(PedPartition);
 protected:
     QHBoxLayout     *layout;
     PedPartition     Partition;
-    QLabel          *PartitionPath;
+    QLabel          *PartitionLabel;
+    QLabel          *FileSystemLabel;
+    QLabel          *SizeLabel;
     virtual void mousePressEvent(QMouseEvent *event);
 };
 
@@ -35,19 +38,24 @@ class PartitionList : public QWidget{
 public:
     explicit        PartitionList(QWidget *parent = 0);
     void            ClearPartitionList(void);
-    void            AddPartition(PedPartition _Partition);
+    void            AddPartition(PedPartition *_Partition, PedDevice *Device);
     void            resizeEvent(QResizeEvent *);
     void            SetPartitionCount(int n);
     int             GetPartitionCount(void);
 
     PedPartition    GetPartitionDataByUID(uint32_t UID);
+    PedPartition    GetCurrentSelectedPartition(void);
 public slots:
     void            ItemClicked(PedPartition);
 signals:
+    void            SetAddButtonDisabled(bool);
+    void            SetDelButtonDisabled(bool);
+    void            SetChangeButtonDisabled(bool);
 protected:
     int             PartitionCount;
     typedef         QMap<int,PartitionItem *>   _Map;
     QScrollArea         *List;
+    PedPartition        *NowSelected;
     QWidget             *PartitionWidget;
     QWidget             *FriendLabelList;
     QVBoxLayout         *PartitionLayout;

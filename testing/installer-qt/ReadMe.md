@@ -19,3 +19,9 @@
 >   include --> 头文件
 
 >   docs    --> 文档
+
+>   data    --> 数据/资源
+
+## 运行
+
+>   You must run as root!

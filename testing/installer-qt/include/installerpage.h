@@ -9,6 +9,7 @@
 #include <QTabWidget>
 #include <QPushButton>
 #include "partitionselect.h"
+#include "dialogbox.h"
 
 class InstallerPage : public QWidget{
     Q_OBJECT
@@ -76,13 +77,16 @@ public:
     void PervShow();
     void RefreshDiskPartition(void);
 public slots:
+    void            ShowChangeDialog(void);
+    void            ShowAddDialog(void);
 private:
     QTabWidget      *DeviceSelect;
     QPushButton     *ChangeButton;
     QPushButton     *AddButton;
     QPushButton     *DelButton;
     PartitionList   *List;
-
+    AddDialogBox    *AddDialog;
+    ChangeDialogBox *ChangeDialog;
 };
 
 #endif // INSTALLERPAGE_H
