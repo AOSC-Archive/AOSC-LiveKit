@@ -149,18 +149,45 @@ PartedPage::PartedPage(InstallerPage *parent)
     this->connect(List,SIGNAL(SetDelButtonDisabled(bool)),this->DelButton,SLOT(setDisabled(bool)));
     this->connect(AddButton,SIGNAL(clicked()),this,SLOT(ShowAddDialog()));
     this->connect(ChangeButton,SIGNAL(clicked()),this,SLOT(ShowChangeDialog()));
+    this->connect(DelButton,SIGNAL(clicked()),this,SLOT(AskForDeletePartition()));
     this->connect(ChangeDialog,SIGNAL(MountPointChangeApplied(int)),this,SLOT(MountPointChangeApplied(int)));
     this->connect(ChangeDialog,SIGNAL(WorkDone()),this,SLOT(WorkDone()));
 }
 
 void PartedPage::ShowAddDialog(){
-    AddDialog->SetCurrentPartition(List->GetCurrentSelectedPartition());
-    AddDialog->show();
+    ChangeDialog->SetCurrentPartition(List->GetCurrentSelectedPartition(),List->GetCurrentSelectedDisk(),List->GetCurrentSelectedDevice(),INSTALLER_MOUNT_POINT_NONE,INSTALLER_WORKTYPE_ADD);
+    ChangeDialog->show();
 }
 
 void PartedPage::ShowChangeDialog(){
-    ChangeDialog->SetCurrentPartition(List->GetCurrentSelectedPartition(),List->GetCurrentMountPoint());
+    ChangeDialog->SetCurrentPartition(List->GetCurrentSelectedPartition(),List->GetCurrentSelectedDisk(),List->GetCurrentSelectedDevice(),List->GetCurrentMountPoint(),INSTALLER_WORKTYPE_CHANGE);
     ChangeDialog->show();
+}
+
+void PartedPage::AskForDeletePartition(){
+    if (QMessageBox::question(this,tr("Question"),tr("Do you want to delete this partition?"),QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
+        DelPartition(List->GetCurrentSelectedPartition(),List->GetCurrentSelectedDisk());
+        List->RefreshList();
+    }
+}
+
+void PartedPage::DelPartition(PedPartition TargetPartition, PedDisk TargetDisk){
+    PedDevice *dev = 0;
+    while((dev = ped_device_get_next(dev))){
+        PedDisk* disk = ped_disk_new(dev);
+        PedPartition* part = 0;
+        while((part = ped_disk_next_partition(disk, part))){
+            //略过不是分区的空间
+            if ((part->type & PED_PARTITION_METADATA) ||
+                (part->type & PED_PARTITION_FREESPACE) ||
+                (part->type & PED_PARTITION_EXTENDED))
+                    continue;
+            if(strcmp(ped_partition_get_path(part),ped_partition_get_path(&TargetPartition)) == 0){
+                ped_disk_delete_partition(disk,part);
+                ped_disk_commit(disk);
+            }
+        }
+    }
 }
 
 PartedPage::~PartedPage(){
@@ -178,4 +205,7 @@ void PartedPage::MountPointChangeApplied(int MountPoint){
 
 void PartedPage::WorkDone(){
     List->RefreshList();
+    AddButton->setDisabled(true);
+    DelButton->setDisabled(true);
+    ChangeButton->setDisabled(true);
 }

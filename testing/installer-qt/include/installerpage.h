@@ -75,9 +75,11 @@ public:
     explicit PartedPage(InstallerPage *parent = 0);
     ~PartedPage();
     void PervShow();
+    void            DelPartition(PedPartition TargetPartition,PedDisk TargetDisk);
 public slots:
     void            ShowChangeDialog(void);
     void            ShowAddDialog(void);
+    void            AskForDeletePartition(void);
     void            MountPointChangeApplied(int);
     void            WorkDone(void);
 private:

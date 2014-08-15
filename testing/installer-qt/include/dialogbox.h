@@ -9,6 +9,8 @@
 #include <QCheckBox>
 #include <QString>
 #include <QThread>
+#include <QMessageBox>
+#include <QSpinBox>
 
 #define     INSTALLER_MOUNT_POINT_NONE  0
 #define     INSTALLER_MOUNT_POINT_ROOT  1
@@ -16,18 +18,23 @@
 #define     INSTALLER_MOUNT_POINT_USR   3
 #define     INSTALLER_MOUNT_POINT_BOOT  4
 
+#define     INSTALLER_FILESYSTEM_NONE   -2
+#define     INSTALLER_FILESYSTEM_FREESPACE -1
 #define     INSTALLER_FILESYSTEM_EXT2   0
 #define     INSTALLER_FILESYSTEM_EXT3   1
 #define     INSTALLER_FILESYSTEM_EXT4   2
 #define     INSTALLER_FILESYSTEM_NTFS   3
 #define     INSTALLER_FILESYSTEM_FAT32  4
 
+#define     INSTALLER_WORKTYPE_ADD      1
+#define     INSTALLER_WORKTYPE_CHANGE   2
+
 class ChangeDialogBox : public QWidget{
     Q_OBJECT
 public:
     explicit ChangeDialogBox(QWidget *parent = 0);
     ~ChangeDialogBox();
-    void    SetCurrentPartition(PedPartition,int);
+    void    SetCurrentPartition(PedPartition Partition, PedDisk Disk, PedDevice Device, int, int WorkType);
 signals:
     void    MountPointChangeApplied(int);     // MountPoint;
     void    WorkDone(void);
@@ -36,10 +43,14 @@ public slots:
     void    ApplyButtonClicked(void);
     void    CancelButtonClicked(void);
     void    FileSystemSelectChanged(int);
+    void    FormatDone(int);
 private:
     PedPartition     CurrentPartition;
+    PedDisk          CurrentDisk;
+    PedDevice        CurrentDevice;
     int              OriginMountPoint;
     int              OriginFileSystem;
+    int              WorkType;
     QPushButton     *ApplyButton;
     QPushButton     *CancelButton;
     QLabel          *PartitionPath;
@@ -49,10 +60,12 @@ private:
     QComboBox       *FileSystemSelect;
     QComboBox       *MountPointSelect;
     QCheckBox       *DoFormatCheckBox;
+    QSpinBox        *PartitionSize;
+    QLabel          *PartitionSizeLabel;
 
     QString         CurrentFileSystem;
     QString         CurrentMountPoint;
-    WorkingThread   *DoWork;
+    WorkingDialog   *DoWork;
 };
 
 class AddDialogBox : public QWidget{

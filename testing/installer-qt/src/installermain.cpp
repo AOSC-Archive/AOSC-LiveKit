@@ -27,9 +27,13 @@ InstallerMain::InstallerMain(QWidget *parent) :
     Introduce->show();
     this->setWindowTitle(tr("AOSC 系统部署器"));
     PageTab->tabBar()->hide();
+
+
     this->AddPage(new WelcomePage);
     this->AddPage(new ReadingPage);
     this->AddPage(new PartedPage);
+
+
     PervButton->setHidden(true);
     this->connect(PervButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToPervPage()));
     this->connect(NextButton,SIGNAL(clicked()),this,SLOT(SLOT_TurnToNextPage()));

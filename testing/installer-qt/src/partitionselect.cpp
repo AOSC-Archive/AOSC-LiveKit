@@ -28,18 +28,18 @@ PartitionItem::PartitionItem(QWidget *parent)
     layout->addWidget(SizeLabel);
     layout->addWidget(MountPointLabel);
 }
-void PartitionItem::SetPartiton(PedPartition *_Partition,PedDevice *Device,int MountPoint = INSTALLER_MOUNT_POINT_NONE){
+void PartitionItem::SetPartiton(PedPartition *_Partition, PedDevice *_Device, PedDisk *_Disk, int MountPoint = INSTALLER_MOUNT_POINT_NONE){
     if(_Partition->type == PED_PARTITION_FREESPACE){  //Free Space
         PartitionLabel->setText(tr("Free Space").toUtf8().data());
         char size[36];
-        sprintf(size,"%lld GB",(_Partition->geom.length * Device->sector_size)/(1024*1024*1024));
+        sprintf(size,"%lld GB",(_Partition->geom.length * _Device->sector_size)/(1024*1024*1024));
         SizeLabel->setText(size);
         FileSystemLabel->setText(tr("Unknown"));
     }
     else if(_Partition->type == PED_PARTITION_NORMAL){  //  Normal Partition
         PartitionLabel->setText(ped_partition_get_path(_Partition));
         char size[36];
-        sprintf(size,"%lld GB",(_Partition->geom.length * Device->sector_size)/(1024*1024*1024));
+        sprintf(size,"%lld GB",(_Partition->geom.length * _Device->sector_size)/(1024*1024*1024));
         SizeLabel->setText(size);
         if(_Partition->fs_type)
             FileSystemLabel->setText(_Partition->fs_type->name);
@@ -49,7 +49,7 @@ void PartitionItem::SetPartiton(PedPartition *_Partition,PedDevice *Device,int M
     else{
         PartitionLabel->setText(tr("Disabled").toUtf8().data());
         char size[36];
-        sprintf(size,"%lld GB",(_Partition->geom.length * Device->sector_size)/(1024*1024*1024));
+        sprintf(size,"%lld GB",(_Partition->geom.length * _Device->sector_size)/(1024*1024*1024));
         SizeLabel->setText(size);
         FileSystemLabel->setText(tr("Unknown"));
     }
@@ -60,12 +60,22 @@ void PartitionItem::SetPartiton(PedPartition *_Partition,PedDevice *Device,int M
     else if(MountPoint == INSTALLER_MOUNT_POINT_HOME)
         MountPointLabel->setText(tr("/home"));
     memcpy((void*)&Partition,(void*)_Partition,sizeof(PedPartition));
+    memcpy((void*)&Device,(void*)_Device,sizeof(PedDevice));
+    memcpy((void*)&Disk,(void*)_Disk,sizeof(PedDisk));
     PartitionLabel->setGeometry(0,0,50,20);
     PartitionLabel->show();
 }
 
 PedPartition PartitionItem::GetPartition(){
     return Partition;
+}
+
+PedDisk PartitionItem::GetDisk(){
+    return Disk;
+}
+
+PedDevice PartitionItem::GetDevice(){
+    return Device;
 }
 
 int PartitionItem::GetMountPoint(){
@@ -117,13 +127,13 @@ PartitionList::PartitionList(QWidget *parent)
     NowMountPoint = INSTALLER_MOUNT_POINT_NONE;
 }
 
-void PartitionList::AddPartition(PedPartition *_Partition, PedDevice *Device){
+void PartitionList::AddPartition(PedPartition *_Partition, PedDevice *Device, PedDisk *Disk){
     if ((_Partition->type & PED_PARTITION_METADATA) ||
                     (_Partition->type & PED_PARTITION_EXTENDED))
         return;
      PartitionItem *f = new PartitionItem(this);
      PartitionCount++;
-     f->SetPartiton(_Partition,Device);
+     f->SetPartiton(_Partition,Device,Disk);
      f->resize(List->width()-20,_FRIEND_LABEL_HEIGTH);
      FriendLabelList->resize(List->width()-20,_FRIEND_LABEL_HEIGTH*PartitionCount);
      PartitionLayout->addWidget(f);
@@ -198,6 +208,9 @@ PedPartition PartitionList::GetPartitionDataByUID(uint32_t UID){
 }
 
 void PartitionList::SetCurrentMountPoint(int MountPoint){
+    if(MountPoint == INSTALLER_MOUNT_POINT_NONE){
+        return;
+    }
     CurrentSelelcted->SetMountPoint(MountPoint);
     PedPartition t = CurrentSelelcted->GetPartition();
     MountPointMap[MountPoint]=ped_partition_get_path(&t);
@@ -209,6 +222,14 @@ int PartitionList::GetCurrentMountPoint(){
 
 PedPartition PartitionList::GetCurrentSelectedPartition(){
     return CurrentSelelcted->GetPartition();
+}
+
+PedDisk PartitionList::GetCurrentSelectedDisk(){
+    return CurrentSelelcted->GetDisk();
+}
+
+PedDevice PartitionList::GetCurrentSelectedDevice(){
+    return CurrentSelelcted->GetDevice();
 }
 
 void PartitionList::RefreshList(){
@@ -239,7 +260,7 @@ void PartitionList::RefreshList(){
             //printf("partition end: %lld/n", part->geom.end);
             printf("partition length:%lld M\n", (part->geom.length * dev->sector_size)/(1024*1024));*/
             memcpy((void*)&Part,(void*)part,sizeof(Part));
-            AddPartition(part,dev);
+            AddPartition(part,dev,disk);
         }
     }
 }

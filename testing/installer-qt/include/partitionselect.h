@@ -17,8 +17,10 @@ class PartitionItem : public QWidget{
     Q_OBJECT
 public:
     explicit        PartitionItem(QWidget *parent = 0);
-    void            SetPartiton(PedPartition *_Partiton, PedDevice *Device, int MountPoint);
+    void            SetPartiton(PedPartition *_Partiton, PedDevice *_Device, PedDisk *_Disk, int MountPoint);
     PedPartition    GetPartition(void);
+    PedDisk         GetDisk(void);
+    PedDevice       GetDevice(void);
     int             GetMountPoint(void);
     void            SetUnselected(bool);
     void            SetMountPoint(int);
@@ -27,6 +29,8 @@ signals:
 protected:
     QHBoxLayout     *layout;
     PedPartition     Partition;
+    PedDevice        Device;
+    PedDisk          Disk;
     int              MountPoint;
     QLabel          *PartitionLabel;
     QLabel          *FileSystemLabel;
@@ -42,13 +46,15 @@ class PartitionList : public QWidget{
 public:
     explicit        PartitionList(QWidget *parent = 0);
     void            ClearPartitionList(void);
-    void            AddPartition(PedPartition *_Partition, PedDevice *Device);
+    void            AddPartition(PedPartition *_Partition, PedDevice *Device, PedDisk *Disk);
     void            resizeEvent(QResizeEvent *);
     void            SetPartitionCount(int n);
     int             GetPartitionCount(void);
 
     PedPartition    GetPartitionDataByUID(uint32_t UID);
     PedPartition    GetCurrentSelectedPartition(void);
+    PedDisk         GetCurrentSelectedDisk(void);
+    PedDevice       GetCurrentSelectedDevice(void);
     int             GetCurrentMountPoint(void);
 
     void            SetCurrentMountPoint(int);
