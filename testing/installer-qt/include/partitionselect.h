@@ -11,23 +11,27 @@
 #include <QHBoxLayout>
 #include <QLabel>
 
-#define _FRIEND_LABEL_HEIGTH    40
+#define _FRIEND_LABEL_HEIGTH    35
 
 class PartitionItem : public QWidget{
     Q_OBJECT
 public:
     explicit        PartitionItem(QWidget *parent = 0);
-    void            SetPartiton(PedPartition *_Partiton, PedDevice *Device);
+    void            SetPartiton(PedPartition *_Partiton, PedDevice *Device, int MountPoint);
     PedPartition    GetPartition(void);
+    int             GetMountPoint(void);
     void            SetUnselected(bool);
+    void            SetMountPoint(int);
 signals:
-    void clicked(PedPartition);
+    void clicked(PartitionItem*);
 protected:
     QHBoxLayout     *layout;
     PedPartition     Partition;
+    int              MountPoint;
     QLabel          *PartitionLabel;
     QLabel          *FileSystemLabel;
     QLabel          *SizeLabel;
+    QLabel          *MountPointLabel;
     virtual void mousePressEvent(QMouseEvent *event);
 };
 
@@ -45,8 +49,13 @@ public:
 
     PedPartition    GetPartitionDataByUID(uint32_t UID);
     PedPartition    GetCurrentSelectedPartition(void);
+    int             GetCurrentMountPoint(void);
+
+    void            SetCurrentMountPoint(int);
+
+    void            RefreshList(void);
 public slots:
-    void            ItemClicked(PedPartition);
+    void            ItemClicked(PartitionItem*);
 signals:
     void            SetAddButtonDisabled(bool);
     void            SetDelButtonDisabled(bool);
@@ -54,13 +63,17 @@ signals:
 protected:
     int             PartitionCount;
     typedef         QMap<int,PartitionItem *>   _Map;
+    typedef         QMap<int,QString>               _MountPointMap;
     QScrollArea         *List;
-    PedPartition        *NowSelected;
+    PartitionItem       *CurrentSelelcted;
+    int                  NowMountPoint;
     QWidget             *PartitionWidget;
     QWidget             *FriendLabelList;
     QVBoxLayout         *PartitionLayout;
     _Map                PartitionMap;
     _Map::iterator      Result;
+    _MountPointMap      MountPointMap;
+    _MountPointMap::iterator    MountPointIterator;
 };
 
 

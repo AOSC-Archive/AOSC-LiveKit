@@ -75,10 +75,10 @@ public:
     explicit PartedPage(InstallerPage *parent = 0);
     ~PartedPage();
     void PervShow();
-    void RefreshDiskPartition(void);
 public slots:
     void            ShowChangeDialog(void);
     void            ShowAddDialog(void);
+    void            ChangeApplied(int);
 private:
     QTabWidget      *DeviceSelect;
     QPushButton     *ChangeButton;

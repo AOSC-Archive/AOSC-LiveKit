@@ -137,8 +137,8 @@ PartedPage::PartedPage(InstallerPage *parent)
     AddButton->setText("+");
     DelButton->setText("-");
     AddButton->setGeometry(0,this->height()-120,20,20);
-    ChangeButton->setGeometry(20,this->height()-120,50,20);
-    DelButton->setGeometry(70,this->height()-120,20,20);
+    ChangeButton->setGeometry(20,this->height()-120,55,20);
+    DelButton->setGeometry(75,this->height()-120,20,20);
     SetContantTitle(tr("Parted!"));
     ped_device_probe_all();
     ChangeButton->setDisabled(true);
@@ -149,6 +149,7 @@ PartedPage::PartedPage(InstallerPage *parent)
     this->connect(List,SIGNAL(SetDelButtonDisabled(bool)),this->DelButton,SLOT(setDisabled(bool)));
     this->connect(AddButton,SIGNAL(clicked()),this,SLOT(ShowAddDialog()));
     this->connect(ChangeButton,SIGNAL(clicked()),this,SLOT(ShowChangeDialog()));
+    this->connect(ChangeDialog,SIGNAL(ChangeApplied(int)),this,SLOT(ChangeApplied(int)));
 }
 
 void PartedPage::ShowAddDialog(){
@@ -157,7 +158,7 @@ void PartedPage::ShowAddDialog(){
 }
 
 void PartedPage::ShowChangeDialog(){
-    ChangeDialog->SetCurrentPartition(List->GetCurrentSelectedPartition());
+    ChangeDialog->SetCurrentPartition(List->GetCurrentSelectedPartition(),List->GetCurrentMountPoint());
     ChangeDialog->show();
 }
 
@@ -165,40 +166,11 @@ PartedPage::~PartedPage(){
 
 }
 
-void PartedPage::RefreshDiskPartition(){
-    List->ClearPartitionList();
-    PedPartition Part;
-    PedDevice *dev = 0;
-    while((dev = ped_device_get_next(dev))){
-      /*printf("\n ==============================================\n");
-        printf("device model: %s\n", dev->model);
-        printf("path: %s\n",dev->path);
-        long long size = (dev->sector_size * dev->length)/(1024*1024*1024);
-        printf("size: %lld G\n", size);*/
-        PedDisk* disk = ped_disk_new(dev);
-        PedPartition* part = 0;
-        while((part = ped_disk_next_partition(disk, part))){
-            //略过不是分区的空间
-      /*    if ((part->type & PED_PARTITION_METADATA) ||
-                (part->type & PED_PARTITION_FREESPACE) ||
-                (part->type & PED_PARTITION_EXTENDED))
-                    continue;*/
-          /*printf("++++++++++++++++++++++++++++++++++++\n");
-            printf("partition: %s\n", ped_partition_get_path(part));
-            if(part->fs_type)
-                printf("fs_type: %s\n", part->fs_type->name);
-            else
-                printf("fs_type: (null)\n");
-            //printf("partition start:%lld/n", part->geom.start);
-            //printf("partition end: %lld/n", part->geom.end);
-            printf("partition length:%lld M\n", (part->geom.length * dev->sector_size)/(1024*1024));*/
-            memcpy((void*)&Part,(void*)part,sizeof(Part));
-            List->AddPartition(part,dev);
-        }
-    }
-}
-
 void PartedPage::PervShow(){
     //emit SIGN_SetNextButtonDisabled(true);
-    RefreshDiskPartition();
+    List->RefreshList();
+}
+
+void PartedPage::ChangeApplied(int MountPoint){
+    List->SetCurrentMountPoint(MountPoint);
 }

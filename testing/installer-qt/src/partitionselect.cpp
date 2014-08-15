@@ -1,4 +1,5 @@
 #include "partitionselect.h"
+#include "dialogbox.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <QToolBox>
@@ -19,13 +20,15 @@ PartitionItem::PartitionItem(QWidget *parent)
     PartitionLabel  = new QLabel(this);
     FileSystemLabel = new QLabel(this);
     SizeLabel       = new QLabel(this);
+    MountPointLabel = new QLabel(this);
     layout          = new QHBoxLayout(this);
     this->setLayout(layout);
     layout->addWidget(PartitionLabel);
     layout->addWidget(FileSystemLabel);
     layout->addWidget(SizeLabel);
+    layout->addWidget(MountPointLabel);
 }
-void PartitionItem::SetPartiton(PedPartition *_Partition,PedDevice *Device){
+void PartitionItem::SetPartiton(PedPartition *_Partition,PedDevice *Device,int MountPoint = INSTALLER_MOUNT_POINT_NONE){
     if(_Partition->type == PED_PARTITION_FREESPACE){  //Free Space
         PartitionLabel->setText(tr("Free Space").toUtf8().data());
         char size[36];
@@ -50,6 +53,12 @@ void PartitionItem::SetPartiton(PedPartition *_Partition,PedDevice *Device){
         SizeLabel->setText(size);
         FileSystemLabel->setText(tr("Unknown"));
     }
+    if(MountPoint == INSTALLER_MOUNT_POINT_NONE)
+        MountPointLabel->setText(tr("NULL"));
+    else if(MountPoint == INSTALLER_MOUNT_POINT_ROOT)
+        MountPointLabel->setText(tr("/"));
+    else if(MountPoint == INSTALLER_MOUNT_POINT_HOME)
+        MountPointLabel->setText(tr("/home"));
     memcpy((void*)&Partition,(void*)_Partition,sizeof(PedPartition));
     PartitionLabel->setGeometry(0,0,50,20);
     PartitionLabel->show();
@@ -57,6 +66,20 @@ void PartitionItem::SetPartiton(PedPartition *_Partition,PedDevice *Device){
 
 PedPartition PartitionItem::GetPartition(){
     return Partition;
+}
+
+int PartitionItem::GetMountPoint(){
+    return MountPoint;
+}
+
+void PartitionItem::SetMountPoint(int _MountPoint){
+    MountPoint = _MountPoint;
+    if(MountPoint == INSTALLER_MOUNT_POINT_NONE)
+        MountPointLabel->setText(tr("NULL"));
+    else if(MountPoint == INSTALLER_MOUNT_POINT_ROOT)
+        MountPointLabel->setText(tr("/"));
+    else if(MountPoint == INSTALLER_MOUNT_POINT_HOME)
+        MountPointLabel->setText(tr("/home"));
 }
 
 void PartitionItem::SetUnselected(bool Status){
@@ -68,7 +91,7 @@ void PartitionItem::SetUnselected(bool Status){
 
 void PartitionItem::mousePressEvent(QMouseEvent *event){
     if (event->button() == Qt::LeftButton){
-        emit clicked(Partition);
+        emit clicked(this);
         this->setStyleSheet("border:1px solid black");
     }else
         QWidget::mousePressEvent(event);
@@ -81,6 +104,9 @@ PartitionList::PartitionList(QWidget *parent)
     PartitionLayout = new QVBoxLayout;
     FriendLabelList = new QWidget(this);
     FriendLabelList->setLayout(PartitionLayout);
+    PartitionLayout->setMargin(0);
+    PartitionLayout->setSpacing(0);
+    PartitionLayout->setContentsMargins(0,0,0,0);
     FriendLabelList->resize(1,1);
     List = new QScrollArea(this);
     List->setWidget(FriendLabelList);
@@ -88,8 +114,7 @@ PartitionList::PartitionList(QWidget *parent)
     List->show();
     this->show();
     PartitionCount = 0;
-    NowSelected = new PedPartition;
-    bzero(NowSelected,sizeof(PedPartition));
+    NowMountPoint = INSTALLER_MOUNT_POINT_NONE;
 }
 
 void PartitionList::AddPartition(PedPartition *_Partition, PedDevice *Device){
@@ -98,11 +123,27 @@ void PartitionList::AddPartition(PedPartition *_Partition, PedDevice *Device){
         return;
      PartitionItem *f = new PartitionItem(this);
      PartitionCount++;
-        f->SetPartiton(_Partition,Device);
+     f->SetPartiton(_Partition,Device);
+     f->resize(List->width()-20,_FRIEND_LABEL_HEIGTH);
      FriendLabelList->resize(List->width()-20,_FRIEND_LABEL_HEIGTH*PartitionCount);
      PartitionLayout->addWidget(f);
-     this->connect(f,SIGNAL(clicked(PedPartition)),this,SLOT(ItemClicked(PedPartition)));
+     this->connect(f,SIGNAL(clicked(PartitionItem*)),this,SLOT(ItemClicked(PartitionItem*)));
      PartitionMap[PartitionCount] = f;
+     char Path[36];
+     memcpy(Path,ped_partition_get_path(_Partition),strlen(ped_partition_get_path(_Partition)));
+     if(MountPointMap.isEmpty() == false){
+         MountPointIterator = MountPointMap.find(INSTALLER_MOUNT_POINT_ROOT);
+         if(MountPointIterator.value() == Path){
+             printf("Yes!\n");
+             f->SetMountPoint(INSTALLER_MOUNT_POINT_ROOT);
+             return;
+         }
+         /*MountPointIterator = MountPointMap.find(INSTALLER_MOUNT_POINT_HOME);
+         if(MountPointIterator.value() == ped_partition_get_path(_Partition)){
+             f->SetMountPoint(INSTALLER_MOUNT_POINT_HOME);
+             return;
+         }*/
+     }
 }
 
 void PartitionList::ClearPartitionList(){
@@ -127,16 +168,17 @@ int PartitionList::GetPartitionCount(){
     return PartitionCount;
 }
 
-void PartitionList::ItemClicked(PedPartition Partition){
+void PartitionList::ItemClicked(PartitionItem *Item){
     if(PartitionMap.isEmpty() == false){
-        for(Result = PartitionMap.begin();Result != PartitionMap.end();Result++)
+        for(Result = PartitionMap.begin();Result != PartitionMap.end();Result++){
             Result.value()->SetUnselected(true);
+        }
     }
-    if(Partition.type == PED_PARTITION_NORMAL){
+    if(Item->GetPartition().type == PED_PARTITION_NORMAL){
         emit SetChangeButtonDisabled(false);
         emit SetAddButtonDisabled(true);
         emit SetDelButtonDisabled(false);
-    }else if(Partition.type == PED_PARTITION_FREESPACE){
+    }else if(Item->GetPartition().type == PED_PARTITION_FREESPACE){
         emit SetChangeButtonDisabled(true);
         emit SetAddButtonDisabled(false);
         emit SetDelButtonDisabled(true);
@@ -145,7 +187,7 @@ void PartitionList::ItemClicked(PedPartition Partition){
         emit SetAddButtonDisabled(true);
         emit SetDelButtonDisabled(true);
     }
-    memcpy((void*)NowSelected,(void*)&Partition,sizeof(PedPartition));
+    CurrentSelelcted = Item;
 }
 
 PedPartition PartitionList::GetPartitionDataByUID(uint32_t UID){
@@ -153,6 +195,49 @@ PedPartition PartitionList::GetPartitionDataByUID(uint32_t UID){
     return Result.value()->GetPartition();
 }
 
+void PartitionList::SetCurrentMountPoint(int MountPoint){
+    CurrentSelelcted->SetMountPoint(MountPoint);
+    PedPartition t = CurrentSelelcted->GetPartition();
+    MountPointMap[MountPoint]=ped_partition_get_path(&t);
+}
+
+int PartitionList::GetCurrentMountPoint(){
+    return CurrentSelelcted->GetMountPoint();
+}
+
 PedPartition PartitionList::GetCurrentSelectedPartition(){
-    return *NowSelected;
+    return CurrentSelelcted->GetPartition();
+}
+
+void PartitionList::RefreshList(){
+    ClearPartitionList();
+    PedPartition Part;
+    PedDevice *dev = 0;
+    while((dev = ped_device_get_next(dev))){
+      /*printf("\n ==============================================\n");
+        printf("device model: %s\n", dev->model);
+        printf("path: %s\n",dev->path);
+        long long size = (dev->sector_size * dev->length)/(1024*1024*1024);
+        printf("size: %lld G\n", size);*/
+        PedDisk* disk = ped_disk_new(dev);
+        PedPartition* part = 0;
+        while((part = ped_disk_next_partition(disk, part))){
+            //略过不是分区的空间
+      /*    if ((part->type & PED_PARTITION_METADATA) ||
+                (part->type & PED_PARTITION_FREESPACE) ||
+                (part->type & PED_PARTITION_EXTENDED))
+                    continue;*/
+          /*printf("++++++++++++++++++++++++++++++++++++\n");
+            printf("partition: %s\n", ped_partition_get_path(part));
+            if(part->fs_type)
+                printf("fs_type: %s\n", part->fs_type->name);
+            else
+                printf("fs_type: (null)\n");
+            //printf("partition start:%lld/n", part->geom.start);
+            //printf("partition end: %lld/n", part->geom.end);
+            printf("partition length:%lld M\n", (part->geom.length * dev->sector_size)/(1024*1024));*/
+            memcpy((void*)&Part,(void*)part,sizeof(Part));
+            AddPartition(part,dev);
+        }
+    }
 }
