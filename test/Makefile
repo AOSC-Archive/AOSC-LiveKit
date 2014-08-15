@@ -1,17 +1,19 @@
-CC=gcc
-CFLAGS=-g -O2 -Wall -fPIC
-CPPPATH=
-LIBPATH=
-LIBS=$(shell pkg-config --libs libparted)
+CC		= 	gcc
+CFLAGS	= 	-g -O2 -Wall -fPIC
+CPPPATH	=
+LIBPATH	=
+LIBS	= 	$(shell pkg-config --libs libparted)
+LIBS	+= 	-lblkid
 
-all: hello
+all: test_libparted test_libblkid
 
-hello:
-	$(CC) -o hello.o -c $(CFLAGS) $(CPPPATH) hello.c
-	#$(CC) -o strlist.o -c $(CFLAGS) $(CPPPATH) strlist.c
-	#$(CC) -o table.o -c $(CFLAGS) $(CPPPATH) table.c
-	#$(CC) -o hello hello.o table.o strlist.o $(LIBPATH) $(LIBS)
-	$(CC) -o hello hello.o $(LIBPATH) $(LIBS)
+test_libparted:
+	$(CC) -o test_libparted.o -c $(CFLAGS) $(CPPPATH) test_libparted.c
+	$(CC) -o test_libparted test_libparted.o $(LIBPATH) $(LIBS)
+
+test_libblkid:
+	$(CC) -o test_libblkid.o -c $(CFLAGS) $(CPPPATH) test_libblkid.c
+	$(CC) -o test_libblkid test_libblkid.o $(LIBPATH) $(LIBS)
 
 clean: 
-	rm -rf *.o hello
+	rm -rf *.o test_libparted test_libblkid

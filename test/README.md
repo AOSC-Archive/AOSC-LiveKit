@@ -5,7 +5,7 @@ There is NO dev doc available in the parted tarball or at [GNU Parted](http://ww
 website.
 
 So I simply read the parted source code `parted/parted/parted.c` to be familiar 
-with how to use libparted API, then I wrote the `hello.c` testcase to print out 
+with how to use libparted API, then I wrote the `test_libparted.c` testcase to print out 
 disk and relative partition information at first.
 
 ## Build
