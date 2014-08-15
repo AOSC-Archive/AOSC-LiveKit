@@ -149,7 +149,8 @@ PartedPage::PartedPage(InstallerPage *parent)
     this->connect(List,SIGNAL(SetDelButtonDisabled(bool)),this->DelButton,SLOT(setDisabled(bool)));
     this->connect(AddButton,SIGNAL(clicked()),this,SLOT(ShowAddDialog()));
     this->connect(ChangeButton,SIGNAL(clicked()),this,SLOT(ShowChangeDialog()));
-    this->connect(ChangeDialog,SIGNAL(ChangeApplied(int)),this,SLOT(ChangeApplied(int)));
+    this->connect(ChangeDialog,SIGNAL(MountPointChangeApplied(int)),this,SLOT(MountPointChangeApplied(int)));
+    this->connect(ChangeDialog,SIGNAL(WorkDone()),this,SLOT(WorkDone()));
 }
 
 void PartedPage::ShowAddDialog(){
@@ -171,6 +172,10 @@ void PartedPage::PervShow(){
     List->RefreshList();
 }
 
-void PartedPage::ChangeApplied(int MountPoint){
+void PartedPage::MountPointChangeApplied(int MountPoint){
     List->SetCurrentMountPoint(MountPoint);
+}
+
+void PartedPage::WorkDone(){
+    List->RefreshList();
 }

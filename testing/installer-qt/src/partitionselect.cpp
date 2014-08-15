@@ -130,20 +130,22 @@ void PartitionList::AddPartition(PedPartition *_Partition, PedDevice *Device){
      this->connect(f,SIGNAL(clicked(PartitionItem*)),this,SLOT(ItemClicked(PartitionItem*)));
      PartitionMap[PartitionCount] = f;
      char Path[36];
+     bzero(Path,36);
      memcpy(Path,ped_partition_get_path(_Partition),strlen(ped_partition_get_path(_Partition)));
-     if(MountPointMap.isEmpty() == false){
-         MountPointIterator = MountPointMap.find(INSTALLER_MOUNT_POINT_ROOT);
-         if(MountPointIterator.value() == Path){
-             printf("Yes!\n");
-             f->SetMountPoint(INSTALLER_MOUNT_POINT_ROOT);
-             return;
-         }
-         /*MountPointIterator = MountPointMap.find(INSTALLER_MOUNT_POINT_HOME);
-         if(MountPointIterator.value() == ped_partition_get_path(_Partition)){
-             f->SetMountPoint(INSTALLER_MOUNT_POINT_HOME);
-             return;
-         }*/
-     }
+     if(MountPointMap.contains(INSTALLER_MOUNT_POINT_ROOT)){
+        MountPointIterator = MountPointMap.find(INSTALLER_MOUNT_POINT_ROOT);
+        if(MountPointIterator.value() == Path){
+            f->SetMountPoint(INSTALLER_MOUNT_POINT_ROOT);
+                return;
+        }
+    }
+    if(MountPointMap.contains(INSTALLER_MOUNT_POINT_HOME)){
+        MountPointIterator = MountPointMap.find(INSTALLER_MOUNT_POINT_HOME);
+        if(MountPointIterator.value() == Path){
+            f->SetMountPoint(INSTALLER_MOUNT_POINT_HOME);
+                return;
+        }
+    }
 }
 
 void PartitionList::ClearPartitionList(){

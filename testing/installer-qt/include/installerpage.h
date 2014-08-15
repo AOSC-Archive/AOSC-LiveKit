@@ -78,7 +78,8 @@ public:
 public slots:
     void            ShowChangeDialog(void);
     void            ShowAddDialog(void);
-    void            ChangeApplied(int);
+    void            MountPointChangeApplied(int);
+    void            WorkDone(void);
 private:
     QTabWidget      *DeviceSelect;
     QPushButton     *ChangeButton;

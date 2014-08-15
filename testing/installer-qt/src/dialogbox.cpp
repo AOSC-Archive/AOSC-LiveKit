@@ -1,4 +1,7 @@
 #include "dialogbox.h"
+#include <stdio.h>
+#include <string.h>
+#include <QThread>
 
 ChangeDialogBox::ChangeDialogBox(QWidget *parent):
     QWidget(parent){
@@ -11,6 +14,8 @@ ChangeDialogBox::ChangeDialogBox(QWidget *parent):
     CancelButton->setText(tr("Cancel"));
     ApplyButton->setGeometry(160,160,60,30);
     CancelButton->setGeometry(230,160,60,30);
+
+    DoWork           = new WorkingThread;
 
     FileSystemSelect = new QComboBox(this);
     MountPointSelect = new QComboBox(this);
@@ -50,6 +55,7 @@ ChangeDialogBox::ChangeDialogBox(QWidget *parent):
 
     this->connect(ApplyButton,SIGNAL(clicked()),this,SLOT(ApplyButtonClicked()));
     this->connect(CancelButton,SIGNAL(clicked()),this,SLOT(CancelButtonClicked()));
+    this->connect(FileSystemSelect,SIGNAL(currentIndexChanged(int)),this,SLOT(FileSystemSelectChanged(int)));
 }
 
 ChangeDialogBox::~ChangeDialogBox(){
@@ -57,11 +63,11 @@ ChangeDialogBox::~ChangeDialogBox(){
 }
 
 void ChangeDialogBox::SetCurrentPartition(PedPartition Data, int MountPoint){
+    memcpy((void*)&CurrentPartition,(void*)&Data,sizeof(PedPartition));
     OriginMountPoint =MountPoint;
     char Name[64];
     sprintf(Name,"%s :%s",tr("Partition path").toUtf8().data(),ped_partition_get_path(&Data));
     PartitionPath->setText(Name);
-    FileSystemSelect->setCurrentText(Data.fs_type->name);
     if(MountPoint > 0){
         if(MountPoint == INSTALLER_MOUNT_POINT_ROOT){
             MountPointSelect->insertItem(MountPoint,tr("/"));
@@ -70,14 +76,27 @@ void ChangeDialogBox::SetCurrentPartition(PedPartition Data, int MountPoint){
         }
     }
     MountPointSelect->setCurrentIndex(MountPoint);
-
+    if(strcmp(Data.fs_type->name,"ext2") == 0)          OriginFileSystem = INSTALLER_FILESYSTEM_EXT2;
+    else if(strcmp(Data.fs_type->name,"ext3") == 0)     OriginFileSystem = INSTALLER_FILESYSTEM_EXT3;
+    else if(strcmp(Data.fs_type->name,"ext4") == 0)     OriginFileSystem = INSTALLER_FILESYSTEM_EXT4;
+    else if(strcmp(Data.fs_type->name,"ntfs") == 0)     OriginFileSystem = INSTALLER_FILESYSTEM_NTFS;
+    else if(strcmp(Data.fs_type->name,"fat32")== 0)     OriginFileSystem = INSTALLER_FILESYSTEM_FAT32;
+    FileSystemSelect->setCurrentIndex(OriginFileSystem);
 }
 
+
 void ChangeDialogBox::ApplyButtonClicked(){
-    emit ChangeApplied(MountPointSelect->currentIndex());
+    emit MountPointChangeApplied(MountPointSelect->currentIndex());
     if(MountPointSelect->currentIndex()>0){
         MountPointSelect->removeItem(MountPointSelect->currentIndex());
     }
+    if(DoFormatCheckBox->isChecked() == true){
+        char Work[64];
+        bzero(Work,64);
+        sprintf(Work,"mkfs.%s %s",FileSystemSelect->currentText().toUtf8().data(),ped_partition_get_path(&CurrentPartition));
+        DoWork->SetWork(tr(Work));
+    }
+    emit WorkDone();
     this->hide();
 }
 
@@ -86,6 +105,15 @@ void ChangeDialogBox::CancelButtonClicked(){
         MountPointSelect->removeItem(OriginMountPoint);
     }
     this->hide();
+}
+
+void ChangeDialogBox::FileSystemSelectChanged(int Now){
+    if(Now != OriginFileSystem){
+        DoFormatCheckBox->setDisabled(true);
+        DoFormatCheckBox->setChecked(true);
+    }else{
+        DoFormatCheckBox->setDisabled(false);
+    }
 }
 
 
