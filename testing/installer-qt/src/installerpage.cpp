@@ -183,7 +183,10 @@ void PartedPage::DelPartition(PedPartition TargetPartition, PedDisk TargetDisk){
                 (part->type & PED_PARTITION_EXTENDED))
                     continue;
             if(strcmp(ped_partition_get_path(part),ped_partition_get_path(&TargetPartition)) == 0){
-                ped_disk_delete_partition(disk,part);
+                char Exec[64];
+                bzero(Exec,64);
+                sprintf(Exec,"parted %s rm %d",TargetDisk.dev->path,TargetPartition.num);
+                system(Exec);
                 ped_disk_commit(disk);
             }
         }
