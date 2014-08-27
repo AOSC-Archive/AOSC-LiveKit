@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# The following is a native implementation of RemasterSys... simplified actually, for AOSC OS2 Distros.
+# The following is a native implementation of RemasterSys... simplified actually, for AOSC OS based Distros.
 # So it works with Debian initrds.
 # Also it's intended for further *Spin Editions* to be built easily and legitimately.
 
@@ -28,7 +28,10 @@
 # Wrap package manager operations
 # Switch operation logging to do_ok "Information" "Process"
 # do_ok() defect: unable to get variables' values after $2 is done.
-  # Try using eval.
+# Try using eval.
+# elffltr?
+# Complete list for not pre-install-able software.
+# Desktop Environment, architecture and PM detection for Target, to get better file name for ISO.
 
 lib=${1:-$(dirname $(readlink -e $0))}
 scriptname=unilive-builder
@@ -46,13 +49,12 @@ echo " - You need about 50% or more space left in your target partition"
 echo " - You need about 2-4 GiB of RAM available, the more, the better"
 echo " - This can take you all day if you don't have a beefy computer"
 echo " - There are things that are not allowed to be preinstalled, like Google Chrome, Adobe Flash Plugin and Firefox"
-echo ""
-echo ""
+printf "\n\n"
 read -p "Press any key to get started, whenever you feel comfortable"
 
 # Make sure network is working
 echo -e "Please tell me if the network is working \e[36m[INFO]\e[0m"
-echo -e "\e[31mIf it's working, press any key to procceed, if not, press Ctrl-C right away to quit\e[0m"
+echo -e "\e[31mIf it's working, press any key to procceed, if not, press Ctrl-C right now to quit\e[0m"
 echo 
 read -p "Press any key to procceed or use Ctrl-C to quit..."
 
@@ -81,10 +83,12 @@ if [ "$fs" == "fuseblk" ]; then
 fi
 
 # Not sure why it doesn't work in anyway
-# do_ok "Checking specified partition for FS error or corruption..." "fsck.$fs $partition || ignore_command_not_found" || exit 1
+# AutoFS...
+do_ok "Checking specified partition for FS error or corruption..." \
+    "fsck.$fs $partition || ignore_command_not_found" || exit 1
 
 # Mount partition to /target
-do_ok "mounting partition.." "mount -t fs $partition /target &> /dev/null"
+do_ok "mounting partition..." "mount -t fs $partition /target &> /dev/null || exit 1"
 
 # LSB Information Fill-in
 echo -e "Now we need to make sure that you have your /etc/lsb-release file filled in... \e[36m[INFO]\e[0m"
@@ -126,11 +130,22 @@ esac
 
 
 # Auditing...
-echo -e "As the system will be released as a free/libre distro, 
-we are now going to remove proprietary software... \e[31m[IMPORTANT]\e[0m"
-chroot /target "apt-get purge google-chrome flashplugin-nonfree firefox xulrunner"
+# The list of REMOVAL should be longer than this...
+echo -e "As the final distribution should be sane on licensing,
+I am going to remove some software that are inappropriate for pre-installation...\e[31m[IMPORTANT]\e[0m"
+chroot /target "apt-get purge google-chrome flashplugin-nonfree" || chroot /target "yum remove google-chrome flashplugin-nonfree"
+
 # A bug of Google Chrome package...
-do_ok "Performing Google Chrome Cleanup..." "rm -rf /opt/google-chrome"
+# do_ok "Performing Google Chrome Cleanup..." "rm -rf /opt/google-chrome"
+
+# Stripping... @Arthur2e5 you want to make this part better?
+pushd /target
+for libs in `find . -name '*.so.*'; do
+    strip --strip-debug $u
+done
+pushd usr/bin
+strip --strip-all * # UGLY. Maybe porting elffltr to LiveKit, eh?
+popd; popd
 
 # Clean up distro...
 echo -e "We are now going to clean up, but meanwhile,
@@ -138,19 +153,33 @@ you will procceed into a temporary shell to pack up the
 configuration files for your user... \e[36m[INFO]\e[0m"
 echo -e "\e[31mRemember to copy all the necessary files into /etc/skel !!!\n\e[1mNot including your browsing data!!!\e[0m"
 echo -e "\e[31mPlease use 'exit' to quit when you are done.\e[0m"
-chroot /target
-do_ok "Cleaning up target system... \" "(rm -rf /target/home/*
+chroot /target 
+do_ok "Cleaning up target system... \" "(
+for u in /target/home/*; do
+    chroot /target userdel $u -r
+done
 chroot /target useradd -g users live -m 
-rm -rf /target/boot/grub/grub.cfg /target/tmp/* /target/var/{tmp,log,spool,cache/fontconfig/*}
-chroot /target apt-get clean) >> /tmp/$scriptname.out"
-echo -e "Now, set the password of the user... \e[36m[INFO]\e[1m\nNote: Using 'live' as password is recommended.\e[0m"
+chroot /target usermod -a -G audio live
+chroot /target usermod -a -G cdrom live
+chroot /target usermod -a -G lp live
+chroot /target usermod -a -G video live
+rm -rf /target/boot/grub/* /target/tmp/{.*,*} /target/var/{tmp,log,cache}/{.*,*}
+rm -rf /target/var/lib/{NetworkManager,connman,yum,sddm,lightdm,os-prober,blkid}/{.*,*}
+) >> /tmp/$scriptname.out"
+
+# User set-up.
+pushd /target
+mount --rbind /dev dev
+mount --bind /proc proc
+mount --bind /sys sys
+echo -e "Now, set the password of the user... \e[36m[INFO]\e[1m\n\e[0m"
 read -e -p "Password for live:" -i live livepass
 do_ok "Setting up live user..." "change_passwd live $livepass"
 rm -rf /target/root/.* 
 rm -rf /target/root/*
-cp -r /target/etc/skel/. /target/root
+cp -ar /target/etc/skel/. /target/root
 chroot /target chown -R root /root
-echo -e "Setting up root... \e[36m[OK\e[0m"
+echo -e "Setting up root... \e[36m[OK]\e[0m"
 
 # Packing...
 umount -Rf /target/{dev,proc,sys}
@@ -163,10 +192,11 @@ on slow Medias) at the cost of mush longer compression time."
 $SQUASHFLAGS="-b 1048576 -comp xz -Xdict-size 100% -Xbcj x86"
 read -e -p "mksquashfs target squash" -i "$SQUASHFLAGS" -t 20 || true
 # do_ok exception since there is a progress bar
-echo -e "Building squashfs file for the distro... This may take some time!!!\e[36m[INFO]\e[0m"
+echo -e "Building squashfs file for the distro... This may take a long time... \nGet to dinner or whatever will do just fine.\e[36m[INFO]\e[0m"
 mksquashfs /target/* /target/squash $SQUASHFLAGS
 # \r (return) deletes the line above, well actually I am not sure
 # how many lines are used by mksquashfs to display the progress bar
+# Jeff: four for actual output and six including blanks.
 echo -e "\r\rBuilding squashfs file for the distro... \e[32m[OK]\e[0m"
 
 # Build ISO
