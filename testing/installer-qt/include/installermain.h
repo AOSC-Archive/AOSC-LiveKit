@@ -9,6 +9,7 @@
 #include <QLabel>
 #include "installerpage.h"
 
+//typedef QMap<int,QString>        MountPointMap_t;
 typedef QMap<int,InstallerPage*> InstallerPagesMap_t;
 
 class InstallerMain : public QWidget{
@@ -32,8 +33,10 @@ private:
     QTabWidget                      *PageTab;
     QPushButton                     *NextButton;
     QPushButton                     *PervButton;
-    InstallerPagesMap_t              InstallerMap;
-    InstallerPagesMap_t::Iterator    InstallerMapIterator;
+    QMap<int,InstallerPage*>              InstallerMap;
+    QMap<int,InstallerPage*>::Iterator    InstallerMapIterator;
+    QMap<int,QString>                  MountPoint;
+    QMap<int,QString>::Iterator        MountPointMapIterator;
     int                              TotalPages;
     QLabel                          *Introduce;
 };

@@ -72,11 +72,17 @@ void InstallerMain::resizeEvent(QResizeEvent *){
 }
 
 void InstallerMain::SLOT_TurnToNextPage(){
+    InstallerPage *Page = InstallerMapIterator.value();
     NextButton->setHidden(false);
     PervButton->setHidden(false);
+    InstallerMapIterator = InstallerMap.find(PageTab->currentIndex());
+    Page = InstallerMapIterator.value();
+    if(Page->SLOT_NextButtonClicked() <0){      //  如果返回不允许
+        return;
+    }
     InstallerMapIterator = InstallerMap.find(PageTab->currentIndex()+1);
     PageTab->setCurrentIndex(PageTab->currentIndex()+1);
-    InstallerPage *Page = InstallerMapIterator.value();
+    Page = InstallerMapIterator.value();
     Page->PervShow();
 }
 

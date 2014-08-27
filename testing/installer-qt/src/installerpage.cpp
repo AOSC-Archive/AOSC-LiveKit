@@ -1,4 +1,5 @@
 #include "installerpage.h"
+#include <stdlib.h>
 #include <parted/parted.h>
 #include <stdio.h>
 #include <QLabel>
@@ -28,8 +29,8 @@ void InstallerPage::PervShow(){
 
 }
 
-void InstallerPage::SLOT_NextButtonClicked(void){
-
+int InstallerPage::SLOT_NextButtonClicked(void){
+    return 0;
 }
 
 void InstallerPage::SLOT_PageChanged(QWidget *){
@@ -72,6 +73,9 @@ void WelcomePage::PervShow(){
 void WelcomePage::resizeEvent(QResizeEvent *){
 }
 
+int WelcomePage::SLOT_NextButtonClicked(void){
+    return 0;
+}
 
 
 
@@ -211,4 +215,48 @@ void PartedPage::WorkDone(){
     AddButton->setDisabled(true);
     DelButton->setDisabled(true);
     ChangeButton->setDisabled(true);
+}
+
+int PartedPage::SLOT_NextButtonClicked(){
+    system("sudo umount -Rf /target");
+    QString Path;
+    char Exec[64];
+    bzero(Exec,64);
+    Path = List->GetMountPoint(INSTALLER_MOUNT_POINT_ROOT);
+    if(Path.length() < 5){
+        QMessageBox::warning(this,tr("警告"),tr("您没有选择root分区或选取分区无效，请选择挂载分区后重试"),QMessageBox::Yes);
+        return -1;
+    }
+    sprintf(Exec,"mount %s /target",Path.toUtf8().data());
+    if(system("Exec")!=0){
+        if(QMessageBox::warning(this,tr("错误"),tr("root分区挂载失败，是否返回分区界面"),QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
+            return -1;
+        }
+    }
+    Path = List->GetMountPoint(INSTALLER_MOUNT_POINT_HOME);
+    if(Path.length()>5){
+        if(system("mkdir /target/home") != 0){
+            QMessageBox::warning(this,tr("提示"),tr("无法创建%SYSTEMROOT%/home 目录，确认目标分区是否已经存在此同名文件"),QMessageBox::Yes);
+        }
+        bzero(Exec,64);
+        sprintf(Exec,"mount %s /target/home",Path.toUtf8().data());
+        if(system("Exec") != 0){
+            QMessageBox::warning(this,tr("失败"),tr("挂载/home分区失败"),QMessageBox::Yes);
+            return -1;
+        }
+    }
+    Path = List->GetMountPoint(INSTALLER_MOUNT_POINT_BOOT);
+    if(Path.length()>5){
+        if(system("mkdir /target/boot") != 0){
+            QMessageBox::warning(this,tr("提示"),tr("无法创建%SYSTEMROOT%/boot 目录，确认目标分区是否已经存在此同名文件"),QMessageBox::Yes);
+            return 0;
+        }
+        bzero(Exec,64);
+        sprintf(Exec,"mount %s /target/home",Path.toUtf8().data());
+        if(system("Exec") != 0){
+            QMessageBox::warning(this,tr("失败"),tr("挂载/home分区失败"),QMessageBox::Yes);
+            return -1;
+        }
+    }
+    return 0;
 }

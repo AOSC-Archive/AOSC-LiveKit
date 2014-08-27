@@ -264,3 +264,14 @@ void PartitionList::RefreshList(){
         }
     }
 }
+
+QString PartitionList::GetMountPoint(int MountPoint){
+    if(MountPointMap.contains(MountPoint)){
+        MountPointIterator = MountPointMap.find(MountPoint);
+        return MountPointIterator.value();
+    }else{
+        QString k;
+        k.clear();
+        return k;       //  返回一个空的QString
+    }
+}
