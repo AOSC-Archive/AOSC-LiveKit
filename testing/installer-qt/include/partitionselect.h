@@ -60,6 +60,7 @@ public:
     void            SetCurrentMountPoint(int);
 
     void            RefreshList(void);
+    QString GetMountPoint(int);
 public slots:
     void            ItemClicked(PartitionItem*);
 signals:

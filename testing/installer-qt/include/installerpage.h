@@ -22,6 +22,7 @@ public:
     void    SetContantTitle(const QString &);
     void    resizeEvent(QResizeEvent* );
     QFont   cContantFont;
+    virtual int  SLOT_NextButtonClicked(void);  //  下一步按钮被按下时所执行的操作
 
 
 signals:
@@ -30,7 +31,6 @@ signals:
     void    SIGN_TurnToSpecialPage(QWidget *);
 
 public slots:
-    virtual void SLOT_NextButtonClicked(void);  //  下一步按钮被按下时所执行的操作
     virtual void SLOT_PageChanged(QWidget *);
 private:
     QLabel *cTitle;
@@ -50,6 +50,7 @@ public:
     ~WelcomePage();
     void    resizeEvent(QResizeEvent *);
     void    PervShow();
+    int     SLOT_NextButtonClicked();
 private:
     QLabel  *Contant;
 };
@@ -61,6 +62,7 @@ public:
     ~ReadingPage();
     void    resizeEvent(QResizeEvent *);
     void    PervShow();
+
 public slots:
     void    AgreementChanged(bool);
 private:
@@ -76,6 +78,8 @@ public:
     ~PartedPage();
     void PervShow();
     void            DelPartition(PedPartition TargetPartition,PedDisk TargetDisk);
+    PartitionList   *List;
+    int             SLOT_NextButtonClicked();
 public slots:
     void            ShowChangeDialog(void);
     void            ShowAddDialog(void);
@@ -87,7 +91,6 @@ private:
     QPushButton     *ChangeButton;
     QPushButton     *AddButton;
     QPushButton     *DelButton;
-    PartitionList   *List;
     AddDialogBox    *AddDialog;
     ChangeDialogBox *ChangeDialog;
 };
