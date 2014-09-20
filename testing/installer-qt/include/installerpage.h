@@ -8,6 +8,7 @@
 #include <QCheckBox>
 #include <QTabWidget>
 #include <QPushButton>
+#include <QTabBar>
 #include "partitionselect.h"
 #include "dialogbox.h"
 
@@ -36,6 +37,7 @@ private:
     QLabel *cTitle;
 };
 
+typedef QMap<int,InstallerPage*> InstallerPagesMap_t;
 //----------------------------------//
 //--------众神与愚民的分界线-----------//
 //--------此刻正是昼夜交替时-----------//
@@ -70,7 +72,6 @@ private:
     QCheckBox       *isAgreed;
 };
 
-
 class PartedPage : public InstallerPage{
     Q_OBJECT
 public:
@@ -87,7 +88,7 @@ public slots:
     void            MountPointChangeApplied(int);
     void            WorkDone(void);
 private:
-    QTabWidget      *DeviceSelect;
+    MyTabWidget     *DeviceSelect;
     QPushButton     *ChangeButton;
     QPushButton     *AddButton;
     QPushButton     *DelButton;
