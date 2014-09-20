@@ -7,10 +7,8 @@
 #include <QMap>
 #include <QResizeEvent>
 #include <QLabel>
+#include <QTabBar>
 #include "installerpage.h"
-
-//typedef QMap<int,QString>        MountPointMap_t;
-typedef QMap<int,InstallerPage*> InstallerPagesMap_t;
 
 class InstallerMain : public QWidget{
     Q_OBJECT
@@ -30,7 +28,7 @@ public slots:
     void    SLOT_TurnToSpecifyPage(QWidget*);
 
 private:
-    QTabWidget                      *PageTab;
+    MyTabWidget                      *PageTab;
     QPushButton                     *NextButton;
     QPushButton                     *PervButton;
     QMap<int,InstallerPage*>              InstallerMap;

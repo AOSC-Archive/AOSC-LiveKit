@@ -1,4 +1,5 @@
 #include "installermain.h"
+#include "dialogbox.h"
 #include <QTabBar>
 #include <QIcon>
 #include <stdio.h>
@@ -7,11 +8,11 @@
 
 InstallerMain::InstallerMain(QWidget *parent) :
     QWidget(parent){
-    PageTab     = new QTabWidget(this);
+    PageTab     = new MyTabWidget;
     NextButton  = new QPushButton(this);
     PervButton  = new QPushButton(this);
     Introduce   = new QLabel(this);
-    Introduce->setText("AOSC CopyLeft 2014~65536,Power By 张峻锋 from Mars");
+    Introduce->setText("AOSC Copyright 2014~65535,Power By 张峻锋 from Mars");
     TotalPages  = 0;
     //  Set Icon
     QIcon Icon(":/Icon/OSIcon");
@@ -26,7 +27,7 @@ InstallerMain::InstallerMain(QWidget *parent) :
     PageTab->show();
     Introduce->show();
     this->setWindowTitle(tr("AOSC 系统部署器"));
-    PageTab->tabBar()->hide();
+//    PageTab->tabBar()->hide();
 
 
     this->AddPage(new WelcomePage);
@@ -98,4 +99,3 @@ void InstallerMain::SLOT_TurnToPervPage(){
 void InstallerMain::SLOT_TurnToSpecifyPage(QWidget*){
 
 }
-

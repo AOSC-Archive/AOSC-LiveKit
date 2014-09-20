@@ -1,4 +1,5 @@
 #include "installerpage.h"
+#include "dialogbox.h"
 #include <stdlib.h>
 #include <parted/parted.h>
 #include <stdio.h>
@@ -124,7 +125,7 @@ void ReadingPage::resizeEvent(QResizeEvent *){
 
 PartedPage::PartedPage(InstallerPage *parent)
     :InstallerPage(parent){
-    DeviceSelect = new QTabWidget(this);
+    DeviceSelect = new MyTabWidget;
     ChangeButton = new QPushButton(this);
     AddButton    = new QPushButton(this);
     DelButton    = new QPushButton(this);
@@ -135,7 +136,6 @@ PartedPage::PartedPage(InstallerPage *parent)
     ChangeDialog->hide();
     DeviceSelect->setGeometry(0,50,475,this->height()-180);
     DeviceSelect->insertTab(0,List,"Main");
-    DeviceSelect->tabBar()->hide();
     DeviceSelect->setDocumentMode(true);
     ChangeButton->setText("Change");
     AddButton->setText("+");

@@ -11,6 +11,8 @@
 #include <QThread>
 #include <QMessageBox>
 #include <QSpinBox>
+#include <QTabWidget>
+#include <QTabBar>
 
 #define     INSTALLER_MOUNT_POINT_NONE  0
 #define     INSTALLER_MOUNT_POINT_ROOT  1
@@ -83,5 +85,18 @@ private:
     QComboBox       *FileSystemSelect;
     QComboBox       *MountPointSelect;
 };
+
+
+class MyTabWidget : public QTabWidget{
+    Q_OBJECT
+public:
+    explicit MyTabWidget(QTabWidget *parent = 0):
+        QTabWidget(parent){
+        this->tabBar()->hide();
+    }
+
+};
+
+
 
 #endif // DIALOGBOX_H
