@@ -90,8 +90,7 @@ private:
 class MyTabWidget : public QTabWidget{
     Q_OBJECT
 public:
-    explicit MyTabWidget(QTabWidget *parent = 0):
-        QTabWidget(parent){
+    explicit MyTabWidget(QWidget *parent = 0){
         this->tabBar()->hide();
     }
 
