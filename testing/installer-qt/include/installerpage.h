@@ -96,4 +96,12 @@ private:
     ChangeDialogBox *ChangeDialog;
 };
 
+class InstallPage : public InstallerPage{
+    Q_OBJECT
+public:
+    explicit InstallPage(InstallerPage *parent = 0);
+    ~InstallPage();
+    void PervShow();
+};
+
 #endif // INSTALLERPAGE_H

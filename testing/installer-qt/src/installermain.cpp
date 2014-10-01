@@ -8,7 +8,7 @@
 
 InstallerMain::InstallerMain(QWidget *parent) :
     QWidget(parent){
-    PageTab     = new MyTabWidget;
+    PageTab     = new MyTabWidget(this);
     NextButton  = new QPushButton(this);
     PervButton  = new QPushButton(this);
     Introduce   = new QLabel(this);

@@ -203,6 +203,7 @@ PartedPage::~PartedPage(){
 
 void PartedPage::PervShow(){
     //emit SIGN_SetNextButtonDisabled(true);
+    system("umount -f /target");    //  umount all partitions
     List->RefreshList();
 }
 
@@ -259,4 +260,18 @@ int PartedPage::SLOT_NextButtonClicked(){
         }
     }
     return 0;
+}
+
+InstallPage::InstallPage(InstallerPage *parent):
+    InstallerPage(parent){
+
+}
+
+InstallPage::~InstallPage(){
+
+}
+
+void InstallPage::PervShow(){
+    emit SIGN_SetNextButtonDisabled(true);
+    emit SIGN_SetPervButtonDisabled(true);
 }
