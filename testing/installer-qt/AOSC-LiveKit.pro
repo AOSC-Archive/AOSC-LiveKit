@@ -3,9 +3,10 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = 
+TARGET = AOSC-LiveKit
 LIBS += -lparted
-DEPENDPATH += . data include src
+DEPENDPATH += . data include src Gui include Window
+QT += widgets core gui
 INCLUDEPATH += . include
 
 

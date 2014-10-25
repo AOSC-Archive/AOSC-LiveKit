@@ -187,3 +187,8 @@ AddDialogBox::~AddDialogBox(){
 void AddDialogBox::SetCurrentPartition(PedPartition){
 
 }
+
+MyTabWidget::MyTabWidget(QWidget *parent):
+    QTabWidget(parent){
+    this->tabBar()->hide();
+}
