@@ -14,6 +14,9 @@
 #include "partitionselect.h"
 #include "dialogbox.h"
 
+
+#define CMD_COPYFILES    "Which command should I run to copy files ???"
+
 class InstallerPage : public QWidget{
     Q_OBJECT
 public:
