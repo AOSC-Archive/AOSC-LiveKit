@@ -9,6 +9,8 @@
 #include <QTabWidget>
 #include <QPushButton>
 #include <QTabBar>
+#include <QProgressBar>
+#include <QFont>
 #include "partitionselect.h"
 #include "dialogbox.h"
 
@@ -102,6 +104,19 @@ public:
     explicit InstallPage(InstallerPage *parent = 0);
     ~InstallPage();
     void PervShow();
+
+    QFont           DefaultFont;
+    QFont           BlodFont;
+public slots:
+    void            WorkDone(QString,int);
+private:
+    QProgressBar    *MainProgressBar;
+    QLabel          *PreparingLabel;
+    QLabel          *CopyFilesLabel;
+    QLabel          *SetGrubLabel;
+    QLabel          *PostInstLabel;
+
+    WorkingThread   *Work;
 };
 
 #endif // INSTALLERPAGE_H

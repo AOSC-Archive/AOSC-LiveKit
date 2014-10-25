@@ -12,7 +12,7 @@ InstallerMain::InstallerMain(QWidget *parent) :
     NextButton  = new QPushButton(this);
     PervButton  = new QPushButton(this);
     Introduce   = new QLabel(this);
-    Introduce->setText("AOSC Copyright 2014~65535,Power By 张峻锋 from Mars");
+    Introduce->setText("AOSC Copyright 2014~65535,Power By <a href=\"mailto::SternWZhang@outlook.com\">SternW Zhang</a> from Mars");
     TotalPages  = 0;
     //  Set Icon
     QIcon Icon(":/Icon/OSIcon");
@@ -27,12 +27,11 @@ InstallerMain::InstallerMain(QWidget *parent) :
     PageTab->show();
     Introduce->show();
     this->setWindowTitle(tr("AOSC 系统部署器"));
-//    PageTab->tabBar()->hide();
 
-
-    this->AddPage(new WelcomePage);
+    /*this->AddPage(new WelcomePage);
     this->AddPage(new ReadingPage);
-    this->AddPage(new PartedPage);
+    this->AddPage(new PartedPage);*/
+    this->AddPage(new InstallPage);
 
 
     PervButton->setHidden(true);
@@ -69,7 +68,7 @@ void InstallerMain::resizeEvent(QResizeEvent *){
     NextButton->setGeometry(this->width()-60,40,45,this->height()-70);
     PervButton->setGeometry(15,40,45,this->height()-70);
     PageTab->setGeometry(59,40,this->width()-118,this->height()-69);
-    Introduce->setGeometry(25,this->height()-35,400,25);
+    Introduce->setGeometry(25,this->height()-35,500,25);
 }
 
 void InstallerMain::SLOT_TurnToNextPage(){

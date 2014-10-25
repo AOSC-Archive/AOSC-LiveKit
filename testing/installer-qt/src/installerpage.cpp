@@ -264,7 +264,35 @@ int PartedPage::SLOT_NextButtonClicked(){
 
 InstallPage::InstallPage(InstallerPage *parent):
     InstallerPage(parent){
+    // new memory
+    MainProgressBar = new QProgressBar(this);
+    PreparingLabel  = new QLabel(this);
+    CopyFilesLabel  = new QLabel(this);
+    SetGrubLabel    = new QLabel(this);
+    PostInstLabel   = new QLabel(this);
+    Work            = new WorkingThread;
+    BlodFont.setBold(true);
+    DefaultFont.setBold(false);
 
+    // init
+    MainProgressBar->setGeometry(0,70,475,35);
+    MainProgressBar->setRange(0,0);
+    PreparingLabel->setGeometry(0,120,475,25);
+    PreparingLabel->setText("Preparing......");
+    PreparingLabel->setFont(BlodFont);
+    CopyFilesLabel->setGeometry(0,150,475,25);
+    CopyFilesLabel->setText("Copy files");
+    CopyFilesLabel->setFont(DefaultFont);
+    SetGrubLabel->setGeometry(0,180,475,25);
+    SetGrubLabel->setText("Setup grub");
+    SetGrubLabel->setFont(DefaultFont);
+    PostInstLabel->setGeometry(0,210,475,25);
+    PostInstLabel->setText("Do postinst scripts");
+    PostInstLabel->setFont(DefaultFont);
+
+    SetContantTitle("Working......");
+
+    this->connect(Work,SIGNAL(WorkDone(QString,int)),this,SLOT(WorkDone(QString,int)));
 }
 
 InstallPage::~InstallPage(){
@@ -274,4 +302,14 @@ InstallPage::~InstallPage(){
 void InstallPage::PervShow(){
     emit SIGN_SetNextButtonDisabled(true);
     emit SIGN_SetPervButtonDisabled(true);
+}
+
+void InstallPage::WorkDone(QString Work,int Status){
+    if(Work == "sleep 2" && Status == 0){
+        PreparingLabel->setFont(DefaultFont);
+        PreparingLabel->setText(tr("Prepare"));
+        CopyFilesLabel->setFont(BlodFont);
+        CopyFilesLabel->setText(tr("Copying files......"));
+        return;
+    }
 }
