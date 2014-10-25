@@ -15,7 +15,7 @@ public:
     void    SetWork(QString);
     void    run();
 signals:
-    void    WorkDone(int);
+    void    WorkDone(QString,int);
 private:
     QString Work;
 };

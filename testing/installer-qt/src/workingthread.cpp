@@ -11,7 +11,8 @@ WorkingThread::~WorkingThread(){
 }
 
 void WorkingThread::run(){
-    emit WorkDone(system(Work.toUtf8().data()));
+    int Status = system(Work.toUtf8().data());
+    emit WorkDone(Work,Status);
 }
 
 void WorkingThread::SetWork(QString Joy){
