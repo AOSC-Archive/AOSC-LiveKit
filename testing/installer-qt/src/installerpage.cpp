@@ -9,6 +9,11 @@
 #include <QFile>
 #include <QPushButton>
 #include <QDebug>
+#include <QMessageBox>
+
+#define CMD_PREPARE     "sleep 2"
+#define CMD_COPYFILES   "cp -ar /media/install/live /target"
+QString cmd_setupgroub;
 
 InstallerPage::InstallerPage(QWidget *parent):
     QWidget(parent){
@@ -284,7 +289,7 @@ InstallPage::InstallPage(InstallerPage *parent):
     CopyFilesLabel->setText("Copy files");
     CopyFilesLabel->setFont(DefaultFont);
     SetGrubLabel->setGeometry(0,180,475,25);
-    SetGrubLabel->setText("Setup grub");
+    SetGrubLabel->setText("Set up grub");
     SetGrubLabel->setFont(DefaultFont);
     PostInstLabel->setGeometry(0,210,475,25);
     PostInstLabel->setText("Do postinst scripts");
@@ -293,6 +298,9 @@ InstallPage::InstallPage(InstallerPage *parent):
     SetContantTitle("Working......");
 
     this->connect(Work,SIGNAL(WorkDone(QString,int)),this,SLOT(WorkDone(QString,int)));
+
+    Work->SetWork(CMD_PREPARE);
+    Work->start();
 }
 
 InstallPage::~InstallPage(){
@@ -304,12 +312,25 @@ void InstallPage::PervShow(){
     emit SIGN_SetPervButtonDisabled(true);
 }
 
-void InstallPage::WorkDone(QString Work,int Status){
-    if(Work == "sleep 2" && Status == 0){
+void InstallPage::WorkDone(QString _Work,int Status){
+    if(_Work == CMD_PREPARE){
         PreparingLabel->setFont(DefaultFont);
-        PreparingLabel->setText(tr("Prepare"));
+        PreparingLabel->setText(tr("Prepared"));
         CopyFilesLabel->setFont(BlodFont);
         CopyFilesLabel->setText(tr("Copying files......"));
+        Work->SetWork(CMD_COPYFILES);
+        Work->start();
         return;
+    }else if(_Work == CMD_COPYFILES && Status == 0){
+        CopyFilesLabel->setFont(DefaultFont);
+        CopyFilesLabel->setText("Copyed done.");
+        if(QMessageBox::question(this,tr("Question"),tr("Do you want to setup grub?"),QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
+            SetGrubLabel->setFont(BlodFont);
+            SetGrubLabel->setText(tr("Installing and configuring GRUB..."));
+            Work->SetWork(cmd_setupgroub);
+        }
+    }else if(_Work == CMD_COPYFILES && Status != 0){
+        QMessageBox::warning(this,tr("Warning"),tr("Fail to copy files."),QMessageBox::Yes);
+        exit(0);
     }
 }
