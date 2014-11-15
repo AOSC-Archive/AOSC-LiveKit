@@ -89,11 +89,22 @@ public slots:
     void            AskForDeletePartition(void);
     void            MountPointChangeApplied(int);
     void            WorkDone(void);
+    void            SetGrubDest(void);
+    void            SetEFIDest(void);
+    void            UnselectGrubClicked(void);
+    void            UnselectEFIClicked(void);
+    void            EnableEFISupport(bool);
 private:
     MyTabWidget     *DeviceSelect;
     QPushButton     *ChangeButton;
     QPushButton     *AddButton;
     QPushButton     *DelButton;
+    QPushButton     *MyEFIPartition;
+    QPushButton     *MyBootDevice;
+    QPushButton     *UnselectGrub;
+    QPushButton     *UnselectEFI;
+    QLabel          *MyBootDevicePath;
+    QLabel          *MyEFIPartitionPath;
     AddDialogBox    *AddDialog;
     ChangeDialogBox *ChangeDialog;
 };

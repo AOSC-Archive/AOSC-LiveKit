@@ -39,7 +39,7 @@ WorkingDialog::WorkingDialog(QWidget *parent):
     CancelButton->setGeometry(90,65,55,25);
     DoneButton->setGeometry(90,65,55,25);
     this->connect(Thread,SIGNAL(started()),this,SLOT(pWorkStarted()));
-    this->connect(Thread,SIGNAL(WorkDone(int)),this,SLOT(pWorkStoped(int)));
+    this->connect(Thread,SIGNAL(WorkDone(QString,int)),this,SLOT(pWorkStoped(QString,int)));
     this->connect(CancelButton,SIGNAL(clicked()),this,SLOT(Stop()));
     this->connect(DoneButton,SIGNAL(clicked()),this,SLOT(close()));
     this->setWindowTitle(tr("Working..."));
@@ -75,7 +75,7 @@ void WorkingDialog::pWorkStarted(){
     this->show();
 }
 
-void WorkingDialog::pWorkStoped(int Status){
+void WorkingDialog::pWorkStoped(QString,int Status){
     if(Status != 0){
         WorkingDescription->setText(tr("Failure!"));
     }else{

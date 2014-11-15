@@ -28,10 +28,10 @@ InstallerMain::InstallerMain(QWidget *parent) :
     Introduce->show();
     this->setWindowTitle(tr("AOSC 系统部署器"));
 
-    /*this->AddPage(new WelcomePage);
+    //this->AddPage(new WelcomePage);
     this->AddPage(new ReadingPage);
-    this->AddPage(new PartedPage);*/
-    this->AddPage(new InstallPage);
+    this->AddPage(new PartedPage);
+    //this->AddPage(new InstallPage);
 
 
     PervButton->setHidden(true);

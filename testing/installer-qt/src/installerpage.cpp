@@ -15,6 +15,12 @@
 #define CMD_COPYFILES   "cp -ar /media/install/live /target"
 QString cmd_setupgroub;
 
+
+int InstallGrub = false;
+int InstallEFI  = false;
+QString GrubDest;
+QString EFIDest;
+
 InstallerPage::InstallerPage(QWidget *parent):
     QWidget(parent){
     QFont cTitleFont;
@@ -130,10 +136,16 @@ void ReadingPage::resizeEvent(QResizeEvent *){
 
 PartedPage::PartedPage(InstallerPage *parent)
     :InstallerPage(parent){
-    DeviceSelect = new MyTabWidget;
+    MyEFIPartitionPath = new QLabel(this);
+    MyBootDevicePath   = new QLabel(this);
+    UnselectEFI  = new QPushButton(this);
+    UnselectGrub = new QPushButton(this);
+    DeviceSelect = new MyTabWidget(this);
     ChangeButton = new QPushButton(this);
     AddButton    = new QPushButton(this);
     DelButton    = new QPushButton(this);
+    MyBootDevice = new QPushButton(this);
+    MyEFIPartition=new QPushButton(this);
     List         = new PartitionList();
     AddDialog    = new AddDialogBox;
     ChangeDialog = new ChangeDialogBox;
@@ -145,22 +157,47 @@ PartedPage::PartedPage(InstallerPage *parent)
     ChangeButton->setText("Change");
     AddButton->setText("+");
     DelButton->setText("-");
+    MyBootDevice->setText(tr("Install Grub here"));
+    MyEFIPartition->setText(tr("Support Grub EFI"));
+    MyBootDevicePath->setText(tr("Do not install"));
+    MyEFIPartitionPath->setText(tr("Do not install"));
+    UnselectGrub->setText(tr("Unselect"));
+    UnselectEFI->setText(tr("Unselect"));
     AddButton->setGeometry(0,this->height()-120,20,20);
     ChangeButton->setGeometry(20,this->height()-120,55,20);
     DelButton->setGeometry(75,this->height()-120,20,20);
+    MyBootDevice->setGeometry(0,this->height()-100,120,20);
+    MyBootDevicePath->setGeometry(130,this->height()-100,120,20);
+    UnselectGrub->setGeometry(300,this->height()-100,70,20);
+    MyEFIPartition->setGeometry(0,this->height()-80,120,20);
+    MyEFIPartitionPath->setGeometry(130,this->height()-80,120,20);
+    UnselectEFI->setGeometry(300,this->height()-80,70,20);
     SetContantTitle(tr("Parted!"));
     ped_device_probe_all();
     ChangeButton->setDisabled(true);
     AddButton->setDisabled(true);
     DelButton->setDisabled(true);
+    MyBootDevice->setDisabled(true);
+    MyEFIPartition->setDisabled(true);
+    MyEFIPartitionPath->show();
+    UnselectGrub->show();
+    UnselectGrub->setDisabled(true);
+    UnselectEFI->show();
+    UnselectEFI->setDisabled(true);
     this->connect(List,SIGNAL(SetAddButtonDisabled(bool)),this->AddButton,SLOT(setDisabled(bool)));
     this->connect(List,SIGNAL(SetChangeButtonDisabled(bool)),this->ChangeButton,SLOT(setDisabled(bool)));
+    this->connect(List,SIGNAL(SetChangeButtonDisabled(bool)),this->MyBootDevice,SLOT(setDisabled(bool)));
+    this->connect(List,SIGNAL(SetChangeButtonDisabled(bool)),this,SLOT(EnableEFISupport(bool)));
     this->connect(List,SIGNAL(SetDelButtonDisabled(bool)),this->DelButton,SLOT(setDisabled(bool)));
     this->connect(AddButton,SIGNAL(clicked()),this,SLOT(ShowAddDialog()));
     this->connect(ChangeButton,SIGNAL(clicked()),this,SLOT(ShowChangeDialog()));
     this->connect(DelButton,SIGNAL(clicked()),this,SLOT(AskForDeletePartition()));
     this->connect(ChangeDialog,SIGNAL(MountPointChangeApplied(int)),this,SLOT(MountPointChangeApplied(int)));
     this->connect(ChangeDialog,SIGNAL(WorkDone()),this,SLOT(WorkDone()));
+    this->connect(MyBootDevice,SIGNAL(clicked()),this,SLOT(SetGrubDest()));
+    this->connect(UnselectGrub,SIGNAL(clicked()),this,SLOT(UnselectGrubClicked()));
+    this->connect(MyEFIPartition,SIGNAL(clicked()),this,SLOT(SetEFIDest()));
+    this->connect(UnselectEFI,SIGNAL(clicked()),this,SLOT(UnselectEFIClicked()));
 }
 
 void PartedPage::ShowAddDialog(){
@@ -171,6 +208,48 @@ void PartedPage::ShowAddDialog(){
 void PartedPage::ShowChangeDialog(){
     ChangeDialog->SetCurrentPartition(List->GetCurrentSelectedPartition(),List->GetCurrentSelectedDisk(),List->GetCurrentSelectedDevice(),List->GetCurrentMountPoint(),INSTALLER_WORKTYPE_CHANGE);
     ChangeDialog->show();
+}
+
+void PartedPage::EnableEFISupport(bool s){
+    if(s == false){
+        if(InstallGrub == false)
+            return;
+        else
+            MyEFIPartition->setEnabled(true);
+    }else{
+        MyEFIPartition->setDisabled(true);
+    }
+}
+
+void PartedPage::SetGrubDest(){
+    GrubDest = List->GetCurrentSelectedDisk().dev->path;
+    InstallGrub = true;
+    MyBootDevicePath->setText(GrubDest);
+    UnselectGrub->setEnabled(true);
+    MyEFIPartition->setEnabled(true);
+}
+
+void PartedPage::SetEFIDest(){
+    PedPartition P;
+    P = List->GetCurrentSelectedPartition();
+    EFIDest = ped_partition_get_path(&P);
+    MyEFIPartitionPath->setText(EFIDest);
+    UnselectEFI->setEnabled(true);
+}
+
+void PartedPage::UnselectGrubClicked(){
+    MyBootDevicePath->setText(tr("Do not install"));
+    UnselectGrub->setDisabled(true);
+    InstallGrub=false;
+    this->UnselectEFIClicked();
+}
+
+void PartedPage::UnselectEFIClicked(){
+    MyEFIPartitionPath->setText(tr("Do not Install"));
+    UnselectEFI->setDisabled(true);
+    InstallEFI = false;
+    if(InstallGrub == false)
+        MyEFIPartition->setDisabled(true);
 }
 
 void PartedPage::AskForDeletePartition(){
