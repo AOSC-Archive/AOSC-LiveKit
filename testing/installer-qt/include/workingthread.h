@@ -34,7 +34,7 @@ public slots:
     void    Start(void);
     void    Stop(void);
     void    pWorkStarted(void);
-    void    pWorkStoped(int);
+    void    pWorkStoped(QString, int);
 private:
     WorkingThread   *Thread;
     QLabel          *WorkingDescription;
