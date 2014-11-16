@@ -12,7 +12,7 @@ InstallerMain::InstallerMain(QWidget *parent) :
     NextButton  = new QPushButton(this);
     PervButton  = new QPushButton(this);
     Introduce   = new QLabel(this);
-    Introduce->setText("AOSC Copyright 2014~65535,Power By <a href=\"mailto::SternWZhang@outlook.com\">SternW Zhang</a> from Mars");
+    Introduce->setText("AOSC CopyRight 2014~65535,Power By <a href=\"mailto::SternWZhang@outlook.com\">SternW Zhang</a> from Mars");
     TotalPages  = 0;
     //  Set Icon
     QIcon Icon(":/Icon/OSIcon");
