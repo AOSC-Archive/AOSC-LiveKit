@@ -13,7 +13,9 @@
 
 #define CMD_PREPARE     "sleep 2"
 #define CMD_COPYFILES   "cp -ar /media/install/live /target"
-QString cmd_setupgroub;
+#define CMD_DOPOSTINST  "...."
+QString cmd_setupgrub;
+QString cmd_setupefi;
 
 
 int InstallGrub = false;
@@ -392,6 +394,19 @@ void InstallPage::PervShow(){
 }
 
 void InstallPage::WorkDone(QString _Work,int Status){
+    if(_Work == cmd_setupgrub && Status == 0 && InstallEFI == true){
+            // configure cmd_setupefi
+        Work->SetWork(cmd_setupefi);
+        Work->start();
+    }
+    if(_Work == cmd_setupgrub && Status != 0){
+        QMessageBox::warning(this,tr("Warning"),tr("Install Grub failed!"),QMessageBox::Yes);
+        exit(1);
+    }
+    if(_Work == cmd_setupefi && Status != 0){
+        QMessageBox::warning(this,tr("warning"),tr("Install EFI support failed"),QMessageBox::Yes);
+        exit(1);
+    }
     if(_Work == CMD_PREPARE){
         PreparingLabel->setFont(DefaultFont);
         PreparingLabel->setText(tr("Prepared"));
@@ -403,13 +418,35 @@ void InstallPage::WorkDone(QString _Work,int Status){
     }else if(_Work == CMD_COPYFILES && Status == 0){
         CopyFilesLabel->setFont(DefaultFont);
         CopyFilesLabel->setText("Copyed done.");
-        if(QMessageBox::question(this,tr("Question"),tr("Do you want to setup grub?"),QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes){
+        if(InstallGrub == true){
             SetGrubLabel->setFont(BlodFont);
             SetGrubLabel->setText(tr("Installing and configuring GRUB..."));
-            Work->SetWork(cmd_setupgroub);
+            // configure cmd_setupgrub
+            Work->SetWork(cmd_setupgrub);
+            Work->start();
+        }else{
+            SetGrubLabel->setText(tr("InstallGrub ignored"));
+            Work->SetWork(CMD_DOPOSTINST);
+            PostInstLabel->setFont(BlodFont);
+            PostInstLabel->setText(tr("Runing postinst scripts......"));
+            Work->start();
         }
     }else if(_Work == CMD_COPYFILES && Status != 0){
         QMessageBox::warning(this,tr("Warning"),tr("Fail to copy files."),QMessageBox::Yes);
         exit(0);
+    }
+    else if((_Work == cmd_setupefi || _Work == cmd_setupgrub) && Status == 0){
+        Work->SetWork(CMD_DOPOSTINST);
+        PostInstLabel->setFont(BlodFont);
+        PostInstLabel->setText(tr("Runing postinst scripts......"));
+        Work->start();
+    }
+    else if(_Work == CMD_DOPOSTINST && Status == 0){
+        emit SIGN_SetNextButtonDisabled(false);
+        PostInstLabel->setText(tr("Install done!"));
+        return;
+    }else if(_Work == CMD_DOPOSTINST && Status != 0){
+        QMessageBox::warning(this,tr("Warning"),tr("Exec postinst scriptes failed!"),QMessageBox::Yes);
+        exit(1);
     }
 }
