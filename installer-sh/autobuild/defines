@@ -1,3 +1,0 @@
-PKGNAME=aosc-installer-sh
-PKGVER=${PKGVER-0}
-PKGDEP="bash expect"
