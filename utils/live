@@ -1,4 +1,3 @@
-alias XZ='xz'
 cinitramfs() {
   cd "$1"
   strip bin/busybox
@@ -8,15 +7,45 @@ cinitramfs() {
 
 _find_decompressor() {
   _decomp=$(file $1| grep compressed | cut -f 2 -d ":" | cut -f 2 -d " ")
-  if [ $_decomp ]; then _decomp+="-cd"; else _decomp=cat; fi
+  if [ $_decomp ]; then _decomp+=" -cd"; else _decomp=cat; fi
 }
 
 xinitramfs() {
   _find_decompressor $1
-  mkdir ${2:-$1.unpacked}; cd ${2:-$1.unpacked}
-  $_decomp $1 | cpio -i
+  set -- "$(readlink -e "$1")" ${2-$1.unpacked}
+  mkdir "$2"; cd "$2"
+  ${_decomp/XZ/xz} $1 | cpio -i
 }
 
+busyboxdup() {
+  local i j
+  pushd "$1/bin" || return 1
+  ./busybox --list | {
+    while read j; do
+      for i in *; do [ "$i" == "$j" ] && echo "$i "; done
+    done
+  } > /tmp/keep
+  for i in $(cat /tmp/keep); do
+    echo $i
+    while read -n 1 -ep "Keep original $i instead of busybox symlink? y/n" j; do
+      [ "$j" == n ] && break
+      [ "$j" == y ] && echo "$j" >> .keep && break
+    done
+  done
+  popd
+}
+
+busyboxln() {
+  local i
+  pushd "$1/bin" || return 1
+  ./busybox --list | {
+    while read i; do
+      [ -e "$i" ] && grep -Fx "$i" .keep && break
+      rm -- "$i"
+      ln -sf busybox "$i"
+    done
+  }
+}
 # For Non-GNU Systems
 _readlink() {
   _rl_help() {
